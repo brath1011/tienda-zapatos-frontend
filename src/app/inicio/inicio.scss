@@ -1,0 +1,119 @@
+.banner-inicio {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  padding: 60px 40px;
+  max-width: 1200px;
+  margin: 20px auto;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+
+  .banner-contenido {
+    max-width: 60%;
+
+    .etiqueta-oferta {
+      background-color: #3b82f6;
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+
+    .titulo-principal {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 0 0 15px 0;
+      line-height: 1.2;
+    }
+
+    .subtitulo {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .botones-banner {
+      display: flex;
+      gap: 15px;
+
+      button {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1rem;
+      }
+
+      .btn-comprar {
+        background-color: white;
+        color: #0f172a;
+        border: none;
+
+        &:hover {
+          background-color: #f1f5f9;
+          transform: translateY(-2px);
+        }
+      }
+
+      .btn-saber-mas {
+        background-color: transparent;
+        color: white;
+        border: 2px solid #475569;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.05);
+          border-color: white;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  .banner-decoracion {
+    max-width: 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .emoji-gigante {
+      font-size: 7rem;
+      animation: flotar 4s ease-in-out infinite;
+      display: inline-block;
+    }
+  }
+}
+
+@keyframes flotar {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(-5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@media (max-width: 768px) {
+  .banner-inicio {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 20px;
+
+    .banner-contenido {
+      max-width: 100%;
+      margin-bottom: 30px;
+      
+      .botones-banner {
+        justify-content: center;
+      }
+    }
+    .banner-decoracion {
+      max-width: 100%;
+    }
+  }
+}

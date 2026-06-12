@@ -1,0 +1,42 @@
+<section class="seccion-catalogo">
+  <h2 class="titulo-catalogo">{{ titulo }}</h2>
+
+  <div class="contenedor-productos">
+    
+    @for (zapato of zapatos; track zapato.id) {
+      <div class="tarjeta-zapato">
+        
+        <div class="imagen-box">
+          <img [src]="zapato.imagenUrl" [alt]="zapato.nombre">
+          <span class="etiqueta-categoria">{{ zapato.categoria }}</span>
+        </div>
+
+        <div class="info-box">
+          <span class="marca">{{ zapato.marca }}</span>
+          <h3 class="nombre">{{ zapato.nombre }}</h3>
+          
+          <div class="fila-precio-stock">
+            <p class="precio">S/ {{ zapato.precio | number:'1.2-2' }}</p>
+            
+            <span [ngClass]="{'con-stock': zapato.stock > 0, 'sin-stock': zapato.stock === 0}">
+              {{ zapato.stock > 0 ? zapato.stock + ' disp.' : 'Agotado' }}
+            </span>
+          </div>
+
+          <button class="btn-agregar" [disabled]="zapato.stock === 0">
+            {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
+          </button>
+        </div>
+        <button class="btn-agregar" [disabled]="zapato.stock === 0" (click)="agregarAlCarrito(zapato)">
+  {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
+</button>
+
+      </div>
+    } @empty {
+      <div class="sin-resultados">
+        No hay zapatos disponibles en el catálogo en este momento.
+      </div>
+    }
+
+  </div>
+</section>
