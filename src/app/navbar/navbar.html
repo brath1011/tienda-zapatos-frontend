@@ -1,20 +1,13 @@
-<nav class="navbar">
-  <div class="nav-contenedor">
-    <a href="#" class="logo" (click)="navegar('inicio', $event)">
-      <span class="icono">👟</span> {{ nombreTienda }}
-    </a>
-    
-    <ul class="enlaces">
-      <li><a href="#" (click)="navegar('catalogo', $event)">Catálogo</a></li>
-      <li><a href="#" (click)="navegar('inicio', $event)">Marcas</a></li>
-    </ul>
-
-    <div class="carrito-status">
-      <button class="btn-carrito" (click)="navegar('carrito', $event)">
-        <span class="icono-carrito">🛒</span>
-        <span class="texto-carrito">Mi Carrito</span>
-        <span class="contador-badge">{{ cantidadItems }}</span>
-      </button>
-    </div>
+<nav style="background: #2c3e50; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+  
+  <div style="color: white; font-size: 1.5rem; font-weight: bold; font-family: sans-serif;">
+    👟 {{ nombreTienda }}
   </div>
+
+  <div style="font-family: sans-serif;">
+    <a routerLink="/inicio" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold; cursor: pointer;">Inicio</a>
+    <a routerLink="/catalogo" style="color: #3498db; text-decoration: none; margin: 0 15px; font-weight: bold; cursor: pointer;">Catálogo</a>
+    <a routerLink="/carrito" style="color: white; text-decoration: none; margin: 0 15px; font-weight: bold; cursor: pointer;">Mi Carrito</a>
+  </div>
+
 </nav>

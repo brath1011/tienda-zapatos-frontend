@@ -1,21 +1,13 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router'; // <-- Herramienta vital para navegar
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [],
+  imports: [RouterLink], // <-- Inyéctalo aquí
   templateUrl: './navbar.html',
-  styleUrl: './navbar.scss'
+  styleUrls: ['./navbar.scss']
 })
 export class Navbar {
   nombreTienda = 'ZapasStore';
-  cantidadItems = 2;
-
-  // Creamos un emisor para avisar el cambio de pestaña
-  @Output() cambioSeccion = new EventEmitter<string>();
-
-  navegar(seccion: string, evento: Event) {
-    evento.preventDefault(); // Evita que la página se recargue
-    this.cambioSeccion.emit(seccion);
-  }
 }

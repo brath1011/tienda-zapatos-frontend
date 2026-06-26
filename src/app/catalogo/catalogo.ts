@@ -1,66 +1,30 @@
-import { Component } from '@angular/core';
-import { NgClass, NgStyle, DecimalPipe } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-interface Zapato {
+export interface Zapato {
   id: number;
   nombre: string;
-  marca: string;
   precio: number;
-  stock: number;
-  categoria: string;
-  imagenUrl: string;
+  imagenNombre: string;
+  descripcion: string;
 }
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [NgClass, NgStyle, DecimalPipe],
+  imports: [CommonModule],
   templateUrl: './catalogo.html',
-  styleUrl: './catalogo.scss'
+  styleUrls: ['./catalogo.scss']
 })
-export class Catalogo {
-  titulo = 'Nuestro Catálogo de Zapatos';
+export class CatalogoComponent {
+  // Lista inicial de prueba para obligar a Angular a renderizar datos en pantalla
+  zapatos = signal<Zapato[]>([
+    { id: 1, nombre: 'Zapatilla Urban Run', precio: 259.90, imagenNombre: 'imagen1', descripcion: 'Máximo confort urbano.' },
+    { id: 2, nombre: 'Zapato Oxford Elegante', precio: 319.00, imagenNombre: 'imagen2', descripcion: 'Estilo clásico en cuero.' },
+    { id: 3, nombre: 'Botín Adventure', precio: 379.50, imagenNombre: 'imagen3', descripcion: 'Resistencia para todo terreno.' }
+  ]);
 
-  zapatos: Zapato[] = [
-    { 
-      id: 1, 
-      nombre: 'Air Max Running Pro', 
-      marca: 'Nike', 
-      precio: 380.00, 
-      stock: 12, 
-      categoria: 'Deportivo', 
-      imagenUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80' 
-    },
-    { 
-      id: 2, 
-      nombre: 'Classic Urban Sneaker', 
-      marca: 'Adidas', 
-      precio: 290.00, 
-      stock: 5, 
-      categoria: 'Urbano', 
-      imagenUrl: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80' 
-    },
-    { 
-      id: 3, 
-      nombre: 'Mocasín Oxford Formal Elegante', 
-      marca: 'Gucci', 
-      precio: 850.00, 
-      stock: 0, 
-      categoria: 'Formal', 
-      imagenUrl: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500&q=80' 
-    },
-    { 
-      id: 4, 
-      nombre: 'Sport Casual Ultra', 
-      marca: 'Puma', 
-      precio: 260.00, 
-      stock: 8, 
-      categoria: 'Deportivo', 
-      imagenUrl: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80' 
-    }
-  ];
   agregarAlCarrito(zapato: Zapato) {
-  alert(`¡Agregaste al carrito: ${zapato.marca} ${zapato.nombre}!`);
-  // Aquí es donde en el próximo laboratorio conectarás el servicio HTTP para enviarlo a Spring Boot
-}
+    console.log('Producto seleccionado:', zapato.nombre);
+  }
 }

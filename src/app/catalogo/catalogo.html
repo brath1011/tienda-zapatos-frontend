@@ -1,42 +1,25 @@
-<section class="seccion-catalogo">
-  <h2 class="titulo-catalogo">{{ titulo }}</h2>
-
-  <div class="contenedor-productos">
-    
-    @for (zapato of zapatos; track zapato.id) {
-      <div class="tarjeta-zapato">
+<div style="padding: 20px; font-family: sans-serif; max-width: 1200px; margin: 0 auto; text-align: center;">
+  <h2 style="color: #2c3e50; margin-bottom: 20px;">Catálogo de Calzado</h2>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+    @for (zapato of zapatos(); track zapato.id) {
+      <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left;">
         
-        <div class="imagen-box">
-          <img [src]="zapato.imagenUrl" [alt]="zapato.nombre">
-          <span class="etiqueta-categoria">{{ zapato.categoria }}</span>
+        <div style="height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
+          <img [src]="'images/' + zapato.imagenNombre + '.jpg'" 
+           [alt]="zapato.nombre" 
+          style="width: 100%; height: 100%; object-fit: cover;"
+           onerror="this.src='https://via.placeholder.com/250x200?text=Error+de+Ruta'" />
         </div>
-
-        <div class="info-box">
-          <span class="marca">{{ zapato.marca }}</span>
-          <h3 class="nombre">{{ zapato.nombre }}</h3>
-          
-          <div class="fila-precio-stock">
-            <p class="precio">S/ {{ zapato.precio | number:'1.2-2' }}</p>
-            
-            <span [ngClass]="{'con-stock': zapato.stock > 0, 'sin-stock': zapato.stock === 0}">
-              {{ zapato.stock > 0 ? zapato.stock + ' disp.' : 'Agotado' }}
-            </span>
-          </div>
-
-          <button class="btn-agregar" [disabled]="zapato.stock === 0">
-            {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
-          </button>
-        </div>
-        <button class="btn-agregar" [disabled]="zapato.stock === 0" (click)="agregarAlCarrito(zapato)">
-  {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
-</button>
-
-      </div>
-    } @empty {
-      <div class="sin-resultados">
-        No hay zapatos disponibles en el catálogo en este momento.
+        
+        <h3>{{ zapato.nombre }}</h3>
+        <p style="color: #555; font-size: 0.9rem;">{{ zapato.descripcion }}</p>
+        <p style="font-size: 1.2rem; font-weight: bold; color: #2c3e50;">S/ {{ zapato.precio.toFixed(2) }}</p>
+        
+        <button (click)="agregarAlCarrito(zapato)" style="width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+          Añadir al Carrito
+        </button>
       </div>
     }
-
   </div>
-</section>
+</div>

@@ -1,13 +1,9 @@
-<app-navbar (cambioSeccion)="cambiarVista($event)"></app-navbar>
+<div class="tienda-container" style="min-height: 100vh; background-color: #f8f9fa; font-family: sans-serif;">
+  
+  <app-navbar></app-navbar>
 
-@if (seccionActiva === 'inicio') {
-  <app-inicio></app-inicio>
-}
+  <main style="padding: 20px;">
+    <router-outlet></router-outlet>
+  </main>
 
-@if (seccionActiva === 'catalogo') {
-  <app-catalogo></app-catalogo>
-}
-
-@if (seccionActiva === 'carrito') {
-  <app-carrito></app-carrito>
-}
+</div>
