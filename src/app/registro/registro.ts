@@ -1,32 +1,62 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { RolUsuario } from '../models/api.models';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-registro',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './registro.html',
-  styleUrl: './registro.scss' // Puedes usar los mismos estilos de login
+  styleUrl: './registro.scss'
 })
 export class RegistroComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  registroForm = this.fb.nonNullable.group({
+  readonly cargando = signal(false);
+  readonly mensaje = signal('');
+  readonly mensajeError = signal('');
+
+  readonly registroForm = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(5)]],
-    rol: ['USER', [Validators.required]] // Por defecto es USER
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    rol: this.fb.nonNullable.control<RolUsuario>('USER', [Validators.required])
   });
 
   registrar(): void {
     if (this.registroForm.invalid) {
       this.registroForm.markAllAsTouched();
+      this.mensajeError.set('Completa los datos requeridos.');
       return;
     }
-    
-    const datos = this.registroForm.getRawValue();
-    console.log('Datos listos para /auth/register:', datos);
-    alert('¡Registro validado! Revisa la consola.');
+
+    this.cargando.set(true);
+    this.mensaje.set('');
+    this.mensajeError.set('');
+
+    this.auth.register(this.registroForm.getRawValue()).subscribe({
+      next: (respuesta) => {
+        this.mensaje.set(respuesta || 'Usuario registrado correctamente.');
+        setTimeout(() => this.router.navigate(['/login']), 700);
+      },
+      error: (error) => {
+        this.cargando.set(false);
+        this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo registrar el usuario.'));
+      },
+      complete: () => this.cargando.set(false)
+    });
+  }
+
+  private obtenerMensajeError(error: unknown, fallback: string): string {
+    if (typeof error === 'object' && error && 'error' in error) {
+      const apiError = (error as { error?: unknown }).error;
+      if (typeof apiError === 'string') return apiError;
+    }
+
+    return fallback;
   }
 }

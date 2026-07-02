@@ -1,36 +1,55 @@
 <div class="contenedor-carrito">
-  <h1 class="titulo">Tu Carrito de Compras</h1>
+  <h1 class="titulo">Tu carrito de compras</h1>
 
-  @if (carritoSvc.cantidadGlobal() === 0) {
+  @if (mensaje()) {
+    <div class="mensaje exito">{{ mensaje() }}</div>
+  }
+
+  @if (mensajeError() || carritoSvc.mensaje()) {
+    <div class="mensaje error">{{ mensajeError() || carritoSvc.mensaje() }}</div>
+  }
+
+  @if (carritoSvc.cargando()) {
+    <p class="estado">Cargando carrito...</p>
+  } @else if (carritoSvc.cantidadGlobal() === 0) {
     <div class="carrito-vacio">
-      <span class="icono-grande">🛒</span>
+      <span class="icono-grande">Carrito</span>
       <h2>Tu carrito está vacío</h2>
-      <p>¡Descubre nuestro catálogo y elige tus favoritos!</p>
-      <a routerLink="/catalogo" class="btn-primario">Ir al Catálogo</a>
+      <p>Descubre nuestro catálogo y elige tus favoritos.</p>
+      <a routerLink="/catalogo" class="btn-primario">Ir al catálogo</a>
     </div>
   } @else {
     <div class="carrito-lleno">
       <div class="lista-items">
         @for (item of carritoSvc.items(); track $index) {
+          @let producto = carritoSvc.getProducto(item);
           <div class="item-tarjeta">
             <div class="info-item">
-              <h3>{{ item.nombre }}</h3>
-              <span class="marca">{{ item.marca }}</span>
+              <h3>{{ producto?.nombre || 'Producto' }}</h3>
+              <span class="marca">{{ producto?.marca || 'Sin marca' }}</span>
+              <span class="cantidad">Cantidad: {{ item.cantidad || 1 }}</span>
             </div>
-            <div class="precio-item">{{ item.precio | currency:'PEN':'symbol':'1.2-2' }}</div>
-            <button class="btn-eliminar" (click)="eliminar($index)">🗑️</button>
+            <div class="precio-item">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'symbol':'1.2-2' }}</div>
+            <button class="btn-eliminar" (click)="eliminar(item)">Eliminar</button>
           </div>
         }
       </div>
 
-      <div class="resumen-compra">
+      <aside class="resumen-compra">
         <h3>Resumen</h3>
+        <div class="fila-resumen">
+          <span>Productos:</span>
+          <span>{{ carritoSvc.cantidadGlobal() }}</span>
+        </div>
         <div class="fila-resumen">
           <span>Total a pagar:</span>
           <span class="total-dinero">{{ carritoSvc.totalGlobal() | currency:'PEN':'symbol':'1.2-2' }}</span>
         </div>
-        <button class="btn-pagar">Proceder al Pago</button>
-      </div>
+        <button class="btn-pagar" (click)="comprar()" [disabled]="procesando()">
+          {{ procesando() ? 'Procesando...' : 'Registrar compra' }}
+        </button>
+        <button class="btn-vaciar" (click)="vaciar()">Vaciar carrito</button>
+      </aside>
     </div>
   }
 </div>

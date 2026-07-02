@@ -1,13 +1,12 @@
 <section class="tarjeta-login">
   <h2>Iniciar Sesión</h2>
-  <p>Ingresa a tu cuenta de la Tienda de Zapatos</p>
+  <p>Ingresa a tu cuenta de la tienda de zapatos</p>
 
   <form [formGroup]="loginForm" (ngSubmit)="enviar()" novalidate>
-    
     <div class="campo">
       <label for="email">Correo electrónico</label>
-      <input id="email" type="email" formControlName="email" placeholder="ejemplo@correo.com">
-      
+      <input id="email" type="email" formControlName="email" placeholder="ejemplo@correo.com" autocomplete="email">
+
       @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
         <small class="error">Ingresa un correo válido.</small>
       }
@@ -15,18 +14,20 @@
 
     <div class="campo">
       <label for="password">Contraseña</label>
-      <input id="password" type="password" formControlName="password" placeholder="Tu contraseña">
-      
+      <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="current-password">
+
       @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
-        <small class="error">La contraseña debe tener al menos 5 caracteres.</small>
+        <small class="error">La contraseña debe tener al menos 6 caracteres.</small>
       }
     </div>
 
-    @if (mensajeError) {
-      <div class="error-global">{{ mensajeError }}</div>
+    @if (mensajeError()) {
+      <div class="error-global">{{ mensajeError() }}</div>
     }
 
-    <button type="submit" class="btn-principal">Ingresar</button>
+    <button type="submit" class="btn-principal" [disabled]="cargando()">
+      {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
   </form>
 
   <p class="enlace-registro">

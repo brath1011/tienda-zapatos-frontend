@@ -1,0 +1,711 @@
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<boolean>> | ((value: boolean) => void) | undefined): Subscription; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:89:45:
+[37m      89 │     this.carritoSvc.agregarItem(producto, 1).[32msubscribe[37m({
+         ╵                                              [32m~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<boolean>> | ((value: boolean) => void) | undefined): Subscription; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:92:45:
+[37m      92 │     this.carritoSvc.agregarItem(producto, 1).[32msubscribe[37m({
+         ╵                                              [32m~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'agregado' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:93:13:
+[37m      93 │       next: ([32magregado[37m) => {
+         ╵              [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'zapato' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:98:33:
+[37m      98 │ ...return item.producto ?? item.[32mzapato[37m ?? this.itemPlanoAProducto(...
+         ╵                                 [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'idZapato' does not exist on type 'Zapato'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:102:37:
+[37m      102 │ ... producto?.id ?? producto?.[32midZapato[37m ?? producto?.idProducto ??...
+          ╵                               [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'idProducto' does not exist on type 'Zapato'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:102:59:
+[37m      102 │ ...to?.idZapato ?? producto?.[32midProducto[37m ?? producto?.productoId ?...
+          ╵                              [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'productoId' does not exist on type 'Zapato'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:102:83:
+[37m      102 │ ...idZapato ?? producto?.idProducto ?? producto?.[32mproductoId[37m ?? null;
+          ╵                                                  [32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'precio' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:108:54:
+[37m      108 │ ...em.subtotal ?? (producto?.precio ?? item.[32mprecio[37m ?? 0) * cantidad;
+          ╵                                             [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nombre' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:112:14:
+[37m      112 │     if (!item.[32mnombre[37m) return null;
+          ╵               [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2551: Property 'idProducto' does not exist on type 'CarritoItem'. Did you mean 'producto'?[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:115:15:
+[37m      115 │       id: item.[32midProducto[37m ?? item.id,
+          ╵                [32m~~~~~~~~~~[0m
+
+  'producto' is declared here.
+
+    src/app/models/api.models.ts:45:2:
+[37m      45 │   [32mproducto[37m: Zapato;
+         ╵   [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'nombre' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:116:19:
+[37m      116 │       nombre: item.[32mnombre[37m,
+          ╵                    [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'marca' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:117:18:
+[37m      117 │       marca: item.[32mmarca[37m ?? '',
+          ╵                   [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'precio' does not exist on type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:121:19:
+[37m      121 │       precio: item.[32mprecio[37m ?? 0,
+          ╵                    [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2345: Argument of type '(items: CarritoItem[]) => (CarritoItem | { producto: Zapato; cantidad: number; })[]' is not assignable to parameter of type '(value: CarritoItem[]) => CarritoItem[]'.
+  Type '(CarritoItem | { producto: Zapato; cantidad: number; })[]' is not assignable to type 'CarritoItem[]'.
+    Type 'CarritoItem | { producto: Zapato; cantidad: number; }' is not assignable to type 'CarritoItem'.
+      Property 'subtotal' is missing in type '{ producto: Zapato; cantidad: number; }' but required in type 'CarritoItem'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/services/carrito.service.ts:143:22:
+[37m      143 │     this.items.update([32m(items) => {[37m
+          ╵                       [32m~~~~~~~~~~~~[0m
+
+  'subtotal' is declared here.
+
+    src/app/models/api.models.ts:47:2:
+[37m      47 │   [32msubtotal[37m: number;
+         ╵   [32m~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:8:36:
+[37m      8 │   @if (mensajeError() || carritoSvc.[32mmensaje[37m()) {
+        ╵                                     [32m~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:9:63:
+[37m      9 │ ...="mensaje error">{{ mensajeError() || carritoSvc.[32mmensaje[37m() }}</div>
+        ╵                                                     [32m~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:12:18:
+[37m      12 │   @if (carritoSvc.[32mcargando[37m()) {
+         ╵                   [32m~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:14:25:
+[37m      14 │   } @else if (carritoSvc.[32mcantidadGlobal[37m() === 0) {
+         ╵                          [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:24:33:
+[37m      24 │         @for (item of carritoSvc.[32mitems[37m(); track $index) {
+         ╵                                  [32m~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:25:37:
+[37m      25 │           @let producto = carritoSvc.[32mgetProducto[37m(item);
+         ╵                                      [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:32:51:
+[37m      32 │ ...recio-item">{{ carritoSvc.[32mgetSubtotal[37m(item) | currency:'PEN':'s...
+         ╵                              [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:42:30:
+[37m      42 │           <span>{{ carritoSvc.[32mcantidadGlobal[37m() }}</span>
+         ╵                               [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:46:51:
+[37m      46 │ ...tal-dinero">{{ carritoSvc.[32mtotalGlobal[37m() | currency:'PEN':'symbo...
+         ╵                              [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:24:4:
+[37m      24 │     [32mthis.carritoSvc[37m.cargar().subscribe();
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:28:21:
+[37m      28 │     const producto = [32mthis.carritoSvc[37m.getProducto(item);
+         ╵                      [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:29:23:
+[37m      29 │     const idProducto = [32mthis.carritoSvc[37m.getProductoId(producto);
+         ╵                        [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:36:4:
+[37m      36 │     [32mthis.carritoSvc[37m.eliminarProducto(idProducto).subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:42:4:
+[37m      42 │     [32mthis.carritoSvc[37m.vaciar().subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:48:21:
+[37m      48 │     const detalles = [32mthis.carritoSvc[37m.items()
+         ╵                      [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'item' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:49:12:
+[37m      49 │       .map(([32mitem[37m) => {
+         ╵             [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:50:25:
+[37m      50 │         const producto = [32mthis.carritoSvc[37m.getProducto(item);
+         ╵                          [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:51:27:
+[37m      51 │         const idProducto = [32mthis.carritoSvc[37m.getProductoId(producto);
+         ╵                            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'detalle' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:57:15:
+[37m      57 │       .filter(([32mdetalle[37m): detalle is { producto: { id: number }; ca...
+         ╵                [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:71:8:
+[37m      71 │         [32mthis.carritoSvc[37m.vaciar().subscribe();
+         ╵         [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:92:4:
+[37m      92 │     [32mthis.carritoSvc[37m.agregarItem(producto, 1).subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'agregado' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:93:13:
+[37m      93 │       next: ([32magregado[37m) => {
+         ╵              [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:99:30:
+[37m      99 │ ...  this.mensajeError.set([32mthis.carritoSvc[37m.mensaje() || 'No se pud...
+         ╵                            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/login/login.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/login/login.ts:40:8:
+[37m      40 │         [32mthis.carrito[37m.cargar().subscribe();
+         ╵         [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.html:9:103:
+[37m      9 │ ...pan class="badge">{{ carritoSvc.[32mcantidadGlobal[37m() }}</span></a></li>
+        ╵                                    [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component NavbarComponent.
+
+    src/app/navbar/navbar.ts:10:15:
+[37m      10 │   templateUrl: [32m'./navbar.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.ts:20:4:
+[37m      20 │     [32mthis.carritoSvc[37m.items.set([]);
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/carrito/carrito.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/catalogo/catalogo.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/login/login.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/navbar/navbar.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:8:36:
+[37m      8 │   @if (mensajeError() || carritoSvc.[32mmensaje[37m()) {
+        ╵                                     [32m~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:9:63:
+[37m      9 │ ...="mensaje error">{{ mensajeError() || carritoSvc.[32mmensaje[37m() }}</div>
+        ╵                                                     [32m~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:12:18:
+[37m      12 │   @if (carritoSvc.[32mcargando[37m()) {
+         ╵                   [32m~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:14:25:
+[37m      14 │   } @else if (carritoSvc.[32mcantidadGlobal[37m() === 0) {
+         ╵                          [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:24:33:
+[37m      24 │         @for (item of carritoSvc.[32mitems[37m(); track $index) {
+         ╵                                  [32m~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:25:37:
+[37m      25 │           @let producto = carritoSvc.[32mgetProducto[37m(item);
+         ╵                                      [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:32:51:
+[37m      32 │ ...recio-item">{{ carritoSvc.[32mgetSubtotal[37m(item) | currency:'PEN':'s...
+         ╵                              [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:42:30:
+[37m      42 │           <span>{{ carritoSvc.[32mcantidadGlobal[37m() }}</span>
+         ╵                               [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.html:46:51:
+[37m      46 │ ...tal-dinero">{{ carritoSvc.[32mtotalGlobal[37m() | currency:'PEN':'symbo...
+         ╵                              [32m~~~~~~~~~~~[0m
+
+  Error occurs in the template of component CarritoComponent.
+
+    src/app/carrito/carrito.ts:12:15:
+[37m      12 │   templateUrl: [32m'./carrito.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:24:4:
+[37m      24 │     [32mthis.carritoSvc[37m.cargar().subscribe();
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:28:21:
+[37m      28 │     const producto = [32mthis.carritoSvc[37m.getProducto(item);
+         ╵                      [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:29:23:
+[37m      29 │     const idProducto = [32mthis.carritoSvc[37m.getProductoId(producto);
+         ╵                        [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:36:4:
+[37m      36 │     [32mthis.carritoSvc[37m.eliminarProducto(idProducto).subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:42:4:
+[37m      42 │     [32mthis.carritoSvc[37m.vaciar().subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:48:21:
+[37m      48 │     const detalles = [32mthis.carritoSvc[37m.items()
+         ╵                      [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'item' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:49:12:
+[37m      49 │       .map(([32mitem[37m) => {
+         ╵             [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:50:25:
+[37m      50 │         const producto = [32mthis.carritoSvc[37m.getProducto(item);
+         ╵                          [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:51:27:
+[37m      51 │         const idProducto = [32mthis.carritoSvc[37m.getProductoId(producto);
+         ╵                            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'detalle' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:57:15:
+[37m      57 │       .filter(([32mdetalle[37m): detalle is { producto: { id: number }; ca...
+         ╵                [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/carrito/carrito.ts:71:8:
+[37m      71 │         [32mthis.carritoSvc[37m.vaciar().subscribe();
+         ╵         [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:92:4:
+[37m      92 │     [32mthis.carritoSvc[37m.agregarItem(producto, 1).subscribe({
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'agregado' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:93:13:
+[37m      93 │       next: ([32magregado[37m) => {
+         ╵              [32m~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/catalogo/catalogo.ts:99:30:
+[37m      99 │ ...  this.mensajeError.set([32mthis.carritoSvc[37m.mensaje() || 'No se pud...
+         ╵                            [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/login/login.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/login/login.ts:40:8:
+[37m      40 │         [32mthis.carrito[37m.cargar().subscribe();
+         ╵         [32m~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.html:9:103:
+[37m      9 │ ...pan class="badge">{{ carritoSvc.[32mcantidadGlobal[37m() }}</span></a></li>
+        ╵                                    [32m~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component NavbarComponent.
+
+    src/app/navbar/navbar.ts:10:15:
+[37m      10 │   templateUrl: [32m'./navbar.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2307: Cannot find module '../services/carrito.service' or its corresponding type declarations.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2571: Object is of type 'unknown'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/navbar/navbar.ts:20:4:
+[37m      20 │     [32mthis.carritoSvc[37m.items.set([]);
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/carrito/carrito.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/catalogo/catalogo.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/login/login.ts:5:31:
+[37m      5 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../services/carrito.service"[0m
+
+    src/app/navbar/navbar.ts:4:31:
+[37m      4 │ import { CarritoService } from [32m'../services/carrito.service'[37m;
+        ╵                                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

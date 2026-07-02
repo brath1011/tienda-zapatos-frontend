@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { CarritoService } from '../services/carrito.service';
 
 @Component({
   selector: 'app-login',
@@ -11,27 +13,47 @@ import { RouterLink } from '@angular/router';
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly carrito = inject(CarritoService);
+  private readonly router = inject(Router);
 
-  // Creamos el formulario con validaciones
-  loginForm = this.fb.nonNullable.group({
+  readonly cargando = signal(false);
+  readonly mensajeError = signal('');
+
+  readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(5)]]
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
-
-  mensajeError = '';
 
   enviar(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      this.mensajeError = 'Por favor, completa los campos correctamente.';
+      this.mensajeError.set('Completa los campos correctamente.');
       return;
     }
 
-    this.mensajeError = '';
-    const datos = this.loginForm.getRawValue();
-    console.log('Datos listos para enviar al Backend:', datos);
-    
-    // Aquí luego conectaremos el AuthService para llamar a /auth/login
-    alert('¡Formulario validado! Revisa la consola.');
+    this.cargando.set(true);
+    this.mensajeError.set('');
+
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      next: () => {
+        this.carrito.cargar().subscribe();
+        this.router.navigate(['/catalogo']);
+      },
+      error: (error) => {
+        this.cargando.set(false);
+        this.mensajeError.set(this.obtenerMensajeError(error, 'Credenciales incorrectas o backend no disponible.'));
+      },
+      complete: () => this.cargando.set(false)
+    });
+  }
+
+  private obtenerMensajeError(error: unknown, fallback: string): string {
+    if (typeof error === 'object' && error && 'error' in error) {
+      const apiError = (error as { error?: unknown }).error;
+      if (typeof apiError === 'string') return apiError;
+    }
+
+    return fallback;
   }
 }

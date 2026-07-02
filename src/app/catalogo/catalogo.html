@@ -1,28 +1,157 @@
 <div class="contenedor-catalogo">
-  <h1 class="titulo">Nuestro Catálogo con 20% de Descuento</h1>
-  
-  <div class="grid-productos">
-    @for (prod of productos; track prod.id) {
-      <div class="tarjeta-producto" [class.sin-stock]="prod.stock === 0">
-        
-        <span class="marca">{{ prod.marca | uppercase }}</span>
-        
-        <h3>{{ prod.nombre }}</h3>
-        
-        <p style="text-decoration: line-through; color: #94a3b8; margin-bottom: 0;">
-          {{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}
-        </p>
+  <header class="cabecera-catalogo">
+    <div>
+      <h1 class="titulo">Catálogo de zapatos</h1>
+      <p>{{ productos().length }} productos registrados · {{ productosConStock() }} disponibles</p>
+    </div>
+    <button type="button" class="btn-secundario" (click)="cargarProductos()" [disabled]="cargando()">
+      {{ cargando() ? 'Cargando...' : 'Actualizar' }}
+    </button>
+  </header>
 
-        <p class="precio" style="font-size: 1.5rem; font-weight: bold; color: #16a34a; margin-top: 5px;">
-          {{ prod.precio | descuentoPrice:20 | currency:'PEN':'symbol':'1.2-2' }}
-        </p>
-        
-        @if (prod.stock > 0) {
-          <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
-        } @else {
-          <span class="etiqueta-agotado" style="color: #dc2626; font-weight: bold;">Agotado</span>
+  @if (mensaje()) {
+    <div class="mensaje exito">{{ mensaje() }}</div>
+  }
+
+  @if (mensajeError()) {
+    <div class="mensaje error">{{ mensajeError() }}</div>
+  }
+
+  @if (auth.esAdmin()) {
+    <section class="panel-admin">
+      <form class="form-producto" [formGroup]="productoForm" (ngSubmit)="guardarProducto()" novalidate>
+        <h2>{{ productoEditando() ? 'Editar producto' : 'Crear producto' }}</h2>
+
+        <div class="grid-form">
+          <label>
+            Nombre
+            <input type="text" formControlName="nombre" placeholder="Air Max">
+          </label>
+
+          <label>
+            Marca
+            <input type="text" formControlName="marca" placeholder="Nike">
+          </label>
+
+          <label>
+            Talla
+            <select formControlName="talla">
+              @for (control of tallasArray.controls; track $index) {
+                <option [value]="control.value">{{ control.value || 'Sin talla' }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Color
+            <input type="text" formControlName="color" placeholder="Negro">
+          </label>
+
+          <label>
+            Categoría
+            <select formControlName="categoria">
+              @for (categoria of categorias; track categoria) {
+                <option [value]="categoria">{{ categoria }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Precio
+            <input type="number" formControlName="precio" min="1" step="0.01">
+          </label>
+
+          <label>
+            Stock
+            <input type="number" formControlName="stock" min="0">
+          </label>
+
+          <label>
+            Imagen URL
+            <input type="url" formControlName="imagenUrl" placeholder="https://example.com/zapato.jpg">
+          </label>
+        </div>
+
+        <label>
+          Descripción
+          <textarea rows="3" formControlName="descripcion" placeholder="Zapatilla deportiva"></textarea>
+        </label>
+
+        @if (productoForm.invalid && productoForm.touched) {
+          <small class="ayuda-error">Revisa los campos marcados. La imagen debe ser una URL http o https.</small>
         }
+
+        <div class="acciones-form">
+          <button type="submit" class="btn-comprar" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : (productoEditando() ? 'Actualizar' : 'Crear') }}
+          </button>
+          <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Limpiar</button>
+        </div>
+      </form>
+
+      <form class="form-oferta" [formGroup]="ofertaForm" (ngSubmit)="aplicarOferta()">
+        <h2>Aplicar oferta</h2>
+        <label>
+          Producto
+          <select formControlName="idProducto">
+            <option [ngValue]="0">Selecciona un producto</option>
+            @for (prod of productos(); track prod.id) {
+              <option [ngValue]="prod.id">{{ prod.nombre }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Descuento %
+          <input type="number" formControlName="porcentaje" min="1" max="90">
+        </label>
+        <button type="submit" class="btn-secundario">Aplicar descuento</button>
+      </form>
+
+      <div class="tallas-dinamicas">
+        <h2>Tallas del formulario</h2>
+        @for (control of tallasArray.controls; track $index) {
+          <div class="fila-talla">
+            <input type="text" [formControl]="control" placeholder="Talla">
+            <button type="button" class="btn-icono" (click)="eliminarTalla($index)">Eliminar</button>
+          </div>
+        }
+        <button type="button" class="btn-secundario" (click)="agregarTalla()">Agregar talla</button>
       </div>
-    }
-  </div>
+    </section>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando catálogo...</p>
+  } @else if (productos().length === 0) {
+    <p class="estado">No hay productos registrados.</p>
+  } @else {
+    <div class="grid-productos">
+      @for (prod of productos(); track prod.id) {
+        <article class="tarjeta-producto" [class.sin-stock]="prod.stock === 0">
+          <img [src]="prod.imagenUrl" [alt]="prod.nombre" loading="lazy">
+
+          <span class="marca">{{ prod.marca | uppercase }}</span>
+          <h3>{{ prod.nombre }}</h3>
+          <p class="descripcion">{{ prod.descripcion }}</p>
+          <p class="detalles">{{ prod.categoria }} · Talla {{ prod.talla }} · {{ prod.color }}</p>
+
+          <p class="precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+          <p class="precio-descuento">Referencial -10%: {{ prod.precio | descuentoPrice:10 | currency:'PEN':'symbol':'1.2-2' }}</p>
+
+          @if (prod.stock > 0) {
+            <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
+          } @else {
+            <span class="etiqueta-agotado">Agotado</span>
+          }
+
+          @if (auth.esAdmin()) {
+            <div class="acciones-admin">
+              <button type="button" class="btn-secundario" (click)="editarProducto(prod)">Editar</button>
+              <button type="button" class="btn-peligro" (click)="eliminarProducto(prod)">Eliminar</button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
 </div>

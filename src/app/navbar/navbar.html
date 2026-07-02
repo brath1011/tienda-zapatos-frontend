@@ -1,13 +1,20 @@
 <nav class="navbar-moderno">
   <div class="logo">
-    <span class="icono">👟</span> TiendaZapatos
+    <span class="icono">Zapatos</span> TiendaZapatos
   </div>
   <ul class="enlaces">
     <li><a routerLink="/inicio" routerLinkActive="activo">Inicio</a></li>
     <li><a routerLink="/catalogo" routerLinkActive="activo">Catálogo</a></li>
-    <li><a routerLink="/carrito" routerLinkActive="activo">Carrito <span class="badge">0</span></a></li>
+    @if (auth.estaAutenticado()) {
+      <li><a routerLink="/carrito" routerLinkActive="activo">Carrito <span class="badge">{{ carritoSvc.cantidadGlobal() }}</span></a></li>
+    }
   </ul>
   <div class="acciones">
-    <a routerLink="/login" class="btn-login">Iniciar Sesión</a>
+    @if (auth.estaAutenticado()) {
+      <span class="usuario">{{ auth.usuario()?.email }} · {{ auth.usuario()?.rol }}</span>
+      <button type="button" class="btn-login" (click)="cerrarSesion()">Salir</button>
+    } @else {
+      <a routerLink="/login" class="btn-login">Iniciar Sesión</a>
+    }
   </div>
 </nav>

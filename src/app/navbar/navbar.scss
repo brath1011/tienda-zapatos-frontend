@@ -13,10 +13,17 @@
   .logo {
     font-size: 1.5rem;
     font-weight: 800;
-    letter-spacing: 1px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .icono {
+    font-size: 0.75rem;
+    background: #fbbf24;
+    color: #0f172a;
+    padding: 0.25rem 0.45rem;
+    border-radius: 4px;
   }
 
   .enlaces {
@@ -35,7 +42,8 @@
       padding: 0.5rem 0;
       border-bottom: 2px solid transparent;
 
-      &:hover, &.activo {
+      &:hover,
+      &.activo {
         color: white;
         border-bottom: 2px solid #fbbf24;
       }
@@ -51,6 +59,17 @@
     }
   }
 
+  .acciones {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .usuario {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
   .btn-login {
     background: white;
     color: #1e3a8a;
@@ -59,10 +78,25 @@
     text-decoration: none;
     font-weight: bold;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 0;
+    cursor: pointer;
 
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .navbar-moderno {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+
+    .enlaces {
+      flex-wrap: wrap;
+      gap: 1rem;
     }
   }
 }

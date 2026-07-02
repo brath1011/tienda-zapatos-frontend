@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { CarritoService } from '../services/carrito.service';
 
 @Component({
@@ -10,5 +11,13 @@ import { CarritoService } from '../services/carrito.service';
   styleUrl: './navbar.scss'
 })
 export class NavbarComponent {
-  carritoSvc = inject(CarritoService); // Inyectamos el servicio
+  readonly carritoSvc = inject(CarritoService);
+  readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  cerrarSesion(): void {
+    this.auth.logout();
+    this.carritoSvc.items.set([]);
+    this.router.navigate(['/inicio']);
+  }
 }
