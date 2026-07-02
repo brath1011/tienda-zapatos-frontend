@@ -1,48 +1,36 @@
-<section class="seccion-carrito">
-  <h2 class="titulo-carrito">Tu Carrito de Compras</h2>
+<div class="contenedor-carrito">
+  <h1 class="titulo">Tu Carrito de Compras</h1>
 
-  <div class="contenedor-carrito">
-    <div class="lista-items">
-      @for (item of items; track item.id) {
-        <div class="item-carrito">
-          <img [src]="item.imagen" [alt]="item.nombre" class="item-img">
-          <div class="item-detalles">
-            <h4>{{ item.nombre }}</h4>
-            <p class="meta">Talla: {{ item.talla }} | Color: {{ item.color }}</p>
+  @if (carritoSvc.cantidadGlobal() === 0) {
+    <div class="carrito-vacio">
+      <span class="icono-grande">🛒</span>
+      <h2>Tu carrito está vacío</h2>
+      <p>¡Descubre nuestro catálogo y elige tus favoritos!</p>
+      <a routerLink="/catalogo" class="btn-primario">Ir al Catálogo</a>
+    </div>
+  } @else {
+    <div class="carrito-lleno">
+      <div class="lista-items">
+        @for (item of carritoSvc.items(); track $index) {
+          <div class="item-tarjeta">
+            <div class="info-item">
+              <h3>{{ item.nombre }}</h3>
+              <span class="marca">{{ item.marca }}</span>
+            </div>
+            <div class="precio-item">{{ item.precio | currency:'PEN':'symbol':'1.2-2' }}</div>
+            <button class="btn-eliminar" (click)="eliminar($index)">🗑️</button>
           </div>
-          <div class="item-cantidad">
-            <span class="label">Cant:</span>
-            <span class="valor-cantidad">{{ item.cantidad }}</span>
-          </div>
-          <div class="item-precio">
-            <p class="subtotal">S/ {{ (item.precio * item.cantidad) | number:'1.2-2' }}</p>
-            <p class="unitario">S/ {{ item.precio | number:'1.2-2' }} c/u</p>
-          </div>
+        }
+      </div>
+
+      <div class="resumen-compra">
+        <h3>Resumen</h3>
+        <div class="fila-resumen">
+          <span>Total a pagar:</span>
+          <span class="total-dinero">{{ carritoSvc.totalGlobal() | currency:'PEN':'symbol':'1.2-2' }}</span>
         </div>
-      } @empty {
-        <p class="carrito-vacio">No has agregado ningún producto al carrito todavía.</p>
-      }
+        <button class="btn-pagar">Proceder al Pago</button>
+      </div>
     </div>
-
-    <div class="resumen-compra">
-      <h3>Resumen del Pedido</h3>
-      <hr class="divisor">
-      <div class="fila-resumen">
-        <span>Subtotal</span>
-        <span>S/ {{ totalGeneral | number:'1.2-2' }}</span>
-      </div>
-      <div class="fila-resumen">
-        <span>Envío</span>
-        <span class="envio-gratis">Gratis</span>
-      </div>
-      <hr class="divisor">
-      <div class="fila-resumen total">
-        <span>Total</span>
-        <span>S/ {{ totalGeneral | number:'1.2-2' }}</span>
-      </div>
-      <button class="btn-checkout" [disabled]="items.length === 0">
-        Proceder al Pago
-      </button>
-    </div>
-  </div>
-</section>
+  }
+</div>

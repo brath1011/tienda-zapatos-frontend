@@ -1,21 +1,14 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CarritoService } from '../services/carrito.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
-export class Navbar {
-  nombreTienda = 'ZapasStore';
-  cantidadItems = 2;
-
-  // Creamos un emisor para avisar el cambio de pestaña
-  @Output() cambioSeccion = new EventEmitter<string>();
-
-  navegar(seccion: string, evento: Event) {
-    evento.preventDefault(); // Evita que la página se recargue
-    this.cambioSeccion.emit(seccion);
-  }
+export class NavbarComponent {
+  carritoSvc = inject(CarritoService); // Inyectamos el servicio
 }

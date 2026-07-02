@@ -1,66 +1,31 @@
-import { Component } from '@angular/core';
-import { NgClass, NgStyle, DecimalPipe } from '@angular/common';
-
-interface Zapato {
-  id: number;
-  nombre: string;
-  marca: string;
-  precio: number;
-  stock: number;
-  categoria: string;
-  imagenUrl: string;
-}
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CarritoService } from '../services/carrito.service';
+import { DescuentoPricePipe } from '../pipes/descuento.pipe'; 
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [NgClass, NgStyle, DecimalPipe],
+  imports: [CommonModule, DescuentoPricePipe], 
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.scss'
 })
-export class Catalogo {
-  titulo = 'Nuestro Catálogo de Zapatos';
+export class CatalogoComponent {
+  
+  // 1. Inyectamos el servicio de comunicación
+  private carritoSvc = inject(CarritoService);
 
-  zapatos: Zapato[] = [
-    { 
-      id: 1, 
-      nombre: 'Air Max Running Pro', 
-      marca: 'Nike', 
-      precio: 380.00, 
-      stock: 12, 
-      categoria: 'Deportivo', 
-      imagenUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80' 
-    },
-    { 
-      id: 2, 
-      nombre: 'Classic Urban Sneaker', 
-      marca: 'Adidas', 
-      precio: 290.00, 
-      stock: 5, 
-      categoria: 'Urbano', 
-      imagenUrl: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80' 
-    },
-    { 
-      id: 3, 
-      nombre: 'Mocasín Oxford Formal Elegante', 
-      marca: 'Gucci', 
-      precio: 850.00, 
-      stock: 0, 
-      categoria: 'Formal', 
-      imagenUrl: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500&q=80' 
-    },
-    { 
-      id: 4, 
-      nombre: 'Sport Casual Ultra', 
-      marca: 'Puma', 
-      precio: 260.00, 
-      stock: 8, 
-      categoria: 'Deportivo', 
-      imagenUrl: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80' 
-    }
+  // 2. Lista temporal de productos para ver el diseño y los Pipes
+  productos = [
+    { id: 1, nombre: 'Zapatillas Urban X', marca: 'Nike', precio: 250.50, stock: 10 },
+    { id: 2, nombre: 'Botas de Montaña', marca: 'Timberland', precio: 420.00, stock: 5 },
+    { id: 3, nombre: 'Mocasines Clásicos', marca: 'Zara', precio: 180.99, stock: 0 }
   ];
-  agregarAlCarrito(zapato: Zapato) {
-  alert(`¡Agregaste al carrito: ${zapato.marca} ${zapato.nombre}!`);
-  // Aquí es donde en el próximo laboratorio conectarás el servicio HTTP para enviarlo a Spring Boot
-}
-}
+
+  // 3. Método que se comunica con el servicio al hacer clic
+  agregarAlCarrito(producto: any) {
+    this.carritoSvc.agregarItem(producto);
+    console.log('Agregado al carrito:', producto.nombre);
+  }
+
+} // <-- ¡Esta es la ÚNICA llave que cierra la clase al final!

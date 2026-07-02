@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss'
 })
-export class Inicio {
-  // Lógica inicial limpia para el componente de presentación
+export class InicioComponent {
+  // Componente de inicio listo para funcionar
 }
