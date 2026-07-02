@@ -1,13 +1,4 @@
-<app-navbar (cambioSeccion)="cambiarVista($event)"></app-navbar>
-
-@if (seccionActiva === 'inicio') {
-  <app-inicio></app-inicio>
-}
-
-@if (seccionActiva === 'catalogo') {
-  <app-catalogo></app-catalogo>
-}
-
-@if (seccionActiva === 'carrito') {
-  <app-carrito></app-carrito>
-}
+<app-navbar></app-navbar>
+<main class="contenedor-principal">
+  <router-outlet></router-outlet>
+</main>

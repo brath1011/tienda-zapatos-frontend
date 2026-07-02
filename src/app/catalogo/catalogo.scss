@@ -1,157 +1,78 @@
-$color-primario: #007bff;
-$color-hover: #0056b3;
-$color-danger: #e63946;
-$color-success: #2a9d8f;
-
-.seccion-catalogo {
-  padding: 40px 20px;
+.contenedor-catalogo {
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: 'Segoe UI', Roboto, sans-serif;
 
-  .titulo-catalogo {
+  .titulo {
+    color: #1e293b;
     font-size: 2rem;
-    color: #222;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
     text-align: center;
-    font-weight: 600;
+  }
+}
+
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.tarjeta-producto {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &:hover {
+    transform: translateY(-5px);
   }
 
-  .contenedor-productos {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 30px;
+  &.sin-stock {
+    opacity: 0.6;
+    filter: grayscale(100%);
   }
 
-  .tarjeta-zapato {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #eee;
-
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .imagen-box {
-      position: relative;
-      background-color: #f8f9fa;
-      height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      img {
-        max-height: 90%;
-        max-width: 90%;
-        object-fit: cover;
-        border-bottom: 1px solid #f1f1f1;
-      }
-
-      .etiqueta-categoria {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        background: #222;
-        color: #fff;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        font-weight: bold;
-        border-radius: 20px;
-      }
-    }
-
-    .info-box {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-
-      .marca {
-        font-size: 0.8rem;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 5px;
-      }
-
-      .nombre {
-        font-size: 1.1rem;
-        color: #333;
-        margin: 0 0 15px 0;
-        font-weight: 500;
-        height: 42px;
-        overflow: hidden;
-      }
-
-      .fila-precio-stock {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-
-        .precio {
-          font-size: 1.3rem;
-          font-weight: 700;
-          color: $color-danger;
-          margin: 0;
-        }
-
-        .con-stock {
-          color: $color-success;
-          background: #e8f5f3;
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: 600;
-        }
-
-        .sin-stock {
-          color: $color-danger;
-          background: #ffebee;
-          padding: 3px 8px;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: 600;
-        }
-      }
-
-      .btn-agregar {
-        background: $color-primario;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.2s;
-
-        &:hover:not(:disabled) {
-          background: $color-hover;
-        }
-
-        &:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-      }
-    }
+  .marca {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
   }
 
-  .sin-resultados {
-    grid-column: 1 / -1;
-    padding: 24px;
-    text-align: center;
-    border-radius: 12px;
-    background: #fee2e2;
-    color: #991b1b;
-    font-weight: 700;
+  h3 { margin: 0 0 1rem 0; color: #0f172a; text-align: center;}
+  
+  .precio {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #16a34a;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-comprar {
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+
+    &:hover { background: #1e40af; }
+  }
+
+  .etiqueta-agotado {
+    color: #dc2626;
+    font-weight: bold;
+    padding: 0.8rem;
   }
 }

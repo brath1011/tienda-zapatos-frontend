@@ -1,24 +1,14 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Navbar } from './navbar/navbar';
-import { Inicio } from './inicio/inicio';
-import { Catalogo } from './catalogo/catalogo';
-import { Carrito } from './carrito/carrito';
+import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './navbar/navbar'; // Ajusta la ruta si es navbar.component
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, Navbar, Inicio, Catalogo, Carrito],
+  imports: [RouterOutlet, NavbarComponent], // <-- ¡Aquí estaba el secreto!
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  title = 'tienda-zapatos-front';
-  
-  // Forzamos a que inicie mostrando el banner promocional
-  seccionActiva: string = 'inicio';
-
-  cambiarVista(nuevaSeccion: string) {
-    this.seccionActiva = nuevaSeccion;
-  }
+  title = 'tienda-zapatos-frontend';
 }

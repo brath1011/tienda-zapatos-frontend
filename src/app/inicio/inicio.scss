@@ -1,119 +1,52 @@
-.banner-inicio {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: white;
-  padding: 60px 40px;
-  max-width: 1200px;
-  margin: 20px auto;
-  border-radius: 16px;
+.hero-section {
+  background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1920&q=80') center/cover;
+  height: 60vh;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  justify-content: center;
+  text-align: center;
+  color: white;
 
-  .banner-contenido {
-    max-width: 60%;
+  .hero-contenido {
+    max-width: 800px;
+    padding: 2rem;
+    animation: fadeIn 1s ease-out;
 
-    .etiqueta-oferta {
-      background-color: #3b82f6;
-      color: white;
-      padding: 6px 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      border-radius: 20px;
-      display: inline-block;
-      margin-bottom: 15px;
-    }
-
-    .titulo-principal {
-      font-size: 2.8rem;
-      font-weight: 800;
-      margin: 0 0 15px 0;
-      line-height: 1.2;
-    }
-
-    .subtitulo {
-      font-size: 1.1rem;
-      color: #94a3b8;
-      margin-bottom: 30px;
-      line-height: 1.5;
-    }
-
-    .botones-banner {
-      display: flex;
-      gap: 15px;
-
-      button {
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 1rem;
-      }
-
-      .btn-comprar {
-        background-color: white;
-        color: #0f172a;
-        border: none;
-
-        &:hover {
-          background-color: #f1f5f9;
-          transform: translateY(-2px);
-        }
-      }
-
-      .btn-saber-mas {
-        background-color: transparent;
-        color: white;
-        border: 2px solid #475569;
-
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.05);
-          border-color: white;
-          transform: translateY(-2px);
-        }
-      }
-    }
+    h1 { font-size: 3.5rem; margin-bottom: 1rem; font-weight: 900; letter-spacing: -1px; }
+    p { font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2.5rem; line-height: 1.6; }
   }
 
-  .banner-decoracion {
-    max-width: 35%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  .btn-accion {
+    background: #fbbf24;
+    color: #0f172a;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 
-    .emoji-gigante {
-      font-size: 7rem;
-      animation: flotar 4s ease-in-out infinite;
-      display: inline-block;
-    }
+    &:hover { background: white; transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
   }
 }
 
-@keyframes flotar {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(-5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+.beneficios {
+  display: flex; justify-content: center; gap: 3rem; padding: 4rem 2rem; background: white; flex-wrap: wrap;
+
+  .card-beneficio {
+    text-align: center; padding: 2rem; border-radius: 12px; background: #f8fafc;
+    width: 250px; transition: transform 0.3s; border: 1px solid #e2e8f0;
+
+    &:hover { transform: translateY(-10px); border-color: #3b82f6; }
+    .icono { font-size: 2.5rem; display: block; margin-bottom: 1rem; }
+    h3 { color: #1e293b; margin-bottom: 0.5rem; }
+    p { color: #64748b; font-size: 0.9rem; }
+  }
 }
 
-@media (max-width: 768px) {
-  .banner-inicio {
-    flex-direction: column;
-    text-align: center;
-    padding: 40px 20px;
-
-    .banner-contenido {
-      max-width: 100%;
-      margin-bottom: 30px;
-      
-      .botones-banner {
-        justify-content: center;
-      }
-    }
-    .banner-decoracion {
-      max-width: 100%;
-    }
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

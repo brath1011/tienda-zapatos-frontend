@@ -1,42 +1,28 @@
-<section class="seccion-catalogo">
-  <h2 class="titulo-catalogo">{{ titulo }}</h2>
-
-  <div class="contenedor-productos">
-    
-    @for (zapato of zapatos; track zapato.id) {
-      <div class="tarjeta-zapato">
+<div class="contenedor-catalogo">
+  <h1 class="titulo">Nuestro Catálogo con 20% de Descuento</h1>
+  
+  <div class="grid-productos">
+    @for (prod of productos; track prod.id) {
+      <div class="tarjeta-producto" [class.sin-stock]="prod.stock === 0">
         
-        <div class="imagen-box">
-          <img [src]="zapato.imagenUrl" [alt]="zapato.nombre">
-          <span class="etiqueta-categoria">{{ zapato.categoria }}</span>
-        </div>
+        <span class="marca">{{ prod.marca | uppercase }}</span>
+        
+        <h3>{{ prod.nombre }}</h3>
+        
+        <p style="text-decoration: line-through; color: #94a3b8; margin-bottom: 0;">
+          {{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}
+        </p>
 
-        <div class="info-box">
-          <span class="marca">{{ zapato.marca }}</span>
-          <h3 class="nombre">{{ zapato.nombre }}</h3>
-          
-          <div class="fila-precio-stock">
-            <p class="precio">S/ {{ zapato.precio | number:'1.2-2' }}</p>
-            
-            <span [ngClass]="{'con-stock': zapato.stock > 0, 'sin-stock': zapato.stock === 0}">
-              {{ zapato.stock > 0 ? zapato.stock + ' disp.' : 'Agotado' }}
-            </span>
-          </div>
-
-          <button class="btn-agregar" [disabled]="zapato.stock === 0">
-            {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
-          </button>
-        </div>
-        <button class="btn-agregar" [disabled]="zapato.stock === 0" (click)="agregarAlCarrito(zapato)">
-  {{ zapato.stock > 0 ? 'Añadir al carrito' : 'No disponible' }}
-</button>
-
-      </div>
-    } @empty {
-      <div class="sin-resultados">
-        No hay zapatos disponibles en el catálogo en este momento.
+        <p class="precio" style="font-size: 1.5rem; font-weight: bold; color: #16a34a; margin-top: 5px;">
+          {{ prod.precio | descuentoPrice:20 | currency:'PEN':'symbol':'1.2-2' }}
+        </p>
+        
+        @if (prod.stock > 0) {
+          <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
+        } @else {
+          <span class="etiqueta-agotado" style="color: #dc2626; font-weight: bold;">Agotado</span>
+        }
       </div>
     }
-
   </div>
-</section>
+</div>
