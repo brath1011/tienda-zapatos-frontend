@@ -159,14 +159,27 @@ export class CatalogoComponent implements OnInit {
   aplicarOferta(): void {
     if (this.ofertaForm.invalid) {
       this.ofertaForm.markAllAsTouched();
+      this.mensajeError.set('Selecciona un producto y escribe un porcentaje valido.');
       return;
     }
 
-    const { idProducto, porcentaje } = this.ofertaForm.getRawValue();
+    const formValue = this.ofertaForm.getRawValue();
+    const idProducto = Number(formValue.idProducto);
+    const porcentaje = Number(formValue.porcentaje);
+    this.mensaje.set('');
+    this.mensajeError.set('');
+
     this.ofertasApi.aplicarDescuento(idProducto, porcentaje).subscribe({
-      next: () => {
+      next: (productoActualizado) => {
+        if (productoActualizado?.id) {
+          this.productos.update((productos) =>
+            productos.map((producto) => producto.id === productoActualizado.id ? productoActualizado : producto)
+          );
+        } else {
+          this.cargarProductos();
+        }
+
         this.mensaje.set('Descuento aplicado correctamente.');
-        this.cargarProductos();
       },
       error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo aplicar el descuento.'))
     });
