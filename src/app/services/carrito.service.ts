@@ -6,16 +6,19 @@ import { CarritoItem, Zapato } from '../models/api.models';
 
 type ApiRecord = Record<string, unknown>;
 
+// [INYECCIÓN DE DEPENDENCIAS]: Servicio global (Singleton) para compartir el estado entre componentes.
 @Injectable({
   providedIn: 'root'
 })
 export class CarritoService {
   private readonly baseUrl = `${environment.apiUrl}/carrito`;
 
+  // [ESTADO REACTIVO - SIGNALS]: Variables que actualizan la interfaz automáticamente al detectar un cambio.
   readonly items = signal<CarritoItem[]>([]);
   readonly cargando = signal(false);
   readonly mensaje = signal('');
 
+  // [PROPIEDADES COMPUTADAS]: Cálculos en tiempo real dependientes del estado reactivo 'items'.
   readonly cantidadGlobal = computed(() =>
     this.items().reduce((total, item) => total + item.cantidad, 0)
   );
@@ -24,8 +27,10 @@ export class CarritoService {
     this.items().reduce((total, item) => total + this.getSubtotal(item), 0)
   );
 
+  // [CLIENTE HTTP - Guía 14]: Herramienta inyectada para la comunicación asíncrona con el Backend.
   constructor(private readonly http: HttpClient) {}
 
+  // [MÉTODO GET]: Solicita información al backend manejando la asincronía con Observables (RxJS).
   cargar(): Observable<CarritoItem[]> {
     this.cargando.set(true);
     this.mensaje.set('');
@@ -42,6 +47,7 @@ export class CarritoService {
     );
   }
 
+  // [MÉTODO POST]: Envía datos hacia el backend (Se conecta con los eventos de la vista).
   agregarItem(producto: Zapato, cantidad = 1): Observable<boolean> {
     if (!producto.id) {
       this.mensaje.set('El producto no tiene un ID valido.');
@@ -65,6 +71,7 @@ export class CarritoService {
     );
   }
 
+  // [MÉTODO DELETE]: Remueve registros ejecutando la petición hacia Spring Boot.
   eliminarProducto(idProducto: number): Observable<boolean> {
     return this.http.delete(`${this.baseUrl}/${idProducto}`, { responseType: 'text' }).pipe(
       tap(() => {
@@ -104,6 +111,7 @@ export class CarritoService {
     return item.subtotal ?? item.producto.precio * item.cantidad;
   }
 
+  // [LÓGICA INTERNA Y PARSEO]: Funciones privadas para procesar las respuestas crudas del backend.
   private normalizarRespuesta(response: unknown): CarritoItem[] {
     if (Array.isArray(response)) {
       return response.map((item) => this.normalizarItem(item)).filter((item): item is CarritoItem => item !== null);
@@ -179,7 +187,6 @@ export class CarritoService {
       const numero = Number(value);
       return Number.isFinite(numero) ? numero : undefined;
     }
-
     return undefined;
   }
 
@@ -202,7 +209,6 @@ export class CarritoService {
             : item
         );
       }
-
       return [...items, { producto, cantidad, subtotal: producto.precio * cantidad }];
     });
   }
@@ -212,12 +218,10 @@ export class CarritoService {
       const apiError = (error as { error?: unknown }).error;
       if (typeof apiError === 'string') return apiError;
     }
-
     if (typeof error === 'object' && error && 'status' in error) {
       const status = (error as { status?: number }).status;
       return status ? `${fallback} Código HTTP ${status}.` : fallback;
     }
-
     return fallback;
   }
 }
