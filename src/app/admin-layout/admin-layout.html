@@ -1,0 +1,54 @@
+<div class="admin-dashboard-container">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <h2>Panel Admin</h2>
+      <p class="role-badge">{{ auth.usuario()?.rol }}</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      @if (!auth.esRepartidor()) {
+        <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        
+        <a routerLink="/admin/pedidos" routerLinkActive="active" class="nav-item">
+          <span class="icon">📦</span>
+          <span>Pedidos</span>
+        </a>
+
+
+
+        <a routerLink="/admin/punto-venta" routerLinkActive="active" class="nav-item" style="background: #10b981; color: white; border-radius: 6px; text-align: center; font-weight: bold; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="icon">💰</span>
+          <span>Caja (Punto de Venta)</span>
+        </a>
+      }
+
+      @if (auth.esRepartidor()) {
+        <a routerLink="/admin/repartos" routerLinkActive="active" class="nav-item">
+          <span class="icon">🛵</span>
+          <span>Mis Repartos</span>
+        </a>
+      }
+
+      @if (auth.esAdmin()) {
+        <a routerLink="/admin/inventario" routerLinkActive="active" class="nav-item">
+          <span class="icon">👟</span>
+          <span>Inventario</span>
+        </a>
+
+        <a routerLink="/admin/usuarios" routerLinkActive="active" class="nav-item">
+          <span class="icon">👥</span>
+          <span>Usuarios</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="admin-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

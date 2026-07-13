@@ -1,0 +1,160 @@
+<div class="pos-container">
+  <header class="pos-header">
+    <h1><span class="icon">💰</span> Punto de Venta (Caja)</h1>
+    <p>Registra ventas físicas y genera boletas electrónicas al instante.</p>
+  </header>
+
+  <div class="pos-grid">
+    <!-- Panel Izquierdo: Catálogo y Búsqueda -->
+    <div class="pos-catalogo panel">
+      <div class="search-bar">
+        <input 
+          type="text" 
+          placeholder="Buscar zapatilla por nombre, marca o modelo..." 
+          [ngModel]="terminoBusqueda()" 
+          (ngModelChange)="terminoBusqueda.set($event)"
+          class="form-control"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <div class="productos-grid">
+        @for (producto of productosFiltradosPorVariante(); track producto.nombre) {
+          @let variantes = obtenerVariantesDeProductoActivo(producto);
+          <div class="producto-card" [class.sin-stock]="calcularTotalStock(producto) <= 0">
+            <div class="producto-img">
+              <span style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; z-index: 10;">{{ producto.genero || 'Caballero' }}</span>
+              <img [src]="getPrimeraImagen(producto.imagen)" [alt]="producto.nombre">
+              @if (calcularTotalStock(producto) <= 0) {
+                <span class="badge-agotado">Agotado</span>
+              }
+            </div>
+            <div class="producto-info">
+              <h3 class="marca">{{ producto.marca }}</h3>
+              <p class="nombre">{{ producto.nombre }}</p>
+
+              <div class="selector-color" style="margin-bottom: 10px; margin-top: 5px;">
+                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">Color: {{ producto.color }}</p>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  @for (variante of variantes; track variante.id) {
+                    <div (click)="$event.stopPropagation(); seleccionarVariante(producto.nombre, variante.id!)"
+                         [style.border]="producto.id === variante.id ? '2px solid #2563eb' : '2px solid #e2e8f0'"
+                         style="width: 28px; height: 28px; border-radius: 50%; cursor: pointer; background-color: #f8fafc; overflow: hidden; display: flex; align-items: center; justify-content: center;"
+                         [title]="variante.color">
+                      <img [src]="getPrimeraImagen(variante.imagen)" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="precio-stock">
+                <span class="precio">S/. {{ producto.precio | number:'1.2-2' }}</span>
+                <span class="stock">Stock: {{ calcularTotalStock(producto) }}</span>
+              </div>
+              
+              @if (calcularTotalStock(producto) > 0) {
+                <div style="margin-top: 10px;">
+                  <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 5px;">Añadir Talla:</p>
+                  <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    @for (talla of tallasDisponibles(producto); track talla) {
+                      <button type="button" 
+                              (click)="$event.stopPropagation(); seleccionarTalla(producto.id!, talla); agregarAlCarrito(producto)" 
+                              style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold; background: #f1f5f9; color: #475569;">
+                        {{ talla }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="no-resultados">
+            <p>No se encontraron productos.</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Panel Derecho: Carrito y Formulario (Ticket) -->
+    <div class="pos-ticket panel">
+      <h2 class="ticket-titulo">Boleta de Venta</h2>
+      
+      <!-- Datos del Cliente -->
+      <div class="formulario-cliente">
+        <div class="form-group">
+          <label>DNI del Cliente *</label>
+          <input type="text" [(ngModel)]="clienteForm.dni" class="form-control" placeholder="12345678" required>
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico (Para Boleta) *</label>
+          <input type="email" [(ngModel)]="clienteForm.email" class="form-control" placeholder="juan@email.com" required>
+        </div>
+      </div>
+
+      <hr class="ticket-divider">
+
+      <!-- Detalles de Venta -->
+      <div class="carrito-items">
+        @for (item of carrito(); track item.producto.id) {
+          <div class="carrito-item">
+            <div class="item-info">
+              <span class="item-nombre">{{ item.producto.nombre }} (Talla {{ item.tallaSeleccionada }})</span>
+              <span class="item-precio">S/. {{ item.precioUnitario | number:'1.2-2' }} x {{ item.cantidad }}</span>
+            </div>
+            <div class="item-acciones">
+              <strong class="item-subtotal">S/. {{ (item.precioUnitario * item.cantidad) | number:'1.2-2' }}</strong>
+              <button class="btn-quitar" (click)="quitarDelCarrito(item.producto.id, item.tallaSeleccionada)">❌</button>
+            </div>
+          </div>
+        } @empty {
+          <p class="carrito-vacio">Seleccione productos para agregarlos a la venta.</p>
+        }
+      </div>
+
+      <hr class="ticket-divider">
+
+      <!-- Total y Pago -->
+      <div class="ticket-resumen">
+        <div class="total-row">
+          <span>Total a Pagar:</span>
+          <strong class="gran-total">S/. {{ calcularTotal() | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Método de Pago</label>
+          <select [(ngModel)]="clienteForm.metodoPago" class="form-control select-pago">
+            <option value="EFECTIVO">💵 Efectivo</option>
+            <option value="TARJETA_POS">💳 Tarjeta (Terminal POS)</option>
+            <option value="YAPE">📱 Yape</option>
+            <option value="PLIN">📱 Plin</option>
+          </select>
+        </div>
+
+        <div class="acciones-caja">
+          <button class="btn-primario btn-grande" [disabled]="cargando() || carrito().length === 0" (click)="procesarVenta()">
+            @if (cargando()) {
+              Procesando...
+            } @else {
+              Cobrar e Imprimir
+            }
+          </button>
+          
+          <button class="btn-secundario" (click)="limpiarFormulario()">
+            Limpiar Venta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Mensajes -->
+  @if (mensaje()) {
+    <div class="toast-flotante" [class.toast-error]="mensaje()?.tipo === 'error'">
+      {{ mensaje()?.texto }}
+      @if (mensaje()?.tipo === 'exito') {
+        <button (click)="imprimirUltimoTicket()" class="btn-imprimir-toast">🖨️ Imprimir Recibo Físico</button>
+      }
+    </div>
+  }
+</div>

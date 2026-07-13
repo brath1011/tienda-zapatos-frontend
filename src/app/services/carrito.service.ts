@@ -1,24 +1,19 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, finalize, map, of, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Observable, of } from 'rxjs';
 import { CarritoItem, Zapato } from '../models/api.models';
 
-type ApiRecord = Record<string, unknown>;
+const CARRITO_STORAGE_KEY = 'tienda_zapatos_carrito';
 
-// [INYECCIÓN DE DEPENDENCIAS]: Servicio global (Singleton) para compartir el estado entre componentes.
 @Injectable({
   providedIn: 'root'
 })
 export class CarritoService {
-  private readonly baseUrl = `${environment.apiUrl}/carrito`;
-
-  // [ESTADO REACTIVO - SIGNALS]: Variables que actualizan la interfaz automáticamente al detectar un cambio.
+  // Estado reactivo
   readonly items = signal<CarritoItem[]>([]);
   readonly cargando = signal(false);
   readonly mensaje = signal('');
 
-  // [PROPIEDADES COMPUTADAS]: Cálculos en tiempo real dependientes del estado reactivo 'items'.
+  // Propiedades computadas
   readonly cantidadGlobal = computed(() =>
     this.items().reduce((total, item) => total + item.cantidad, 0)
   );
@@ -27,80 +22,75 @@ export class CarritoService {
     this.items().reduce((total, item) => total + this.getSubtotal(item), 0)
   );
 
-  // [CLIENTE HTTP - Guía 14]: Herramienta inyectada para la comunicación asíncrona con el Backend.
-  constructor(private readonly http: HttpClient) {}
-
-  // [MÉTODO GET]: Solicita información al backend manejando la asincronía con Observables (RxJS).
-  cargar(): Observable<CarritoItem[]> {
-    this.cargando.set(true);
-    this.mensaje.set('');
-
-    return this.http.get(this.baseUrl, { responseType: 'text' }).pipe(
-      map((response) => this.parsearRespuesta(response)),
-      map((response) => this.normalizarRespuesta(response)),
-      tap((items) => this.items.set(items)),
-      catchError((error) => {
-        this.mensaje.set(this.obtenerMensajeError(error, 'No se pudo cargar el carrito.'));
-        return of(this.items());
-      }),
-      finalize(() => this.cargando.set(false))
-    );
+  constructor() {
+    // Carga inicial sincrónica (pero también mantenemos el método cargar para compatibilidad)
+    this.cargarDesdeStorage();
   }
 
-  // [MÉTODO POST]: Envía datos hacia el backend (Se conecta con los eventos de la vista).
-  agregarItem(producto: Zapato, cantidad = 1): Observable<boolean> {
+  cargar(): Observable<CarritoItem[]> {
+    this.cargando.set(true);
+    this.cargarDesdeStorage();
+    this.cargando.set(false);
+    return of(this.items());
+  }
+
+  agregarItem(producto: Zapato, cantidad = 1, tallaSeleccionada: string): Observable<boolean> {
     if (!producto.id) {
       this.mensaje.set('El producto no tiene un ID valido.');
       return of(false);
     }
+    
+    if (!tallaSeleccionada) {
+      this.mensaje.set('Debes seleccionar una talla.');
+      return of(false);
+    }
 
     this.mensaje.set('');
+    this.items.update((itemsActuales) => {
+      const existente = itemsActuales.find((item) => item.producto.id === producto.id && item.tallaSeleccionada === tallaSeleccionada);
+      
+      let nuevosItems: CarritoItem[];
+      if (existente) {
+        nuevosItems = itemsActuales.map((item) =>
+          item.producto.id === producto.id && item.tallaSeleccionada === tallaSeleccionada
+            ? {
+                ...item,
+                cantidad: item.cantidad + cantidad,
+                subtotal: item.producto.precio * (item.cantidad + cantidad)
+              }
+            : item
+        );
+      } else {
+        nuevosItems = [...itemsActuales, { producto, cantidad, tallaSeleccionada, subtotal: producto.precio * cantidad }];
+      }
+      
+      this.guardarEnStorage(nuevosItems);
+      return nuevosItems;
+    });
 
-    return this.http.post(`${this.baseUrl}/agregar?idProducto=${producto.id}&cantidad=${cantidad}`, null, {
-      responseType: 'text'
-    }).pipe(
-      tap(() => {
-        this.agregarLocalmente(producto, cantidad);
-        this.cargar().subscribe();
-      }),
-      map(() => true),
-      catchError((error) => {
-        this.mensaje.set(this.obtenerMensajeError(error, 'No se pudo agregar el producto al carrito.'));
-        return of(false);
-      })
-    );
+    this.mensaje.set('Producto agregado al carrito.');
+    return of(true);
   }
 
-  // [MÉTODO DELETE]: Remueve registros ejecutando la petición hacia Spring Boot.
-  eliminarProducto(idProducto: number): Observable<boolean> {
-    return this.http.delete(`${this.baseUrl}/${idProducto}`, { responseType: 'text' }).pipe(
-      tap(() => {
-        this.items.update((items) => items.filter((item) => item.producto.id !== idProducto));
-        this.cargar().subscribe();
-      }),
-      map(() => true),
-      catchError((error) => {
-        this.mensaje.set(this.obtenerMensajeError(error, 'No se pudo eliminar el producto.'));
-        return of(false);
-      })
-    );
+  eliminarProducto(idProducto: number, tallaSeleccionada: string): Observable<boolean> {
+    this.items.update((itemsActuales) => {
+      const nuevosItems = itemsActuales.filter((item) => !(item.producto.id === idProducto && item.tallaSeleccionada === tallaSeleccionada));
+      this.guardarEnStorage(nuevosItems);
+      return nuevosItems;
+    });
+    this.mensaje.set('Producto eliminado.');
+    return of(true);
   }
 
   vaciar(): Observable<boolean> {
-    return this.http.delete(`${this.baseUrl}/vaciar`, { responseType: 'text' }).pipe(
-      tap(() => this.items.set([])),
-      map(() => true),
-      catchError((error) => {
-        this.mensaje.set(this.obtenerMensajeError(error, 'No se pudo vaciar el carrito.'));
-        return of(false);
-      })
-    );
+    this.items.set([]);
+    this.guardarEnStorage([]);
+    this.mensaje.set('Carrito vaciado.');
+    return of(true);
   }
 
   obtenerTotalBackend(): Observable<number> {
-    return this.http.get<number>(`${this.baseUrl}/total`).pipe(
-      catchError(() => of(this.totalGlobal()))
-    );
+    return of(this.totalGlobal());
   }
 
   getProducto(item: CarritoItem): Zapato {
@@ -111,117 +101,19 @@ export class CarritoService {
     return item.subtotal ?? item.producto.precio * item.cantidad;
   }
 
-  // [LÓGICA INTERNA Y PARSEO]: Funciones privadas para procesar las respuestas crudas del backend.
-  private normalizarRespuesta(response: unknown): CarritoItem[] {
-    if (Array.isArray(response)) {
-      return response.map((item) => this.normalizarItem(item)).filter((item): item is CarritoItem => item !== null);
-    }
-
-    if (!this.esRegistro(response)) return [];
-
-    const posiblesListas = [response['items'], response['carrito'], response['contenido'], response['content']];
-    const lista = posiblesListas.find(Array.isArray);
-
-    if (!lista) return [];
-
-    return lista.map((item) => this.normalizarItem(item)).filter((item): item is CarritoItem => item !== null);
-  }
-
-  private parsearRespuesta(response: string): unknown {
-    const texto = response.trim();
-    if (!texto) return [];
-
+  private cargarDesdeStorage(): void {
     try {
-      return JSON.parse(texto);
-    } catch {
-      return [];
-    }
-  }
-
-  private normalizarItem(item: unknown): CarritoItem | null {
-    if (!this.esRegistro(item)) return null;
-
-    const producto = this.normalizarProducto(item['producto'] ?? item['zapato'] ?? item);
-    if (!producto) return null;
-
-    const cantidad = this.obtenerNumero(item['cantidad']) ?? 1;
-    const subtotal = this.obtenerNumero(item['subtotal']) ?? producto.precio * cantidad;
-
-    return {
-      id: this.obtenerNumero(item['id']),
-      producto,
-      cantidad,
-      subtotal
-    };
-  }
-
-  private normalizarProducto(value: unknown): Zapato | null {
-    if (!this.esRegistro(value)) return null;
-
-    const id = this.obtenerNumero(value['id'] ?? value['idZapato'] ?? value['idProducto'] ?? value['productoId']);
-    const nombre = this.obtenerTexto(value['nombre']);
-
-    if (!id && !nombre) return null;
-
-    return {
-      id,
-      nombre: nombre || 'Producto',
-      marca: this.obtenerTexto(value['marca']) || 'Sin marca',
-      talla: this.obtenerTexto(value['talla']) || '',
-      color: this.obtenerTexto(value['color']) || '',
-      categoria: this.obtenerTexto(value['categoria']) || '',
-      precio: this.obtenerNumero(value['precio']) ?? 0,
-      stock: this.obtenerNumero(value['stock']) ?? 0,
-      descripcion: this.obtenerTexto(value['descripcion']) || '',
-      imagenUrl: this.obtenerTexto(value['imagenUrl']) || this.obtenerTexto(value['imagen']) || ''
-    };
-  }
-
-  private esRegistro(value: unknown): value is ApiRecord {
-    return typeof value === 'object' && value !== null;
-  }
-
-  private obtenerNumero(value: unknown): number | undefined {
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string' && value.trim() !== '') {
-      const numero = Number(value);
-      return Number.isFinite(numero) ? numero : undefined;
-    }
-    return undefined;
-  }
-
-  private obtenerTexto(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-  }
-
-  private agregarLocalmente(producto: Zapato, cantidad: number): void {
-    this.items.update((items) => {
-      const existente = items.find((item) => item.producto.id === producto.id);
-
-      if (existente) {
-        return items.map((item) =>
-          item.producto.id === producto.id
-            ? {
-                ...item,
-                cantidad: item.cantidad + cantidad,
-                subtotal: item.producto.precio * (item.cantidad + cantidad)
-              }
-            : item
-        );
+      const stored = localStorage.getItem(CARRITO_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as CarritoItem[];
+        this.items.set(parsed);
       }
-      return [...items, { producto, cantidad, subtotal: producto.precio * cantidad }];
-    });
+    } catch {
+      this.items.set([]);
+    }
   }
 
-  private obtenerMensajeError(error: unknown, fallback: string): string {
-    if (typeof error === 'object' && error && 'error' in error) {
-      const apiError = (error as { error?: unknown }).error;
-      if (typeof apiError === 'string') return apiError;
-    }
-    if (typeof error === 'object' && error && 'status' in error) {
-      const status = (error as { status?: number }).status;
-      return status ? `${fallback} Código HTTP ${status}.` : fallback;
-    }
-    return fallback;
+  private guardarEnStorage(items: CarritoItem[]): void {
+    localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(items));
   }
 }

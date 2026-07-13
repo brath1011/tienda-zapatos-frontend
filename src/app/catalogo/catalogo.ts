@@ -11,7 +11,7 @@ import { DescuentoPricePipe } from '../pipes/descuento.pipe';
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DescuentoPricePipe],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.scss'
 })
@@ -24,49 +24,106 @@ export class CatalogoComponent implements OnInit {
   readonly auth = inject(AuthService);
   readonly productos = signal<Zapato[]>([]);
   readonly cargando = signal(false);
-  readonly guardando = signal(false);
-  readonly productoEditando = signal<Zapato | null>(null);
   readonly mensaje = signal('');
   readonly mensajeError = signal('');
-
+  
   readonly categorias = ['Deportivo', 'Casual', 'Formal', 'Urbano', 'Botas'];
-  readonly tallas = this.fb.array(['38', '39', '40', '41', '42'].map((talla) => this.fb.nonNullable.control(talla)));
+  readonly productosConStock = computed(() => this.productos().filter((producto) => this.calcularTotalStock(producto) > 0).length);
 
-  readonly productosConStock = computed(() => this.productos().filter((producto) => producto.stock > 0).length);
-
-  readonly productoForm = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-    marca: ['', [Validators.required, Validators.minLength(2)]],
-    talla: ['42', [Validators.required]],
-    color: ['', [Validators.required]],
-    categoria: ['Deportivo', [Validators.required]],
-    precio: [0, [Validators.required, Validators.min(1)]],
-    stock: [0, [Validators.required, Validators.min(0)]],
-    descripcion: ['', [Validators.required, Validators.minLength(8)]],
-    imagenUrl: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
+  readonly modelosAgrupados = computed(() => {
+    const productosArray = this.productos();
+    const map = new Map<string, Zapato[]>();
+    for (const p of productosArray) {
+      const clave = `${p.nombre.trim().toLowerCase()}|${(p.genero || 'Caballero')}|${p.categoria}`;
+      if (!map.has(clave)) map.set(clave, []);
+      map.get(clave)!.push(p);
+    }
+    return Array.from(map.values());
   });
 
-  readonly ofertaForm = this.fb.nonNullable.group({
-    idProducto: [0, [Validators.required, Validators.min(1)]],
-    porcentaje: [10, [Validators.required, Validators.min(1), Validators.max(90)]]
+  // Agrupar por categoría para mostrar secciones en el catálogo
+  readonly modelosPorCategoria = computed(() => {
+    const grupos = this.modelosAgrupados();
+    const catMap = new Map<string, Zapato[][]>();
+    for (const grupo of grupos) {
+      const cat = grupo[0].categoria || 'Otros';
+      if (!catMap.has(cat)) catMap.set(cat, []);
+      catMap.get(cat)!.push(grupo);
+    }
+    return Array.from(catMap.entries()).map(([cat, grupos]) => ({ cat, grupos }));
   });
+
+  readonly categoriasOrden = ['Deportivo', 'Urbano', 'Casual', 'Formal', 'Botas'];
+
+  get modelosPorCategoriaOrdenados() {
+    return this.modelosPorCategoria().sort((a, b) =>
+      (this.categoriasOrden.indexOf(a.cat) ?? 99) - (this.categoriasOrden.indexOf(b.cat) ?? 99)
+    );
+  }
+
+  varianteSeleccionadaPorModelo = signal<{ [nombre: string]: number }>({});
+  productoDetalle = signal<Zapato | null>(null);
 
   ngOnInit(): void {
     this.cargarProductos();
   }
 
-  get tallasArray(): FormArray<FormControl<string>> {
-    return this.tallas;
+  getPrimeraImagen(imagenStr?: string): string {
+    if (!imagenStr) return 'assets/no-image.png';
+    return imagenStr.split(',')[0];
   }
 
-  agregarTalla(): void {
-    this.tallas.push(this.fb.nonNullable.control(''));
+  getImagenesGaleria(imagenStr?: string): string[] {
+    if (!imagenStr) return [];
+    return imagenStr.split(',').filter(url => url.trim() !== '');
   }
 
-  eliminarTalla(index: number): void {
-    if (this.tallas.length > 1) {
-      this.tallas.removeAt(index);
+  verDetalle(producto: Zapato): void {
+    this.productoDetalle.set(producto);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cerrarDetalle(): void {
+    this.productoDetalle.set(null);
+  }
+
+  obtenerVarianteActiva(variantes: Zapato[]): Zapato {
+    const modeloNombre = variantes[0].nombre;
+    const idSeleccionado = this.varianteSeleccionadaPorModelo()[modeloNombre];
+    if (idSeleccionado) {
+      const variante = variantes.find(v => v.id === idSeleccionado);
+      if (variante) return variante;
     }
+    return variantes[0];
+  }
+
+  seleccionarVariante(modeloNombre: string, idProducto: number): void {
+    this.varianteSeleccionadaPorModelo.update(current => ({
+      ...current,
+      [modeloNombre]: idProducto
+    }));
+    // Actualizar el detalle si está abierto
+    const abierto = this.productoDetalle();
+    if (abierto && abierto.nombre === modeloNombre) {
+       const variantesDelModelo = this.modelosAgrupados().find(v => v[0].nombre === modeloNombre);
+       if (variantesDelModelo) {
+         const nueva = variantesDelModelo.find(v => v.id === idProducto);
+         if (nueva) this.productoDetalle.set(nueva);
+       }
+    }
+  }
+
+  calcularTotalStock(producto: Zapato): number {
+    if (!producto.tallasStock) return 0;
+    return Object.values(producto.tallasStock).reduce((acc, curr) => acc + (curr || 0), 0);
+  }
+
+  tallasDisponibles(producto: Zapato): string[] {
+    if (!producto.tallasStock) return [];
+    return Object.entries(producto.tallasStock)
+      .filter(([_, stock]) => stock > 0)
+      .map(([talla, _]) => talla)
+      .sort((a, b) => parseInt(a) - parseInt(b));
   }
 
   cargarProductos(): void {
@@ -80,19 +137,31 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
+  tallaSeleccionadaPorProducto: { [id: number]: string } = {};
+
+  seleccionarTalla(idProducto: number, talla: string): void {
+    this.tallaSeleccionadaPorProducto[idProducto] = talla;
+  }
+
   agregarAlCarrito(producto: Zapato): void {
     if (!this.auth.estaAutenticado()) {
       this.mensajeError.set('Inicia sesión para agregar productos al carrito.');
       return;
     }
 
+    const tallaSeleccionada = this.tallaSeleccionadaPorProducto[producto.id!];
+    if (!tallaSeleccionada) {
+      this.mensajeError.set(`Selecciona una talla para ${producto.nombre} antes de añadir al carrito.`);
+      return;
+    }
+
     this.mensaje.set('');
     this.mensajeError.set('');
 
-    this.carritoSvc.agregarItem(producto, 1).subscribe({
+    this.carritoSvc.agregarItem(producto, 1, tallaSeleccionada).subscribe({
       next: (agregado) => {
         if (agregado) {
-          this.mensaje.set(`${producto.nombre} agregado al carrito.`);
+          this.mensaje.set(`Talla ${tallaSeleccionada} de ${producto.nombre} agregada al carrito.`);
           return;
         }
 
@@ -101,104 +170,7 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
-  guardarProducto(): void {
-    if (this.productoForm.invalid) {
-      this.productoForm.markAllAsTouched();
-      this.mensajeError.set('Completa correctamente el formulario de producto.');
-      return;
-    }
 
-    const producto = this.productoForm.getRawValue();
-    const editando = this.productoEditando();
-    this.guardando.set(true);
-    this.mensaje.set('');
-    this.mensajeError.set('');
-
-    const request = editando?.id
-      ? this.productosApi.actualizar(editando.id, { ...producto, id: editando.id })
-      : this.productosApi.crear(producto);
-
-    request.subscribe({
-      next: () => {
-        this.mensaje.set(editando ? 'Producto actualizado correctamente.' : 'Producto creado correctamente.');
-        this.cancelarEdicion();
-        this.cargarProductos();
-      },
-      error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo guardar el producto.')),
-      complete: () => this.guardando.set(false)
-    });
-  }
-
-  editarProducto(producto: Zapato): void {
-    this.productoEditando.set(producto);
-    this.productoForm.patchValue({
-      nombre: producto.nombre,
-      marca: producto.marca,
-      talla: producto.talla,
-      color: producto.color,
-      categoria: producto.categoria,
-      precio: producto.precio,
-      stock: producto.stock,
-      descripcion: producto.descripcion,
-      imagenUrl: producto.imagenUrl
-    });
-  }
-
-  eliminarProducto(producto: Zapato): void {
-    if (!producto.id) return;
-
-    this.productosApi.eliminar(producto.id).subscribe({
-      next: () => {
-        this.mensaje.set('Producto eliminado correctamente.');
-        this.cargarProductos();
-      },
-      error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo eliminar el producto.'))
-    });
-  }
-
-  aplicarOferta(): void {
-    if (this.ofertaForm.invalid) {
-      this.ofertaForm.markAllAsTouched();
-      this.mensajeError.set('Selecciona un producto y escribe un porcentaje valido.');
-      return;
-    }
-
-    const formValue = this.ofertaForm.getRawValue();
-    const idProducto = Number(formValue.idProducto);
-    const porcentaje = Number(formValue.porcentaje);
-    this.mensaje.set('');
-    this.mensajeError.set('');
-
-    this.ofertasApi.aplicarDescuento(idProducto, porcentaje).subscribe({
-      next: (productoActualizado) => {
-        if (productoActualizado?.id) {
-          this.productos.update((productos) =>
-            productos.map((producto) => producto.id === productoActualizado.id ? productoActualizado : producto)
-          );
-        } else {
-          this.cargarProductos();
-        }
-
-        this.mensaje.set('Descuento aplicado correctamente.');
-      },
-      error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo aplicar el descuento.'))
-    });
-  }
-
-  cancelarEdicion(): void {
-    this.productoEditando.set(null);
-    this.productoForm.reset({
-      nombre: '',
-      marca: '',
-      talla: '42',
-      color: '',
-      categoria: 'Deportivo',
-      precio: 0,
-      stock: 0,
-      descripcion: '',
-      imagenUrl: ''
-    });
-  }
 
   private obtenerMensajeError(error: unknown, fallback: string): string {
     if (typeof error === 'object' && error && 'error' in error) {

@@ -1,0 +1,181 @@
+<div class="panel-admin">
+  <header class="panel-header">
+    <h1>Gestión de Usuarios y Roles</h1>
+    <p>Agrega personal a tu tienda para que te ayuden con las ventas y envíos.</p>
+  </header>
+
+  @if (mensaje()) {
+    <div class="mensaje exito">{{ mensaje() }}</div>
+  }
+  @if (mensajeError()) {
+    <div class="mensaje error">{{ mensajeError() }}</div>
+  }
+
+  <div class="grid-usuarios">
+    <section class="tarjeta-blanca">
+      <h2>Crear Empleado</h2>
+      
+      <form [formGroup]="usuarioForm" (ngSubmit)="crearUsuario()" class="form-moderno">
+        <div class="campo">
+          <label>Nombre Completo</label>
+          <input type="text" formControlName="nombre" placeholder="Ej. Juan Pérez">
+        </div>
+
+        <div class="campo">
+          <label>Correo Electrónico</label>
+          <input type="email" formControlName="email" placeholder="juan@utpfashion.com">
+        </div>
+
+        <div class="campo">
+          <label>Contraseña Temporal</label>
+          <input type="password" formControlName="password" placeholder="Min. 6 caracteres">
+        </div>
+
+        <div class="campo">
+          <label>Rol Asignado</label>
+          <select formControlName="rol">
+            <option value="VENTAS">Ventas</option>
+            <option value="REPARTIDOR">Repartidor</option>
+          </select>
+        </div>
+
+        @if (usuarioForm.controls.rol.value === 'REPARTIDOR') {
+          <div class="campo" style="margin-top: 1rem; padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #1e293b;">📍 Zonas de Cobertura</label>
+            <small style="color: #64748b; margin-bottom: 0.5rem; display: block; font-size: 0.75rem;">
+              Selecciona las zonas que cubrirá este repartidor (Ctrl+Click para seleccionar varias).
+            </small>
+            <select formControlName="zona" multiple class="select-moderno" style="height: 120px;">
+              <option value="Norte">Lima Norte</option>
+              <option value="Sur">Lima Sur</option>
+              <option value="Centro">Lima Centro</option>
+              <option value="Este">Lima Este</option>
+              <option value="Callao">Callao</option>
+            </select>
+          </div>
+        }
+
+        @if (usuarioForm.invalid && usuarioForm.touched) {
+          <small class="error-form">Revisa los campos. La contraseña debe tener al menos 6 caracteres.</small>
+        }
+
+        <button type="submit" class="btn-primario mt-4" [disabled]="guardando()">
+          {{ guardando() ? 'Creando...' : 'Crear Empleado' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="tarjeta-blanca listado">
+      <h2>Lista de Personal</h2>
+      @if (cargando()) {
+        <p>Cargando personal...</p>
+      } @else {
+        <ul class="lista-empleados">
+          @for (user of usuarios(); track user.id) {
+            <!-- Mostramos a todos menos a los clientes -->
+            @if (user.rol !== 'CLIENTE') {
+              <li class="empleado-item" [ngStyle]="{'opacity': user.activo === false ? '0.6' : '1'}">
+                <div class="avatar" [ngStyle]="{'background': user.activo === false ? '#94a3b8' : ''}">{{ user.nombre.charAt(0) }}</div>
+                <div class="detalles">
+                  <strong [ngStyle]="{'text-decoration': user.activo === false ? 'line-through' : 'none'}">{{ user.nombre }}</strong>
+                  <span>{{ user.email }}</span>
+                </div>
+                <div class="acciones-empleado" style="display: flex; align-items: center; gap: 10px;">
+                  @if (user.activo === false) {
+                    <span class="badge" style="background: #fee2e2; color: #b91c1c;">SUSPENDIDO</span>
+                  } @else {
+                    <span class="badge" [ngClass]="user.rol.toLowerCase()">{{ user.rol }}</span>
+                  }
+                  <button type="button" class="btn-info" (click)="verDetalles(user)" style="background: none; border: none; cursor: pointer; font-size: 1.25rem;" title="Ver Ficha">👁️</button>
+                </div>
+              </li>
+            }
+          }
+        </ul>
+      }
+    </section>
+  </div>
+
+  @if (usuarioSeleccionado()) {
+    <div class="modal-backdrop" (click)="cerrarModal()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+      <div class="modal-contenido" (click)="$event.stopPropagation()" style="background: white; padding: 2rem; border-radius: 16px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-family: 'Outfit', 'Inter', sans-serif;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="margin: 0; font-size: 1.5rem; color: #0f172a;">Ficha de Identificación</h2>
+          <button (click)="cerrarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        </header>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+          <div style="width: 70px; height: 70px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;"
+               [ngStyle]="{'background': usuarioSeleccionado().activo === false ? '#94a3b8' : '#3b82f6'}">
+            {{ usuarioSeleccionado().nombre.charAt(0) }}
+          </div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: #0f172a;">{{ usuarioSeleccionado().nombre }}</h3>
+          <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 0.25rem; color: white;"
+                [style.background-color]="usuarioSeleccionado().activo === false ? '#ef4444' : (usuarioSeleccionado().rol === 'VENTAS' ? '#10b981' : '#f59e0b')">
+            {{ usuarioSeleccionado().activo === false ? 'SUSPENDIDO' : usuarioSeleccionado().rol }}
+          </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">DNI / Documento</label>
+            <span style="color: #334155; font-weight: 500;">{{ usuarioSeleccionado().numeroDocumento || 'No registrado' }}</span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Correo de Acceso (Login)</label>
+            <span style="color: #334155; font-weight: 500;">{{ usuarioSeleccionado().email }}</span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Gmail de Contacto Personal</label>
+            <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              ✉️ {{ usuarioSeleccionado().emailContacto || 'No registrado' }}
+            </span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Teléfono Personal</label>
+            <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              📞 {{ usuarioSeleccionado().telefono || 'No registrado' }}
+            </span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Teléfono Corporativo</label>
+            <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              🏢 {{ usuarioSeleccionado().telefonoSecundario || 'No registrado' }}
+            </span>
+          </div>
+          @if (usuarioSeleccionado().rol === 'REPARTIDOR') {
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 0.5rem;">
+              <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">📍 Editar Zonas de Cobertura</label>
+              
+              <select #zonaSelect multiple class="select-moderno" style="height: 100px; margin-bottom: 0.5rem; width: 100%;">
+                <option value="Norte" [selected]="usuarioSeleccionado().zona?.includes('Norte')">Lima Norte</option>
+                <option value="Sur" [selected]="usuarioSeleccionado().zona?.includes('Sur')">Lima Sur</option>
+                <option value="Centro" [selected]="usuarioSeleccionado().zona?.includes('Centro')">Lima Centro</option>
+                <option value="Este" [selected]="usuarioSeleccionado().zona?.includes('Este')">Lima Este</option>
+                <option value="Callao" [selected]="usuarioSeleccionado().zona?.includes('Callao')">Callao</option>
+              </select>
+              
+              <button (click)="actualizarZona(usuarioSeleccionado(), zonaSelect)" style="width: 100%; padding: 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                💾 Guardar Zonas
+              </button>
+            </div>
+          }
+        </div>
+        
+        @if (usuarioSeleccionado().email !== authService.usuario()?.email) {
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem; display: flex; gap: 10px;">
+            @if (usuarioSeleccionado().activo !== false) {
+              <button (click)="cambiarEstado(usuarioSeleccionado(), false)" style="flex: 1; padding: 0.75rem; border: none; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: bold; cursor: pointer;">
+                🚫 Suspender Acceso
+              </button>
+            } @else {
+              <button (click)="cambiarEstado(usuarioSeleccionado(), true)" style="flex: 1; padding: 0.75rem; border: none; border-radius: 8px; background: #dcfce7; color: #15803d; font-weight: bold; cursor: pointer;">
+                ✅ Reactivar Acceso
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

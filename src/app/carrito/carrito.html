@@ -1,54 +1,220 @@
-<div class="contenedor-carrito">
-  <h1 class="titulo">Tu carrito de compras</h1>
-
-  @if (mensaje()) {
-    <div class="mensaje exito">{{ mensaje() }}</div>
-  }
-
-  @if (mensajeError() || carritoSvc.mensaje()) {
-    <div class="mensaje error">{{ mensajeError() || carritoSvc.mensaje() }}</div>
-  }
-
-  @if (carritoSvc.cargando()) {
-    <p class="estado">Cargando carrito...</p>
-  } @else if (carritoSvc.cantidadGlobal() === 0) {
-    <div class="carrito-vacio">
-      <span class="icono-grande">Carrito</span>
-      <h2>Tu carrito está vacío</h2>
-      <p>Descubre nuestro catálogo y elige tus favoritos.</p>
-      <a routerLink="/catalogo" class="btn-primario">Ir al catálogo</a>
+<div class="checkout-container" [formGroup]="pagoForm">
+  
+  @if (pasoActual() === 3) {
+    <!-- PANTALLA DE ÉXITO -->
+    <div class="pantalla-exito">
+      <div class="icono-check">✓</div>
+      <h1>¡Gracias por tu compra!</h1>
+      <p>Tu pedido ha sido registrado con éxito.</p>
+      <a routerLink="/inicio" class="btn-primario">Volver al inicio</a>
     </div>
   } @else {
-    <div class="carrito-lleno">
-      <div class="lista-items">
-        @for (item of carritoSvc.items(); track $index) {
-          @let producto = carritoSvc.getProducto(item);
-          <div class="item-tarjeta">
-            <div class="info-item">
-              <h3>{{ producto?.nombre || 'Producto' }}</h3>
-              <span class="marca">{{ producto?.marca || 'Sin marca' }}</span>
-              <span class="cantidad">Cantidad: {{ item.cantidad || 1 }}</span>
+    <!-- BARRA DE PROGRESO (Breadcrumbs) -->
+    <div class="progreso-pasos">
+      <div class="paso" [class.completado]="pasoActual() > 1" [class.activo]="pasoActual() === 1">
+        <span class="icono-paso">@if (pasoActual() > 1) { ✓ } @else { 1 }</span>
+        <span class="texto-paso">Carro de compra</span>
+      </div>
+      <div class="linea"></div>
+      <div class="paso" [class.completado]="pasoActual() > 2" [class.activo]="pasoActual() === 2">
+        <span class="icono-paso">@if (pasoActual() > 2) { ✓ } @else { 2 }</span>
+        <span class="texto-paso">Detalles de pago</span>
+      </div>
+      <div class="linea"></div>
+      <div class="paso" [class.activo]="pasoActual() === 3">
+        <span class="icono-paso">3</span>
+        <span class="texto-paso">Orden completada</span>
+      </div>
+    </div>
+
+    @if (mensajeError() || carritoSvc.mensaje()) {
+      <div class="mensaje error">{{ mensajeError() || carritoSvc.mensaje() }}</div>
+    }
+  
+    <div class="checkout-grid">
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="checkout-main">
+        
+        <!-- LISTA DE PRODUCTOS (Solo en paso 1) -->
+        <div class="lista-productos">
+          @for (item of carritoSvc.items(); track $index) {
+            @let producto = carritoSvc.getProducto(item);
+            <div class="producto-checkout">
+              <div class="foto-placeholder">
+                <!-- Se asume que no hay imagen real guardada en BD para la demostración, usamos placeholder gris o icono -->
+              </div>
+              <div class="info-prod">
+                <h4>{{ producto?.nombre || 'Producto' }}</h4>
+                <div class="detalles-prod">
+                  <span>{{ producto?.color | uppercase }}</span> - <span>TALLA {{ item.tallaSeleccionada }}</span>
+                </div>
+                <div class="controles-cantidad">
+                  <span>Cant: {{ item.cantidad }}</span> 
+                  <span class="precio-unit">S/. {{ producto?.precio }} c/u</span>
+                </div>
+              </div>
+              <div class="acciones-prod">
+                <div class="precio-total-prod">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'symbol':'1.2-2' }}</div>
+                <button class="btn-basurero" (click)="eliminar(item)">🗑</button>
+              </div>
             </div>
-            <div class="precio-item">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'symbol':'1.2-2' }}</div>
-            <button class="btn-eliminar" (click)="eliminar(item)">Eliminar</button>
+          }
+        </div>
+  
+        @if (pasoActual() === 1) {
+          <!-- PASO 1: INFORMACIÓN Y DIRECCIÓN -->
+          <div class="seccion-checkout">
+            <h3>Información de usuario</h3>
+            <div class="campo">
+              <label>E-mail *</label>
+              <input type="text" [value]="authSvc.usuario()?.email || 'usuario@correo.com'" disabled class="input-deshabilitado">
+            </div>
+          </div>
+    
+          <div class="seccion-checkout">
+            <h3>Dirección de envío</h3>
+            
+            <div class="tipo-envio-box activo">
+              <span class="icono-regalo">🎁</span>
+              <div>
+                <strong>Delivery</strong>
+                <small>Sujeto a evaluación</small>
+              </div>
+            </div>
+
+            <div>
+              <div class="grid-3-cols mt-3">
+                <div class="campo">
+                  <label>Departamento *</label>
+                  <select formControlName="departamento">
+                    <option value="">Seleccione departamento</option>
+                    @for (dep of departamentos; track dep) {
+                      <option [value]="dep">{{ dep }}</option>
+                    }
+                  </select>
+                  @if (pagoForm.controls.departamento.invalid && pagoForm.controls.departamento.touched) {
+                    <small class="error-texto">Requerido.</small>
+                  }
+                </div>
+                <div class="campo">
+                  <label>Provincia *</label>
+                  <select formControlName="provincia">
+                    <option value="">Seleccione provincia</option>
+                    @for (prov of provincias; track prov) {
+                      <option [value]="prov">{{ prov }}</option>
+                    }
+                  </select>
+                  @if (pagoForm.controls.provincia.invalid && pagoForm.controls.provincia.touched) {
+                    <small class="error-texto">Requerido.</small>
+                  }
+                </div>
+                <div class="campo">
+                  <label>Distrito *</label>
+                  <select formControlName="distrito">
+                    <option value="">Seleccione distrito</option>
+                    @for (dist of distritos; track dist) {
+                      <option [value]="dist">{{ dist }}</option>
+                    }
+                  </select>
+                  @if (pagoForm.controls.distrito.invalid && pagoForm.controls.distrito.touched) {
+                    <small class="error-texto">Requerido.</small>
+                  }
+                </div>
+              </div>
+      
+              <div class="campo mt-3">
+                <label>Avenida / Calle / Jirón *</label>
+                <input type="text" formControlName="calleJiron" placeholder="Ingresa el nombre de la calle">
+                @if (pagoForm.controls.calleJiron.invalid && pagoForm.controls.calleJiron.touched) {
+                  <small class="error-texto">Requerido.</small>
+                }
+              </div>
+      
+              <div class="grid-2-cols mt-3">
+                <div class="campo">
+                  <label>Número *</label>
+                  <input type="text" formControlName="numero" placeholder="Ingresa el número de la calle">
+                  @if (pagoForm.controls.numero.invalid && pagoForm.controls.numero.touched) {
+                    <small class="error-texto">Requerido.</small>
+                  }
+                </div>
+                <div class="campo">
+                  <label>Dpto./ Interior/ Piso/ Lote/ Bloque (opcional)</label>
+                  <input type="text" formControlName="dptoInterior" placeholder="Ejem. Casa 3. Dpto 101">
+                </div>
+              </div>
+            </div>
+          </div>
+        } 
+        @else if (pasoActual() === 2) {
+          <!-- PASO 2: DETALLES DE PAGO -->
+          <div class="seccion-checkout">
+            <h3>Método de pago</h3>
+            
+            <div class="campo">
+              <label>Pago con:</label>
+              <select formControlName="metodoPago">
+                <option value="TARJETA">Tarjeta de Crédito/Débito</option>
+              </select>
+            </div>
+            
+            <div class="tarjeta-form">
+              <div class="campo">
+                <label>Número de Tarjeta (16 dígitos):</label>
+                <input type="text" formControlName="numeroTarjeta" maxlength="19" placeholder="1234 5678 9012 3456">
+                @if (pagoForm.controls.numeroTarjeta.invalid && pagoForm.controls.numeroTarjeta.touched) {
+                  <small class="error-texto">Número inválido.</small>
+                }
+              </div>
+              <div class="campo">
+                <label>CVV (3 dígitos):</label>
+                <input type="password" formControlName="cvv" maxlength="3" placeholder="123">
+                @if (pagoForm.controls.cvv.invalid && pagoForm.controls.cvv.touched) {
+                  <small class="error-texto">CVV inválido.</small>
+                }
+              </div>
+            </div>
+            
+            <button class="btn-secundario mt-3" (click)="volverPaso()">← Volver a Dirección</button>
           </div>
         }
       </div>
-
-      <aside class="resumen-compra">
-        <h3>Resumen</h3>
-        <div class="fila-resumen">
-          <span>Productos:</span>
-          <span>{{ carritoSvc.cantidadGlobal() }}</span>
+  
+      <!-- COLUMNA DERECHA (Resumen) -->
+      <aside class="checkout-sidebar">
+        <h3>Resumen de la compra</h3>
+        
+        <div class="fila-cupon">
+          <div class="campo" style="flex:1;">
+            <label>Código de cupon</label>
+            <input type="text">
+          </div>
+          <button class="btn-aplicar">Aplicar</button>
         </div>
-        <div class="fila-resumen">
-          <span>Total a pagar:</span>
-          <span class="total-dinero">{{ carritoSvc.totalGlobal() | currency:'PEN':'symbol':'1.2-2' }}</span>
+  
+        <div class="totales">
+          <div class="fila-total">
+            <span>Envío</span>
+            <!-- Costo ficticio de ejemplo o 0 si no hay lógica -->
+            <span>S/ 0.00</span>
+          </div>
+          <div class="fila-total">
+            <span>Subtotal</span>
+            <span>S/ {{ carritoSvc.totalGlobal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="fila-total total-final">
+            <span>Total</span>
+            <span>S/ {{ carritoSvc.totalGlobal() | number:'1.2-2' }}</span>
+          </div>
         </div>
-        <button class="btn-pagar" (click)="comprar()" [disabled]="procesando()">
-          {{ procesando() ? 'Procesando...' : 'Registrar compra' }}
-        </button>
-        <button class="btn-vaciar" (click)="vaciar()">Vaciar carrito</button>
+  
+        @if (pasoActual() === 1) {
+          <button class="btn-pagar" (click)="siguientePaso()">Ir a pagar</button>
+        } @else if (pasoActual() === 2) {
+          <button class="btn-pagar" (click)="comprar()" [disabled]="procesando()">
+            {{ procesando() ? 'Procesando pago...' : 'Comprar ahora' }}
+          </button>
+        }
       </aside>
     </div>
   }

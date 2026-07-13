@@ -107,6 +107,35 @@
   margin-top: 0.5rem;
 }
 
+.seccion-categoria {
+  margin-bottom: 3rem;
+
+  .seccion-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .seccion-titulo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .seccion-count {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
 .grid-productos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -176,6 +205,64 @@
     color: #64748b;
     font-size: 0.9rem;
     margin: 0 0 1rem;
+  }
+}
+
+.btn-ver-datos {
+  width: 100%;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+}
+
+// Modal de detalle del producto
+.modal-detalle {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1000px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  position: relative;
+  margin: auto;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+    gap: 20px;
+  }
+
+  .modal-imagenes {
+    @media (max-width: 700px) {
+      order: -1;
+    }
+  }
+
+  .modal-info {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 80vh;
+
+    @media (max-width: 700px) {
+      max-height: none;
+    }
   }
 }
 

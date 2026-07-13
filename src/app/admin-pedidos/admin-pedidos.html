@@ -1,0 +1,355 @@
+<div class="panel-admin">
+  <header class="panel-header">
+    <h1>Gestión de Pedidos y Logística</h1>
+    <p>Visualiza y administra el estado de los pedidos realizados.</p>
+  </header>
+
+  @if (mensaje()) {
+    <div class="mensaje exito">{{ mensaje() }}</div>
+  }
+
+  <div class="filtros-container" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+    <div style="flex: 1; min-width: 200px;">
+      <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Desde (o Día Único)</label>
+      <input type="date" [ngModel]="fechaInicioFiltro()" (ngModelChange)="fechaInicioFiltro.set($event)" 
+             style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Hasta (Opcional)</label>
+      <input type="date" [ngModel]="fechaFinFiltro()" (ngModelChange)="fechaFinFiltro.set($event)" 
+             style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <button (click)="buscarPorFechas()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+        🔍 Buscar
+      </button>
+      @if (fechaInicioFiltro() || fechaFinFiltro()) {
+        <button (click)="limpiarFiltros()" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" title="Limpiar y ver todos">
+          ✖ Limpiar
+        </button>
+      }
+    </div>
+  </div>
+
+  <section class="tarjeta-blanca">
+    @if (cargando()) {
+      <p>Cargando pedidos...</p>
+    } @else {
+      <div class="tabla-responsive">
+        <table class="tabla-moderna">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Tipo</th>
+              <th>Total</th>
+              <th>Pago</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pedido of pedidos(); track pedido.idPedido) {
+              <tr>
+                <td>#{{ pedido.idPedido }}</td>
+                <td>
+                  <div style="display: flex; flex-direction: column;">
+                    <span>{{ pedido.fecha }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="cliente-info">
+                    <span class="nombre">{{ pedido.usuario?.nombre || 'Cliente Anónimo' }}</span>
+                    @if (pedido.usuario?.email) {
+                      <span class="email">{{ pedido.usuario?.email }}</span>
+                    }
+                  </div>
+                </td>
+                <td>{{ pedido.tipoPedido }}</td>
+                <td class="font-bold">S/. {{ pedido.total }}</td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    @if (pedido.estado === 'DEVUELTO') {
+                      <span class="badge badge-devuelto">REEMBOLSADO</span>
+                    } @else {
+                      <span class="badge badge-entregado">PAGADO</span>
+                    }
+                    <button class="icon-btn" (click)="verBoleta(pedido)" title="Ver Boleta">📄</button>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; flex-direction: column; gap: 0.25rem; align-items: flex-start;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span class="badge" [ngClass]="getEstadoClase(pedido.estado)">
+                        {{ pedido.estado === 'LISTO_PARA_ENVIO' ? 'EN REPARTO' : (pedido.estado === 'ENTREGADO_PRESENCIAL' ? 'TIENDA FÍSICA' : pedido.estado) }}
+                      </span>
+                      @if (pedido.tipoPedido !== 'PRESENCIAL') {
+                        <button class="icon-btn btn-edit" (click)="abrirModalEstado(pedido)" title="Editar Estado">✏️</button>
+                      }
+                      @if (authService.esAdmin()) {
+                        <button class="icon-btn btn-delete" (click)="abrirModalEliminar(pedido)" title="Eliminar Pedido">🗑️</button>
+                      }
+                      @if (pedido.repartidor || pedido.fechaEntrega) {
+                        <button class="icon-btn" (click)="pedidoInfoSeleccionado.set(pedido)" title="Ver Info de Logística" style="color: #b45309;">🛵</button>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center">No hay pedidos registrados todavía.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>
+
+<!-- Modal de Boleta Flotante -->
+<div class="modal-overlay" *ngIf="boletaSeleccionada()" (click)="cerrarBoleta()">
+  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative;">
+    
+    @if (boletaSeleccionada()?.estado === 'DEVUELTO') {
+      <div class="sello-anulado">
+        PEDIDO ANULADO / DEVOLUCIÓN
+      </div>
+    }
+
+    <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
+    
+    <div class="boleta-header">
+      <h2>Moda UTP</h2>
+      <p>Comprobante de Pago Electrónico</p>
+      <span class="boleta-tipo">{{ boletaSeleccionada()?.comprobante?.tipoComprobante }}</span>
+    </div>
+    
+    <div class="boleta-info">
+      <div class="info-row">
+        <span>Nro:</span>
+        <strong>{{ boletaSeleccionada()?.comprobante?.serieNumero }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Fecha de Emisión:</span>
+        <strong>{{ boletaSeleccionada()?.comprobante?.fechaEmision | date:'longDate' }}</strong>
+      </div>
+    </div>
+    
+    <div class="boleta-cliente">
+      <h3>Datos del Cliente</h3>
+      <div class="info-row">
+        <span>Nombre:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.nombre || 'Cliente' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Documento:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.numeroDocumento || 'N/A' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Email:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.email }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Celular:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.telefono || 'N/A' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Dirección:</span>
+        <strong>{{ boletaSeleccionada()?.direccion?.direccionExacta || 'Por defecto / Recojo en Tienda' }}</strong>
+      </div>
+    </div>
+
+    <div class="boleta-productos">
+      <h3>Detalle de Compra</h3>
+      <table class="tabla-productos" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <thead>
+          <tr>
+            <th style="text-align: left; border-bottom: 1px dashed #ccc;">Cant.</th>
+            <th style="text-align: left; border-bottom: 1px dashed #ccc;">Descripción</th>
+            <th style="text-align: right; border-bottom: 1px dashed #ccc;">P. Unit</th>
+            <th style="text-align: right; border-bottom: 1px dashed #ccc;">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of boletaSeleccionada()?.detalles">
+            <td style="padding: 0.5rem 0;">{{ item.cantidad }}</td>
+            <td style="padding: 0.5rem 0;">{{ item.producto.nombre }} <small *ngIf="item.producto.marca">({{ item.producto.marca }})</small></td>
+            <td style="padding: 0.5rem 0; text-align: right;">S/{{ item.precioUnitario | number:'1.2-2' }}</td>
+            <td style="padding: 0.5rem 0; text-align: right;">S/{{ (item.cantidad * item.precioUnitario) | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="boleta-montos">
+      <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span>Subtotal:</span>
+        <span>PEN {{ boletaSeleccionada()?.comprobante?.subtotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span>I.G.V. (18%):</span>
+        <span>PEN {{ boletaSeleccionada()?.comprobante?.igv | number:'1.2-2' }}</span>
+      </div>
+      <div class="monto-row total-row" style="display: flex; justify-content: space-between; border-top: 1px solid #ccc; padding-top: 0.5rem; font-weight: bold; font-size: 1.1rem; color: #059669;">
+        <span>TOTAL A PAGAR:</span>
+        <span>PEN {{ boletaSeleccionada()?.comprobante?.total | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Flotante Profesional para Editar Estado -->
+<div class="modal-overlay" *ngIf="pedidoAEditar()" (click)="cerrarModalEstado()">
+  <div class="modal-estado" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar" (click)="cerrarModalEstado()">×</button>
+    
+    <div class="modal-header">
+      <h2>Modificar Estado del Pedido</h2>
+      <p>Estás editando el pedido <strong>#{{ pedidoAEditar()?.idPedido }}</strong></p>
+    </div>
+
+    <div class="modal-body">
+      <div class="aviso-importante">
+        ⚠️ <strong>Advertencia:</strong> Cambiar el estado afectará la logística del repartidor y lo que ve el cliente en su panel.
+      </div>
+      
+      <div class="form-group">
+        <label>Selecciona el nuevo estado:</label>
+        <select [ngModel]="nuevoEstadoPropuesto()" (ngModelChange)="nuevoEstadoPropuesto.set($event)" class="select-moderno">
+          <option value="PENDIENTE">PENDIENTE (El paquete aún no se ha armado)</option>
+          <option value="LISTO_PARA_ENVIO">EN REPARTO (Entregar al motorizado)</option>
+          <option value="ENTREGADO">ENTREGADO (Ya llegó al cliente)</option>
+          <option value="DEVUELTO">DEVUELTO (Devolución de productos y dinero)</option>
+        </select>
+      </div>
+
+      @if (nuevoEstadoPropuesto() === 'LISTO_PARA_ENVIO') {
+        <div class="form-group" style="margin-top: 1rem; padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+          
+          <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
+            <p style="margin: 0; color: #0369a1; font-size: 0.9rem;">
+              <strong>📍 Información de Envío:</strong><br>
+              El cliente compró en la zona <strong>{{ getZonaPedido(pedidoAEditar()?.direccion?.distrito || '') }}</strong> 
+              (Lima, Lima, {{ pedidoAEditar()?.direccion?.distrito || 'No especificado' }}).
+            </p>
+          </div>
+
+          <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #1e293b;">👤 Asignar a Repartidor Específico:</label>
+          <select [ngModel]="repartidorSeleccionado()" (ngModelChange)="repartidorSeleccionado.set(+$event)" class="select-moderno">
+            <option [ngValue]="null" disabled selected>-- Selecciona un Repartidor --</option>
+            @for (repa of repartidores(); track repa.id) {
+              <option [value]="repa.id">
+                {{ getZonaRepartidor(repa).toUpperCase().includes( (getZonaPedido(pedidoAEditar()?.direccion?.distrito || '') || '').toUpperCase() ) ? '✅' : '⚠️' }}
+                {{ repa.nombre }} 
+                {{ getZonaRepartidor(repa) ? '[Zona: ' + getZonaRepartidor(repa) + ']' : '' }}
+                {{ repa.telefono ? ' - 📞 ' + repa.telefono : '' }}
+                {{ repa.activo === false ? '(SUSPENDIDO)' : '' }}
+              </option>
+            }
+          </select>
+          <small style="color: #64748b; margin-top: 0.5rem; display: block; font-size: 0.75rem;">
+            Los repartidores con el símbolo ✅ cubren la zona de este pedido.
+          </small>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalEstado()">Cancelar</button>
+      <button class="btn-confirmar" 
+              (click)="confirmarCambioEstado()" 
+              [disabled]="nuevoEstadoPropuesto() === 'LISTO_PARA_ENVIO' && !repartidorSeleccionado()"
+              [ngStyle]="{'opacity': (nuevoEstadoPropuesto() === 'LISTO_PARA_ENVIO' && !repartidorSeleccionado()) ? '0.5' : '1', 'cursor': (nuevoEstadoPropuesto() === 'LISTO_PARA_ENVIO' && !repartidorSeleccionado()) ? 'not-allowed' : 'pointer'}">
+        Confirmar Cambio
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Flotante de ADVERTENCIA GRAVE para Eliminar Pedido -->
+<div class="modal-overlay" *ngIf="pedidoAEliminar()" (click)="cerrarModalEliminar()">
+  <div class="modal-estado modal-danger" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar" (click)="cerrarModalEliminar()">×</button>
+    
+    <div class="modal-header">
+      <h2 style="color: #dc2626;">🚨 Eliminar Pedido</h2>
+      <p>Estás editando el pedido <strong>#{{ pedidoAEliminar()?.idPedido }}</strong> de {{ pedidoAEliminar()?.usuario?.nombre }}</p>
+    </div>
+
+    <div class="modal-body text-center">
+      <p style="font-size: 1.1rem; color: #111827; margin-bottom: 0.5rem; font-weight: 600;">
+        ¿Estás seguro de que deseas eliminar este pedido?
+      </p>
+    </div>
+
+    <div class="modal-footer" style="justify-content: center;">
+      <button class="btn-cancelar" (click)="cerrarModalEliminar()">Cancelar</button>
+      <button class="btn-confirmar" style="background-color: #dc2626;" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Flotante de Info de Logística / Repartidor -->
+<div class="modal-overlay" *ngIf="pedidoInfoSeleccionado()" (click)="pedidoInfoSeleccionado.set(null)" style="z-index: 9999;">
+  <div class="modal-estado" (click)="$event.stopPropagation()" style="max-width: 450px;">
+    <button class="btn-cerrar" (click)="pedidoInfoSeleccionado.set(null)">×</button>
+    
+    <div class="modal-header">
+      <h2 style="color: #0f172a;">Detalles de Logística</h2>
+    </div>
+
+    <div class="modal-body" style="padding-top: 0;">
+      
+      @if (pedidoInfoSeleccionado()?.fechaEntrega) {
+        <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0; color: #065f46; font-size: 0.9rem; text-transform: uppercase;">Estado de Entrega</h4>
+          <p style="margin: 0.5rem 0 0; color: #047857; font-weight: bold; font-size: 1.1rem;">
+            📦 Entregado el {{ pedidoInfoSeleccionado()?.fechaEntrega | date:'short' }}
+          </p>
+        </div>
+      }
+
+      @if (pedidoInfoSeleccionado()?.repartidor) {
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1.5rem;">
+          <div style="width: 70px; height: 70px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;"
+               [ngStyle]="{'background': pedidoInfoSeleccionado()?.repartidor?.activo === false ? '#94a3b8' : '#3b82f6'}">
+            {{ pedidoInfoSeleccionado()?.repartidor?.nombre?.charAt(0) }}
+          </div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: #0f172a;">{{ pedidoInfoSeleccionado()?.repartidor?.nombre }}</h3>
+          <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 0.25rem; color: white;"
+                [style.background-color]="pedidoInfoSeleccionado()?.repartidor?.activo === false ? '#ef4444' : '#f59e0b'">
+            {{ pedidoInfoSeleccionado()?.repartidor?.activo === false ? 'SUSPENDIDO' : 'REPARTIDOR' }}
+            {{ getZonaRepartidor(pedidoInfoSeleccionado()?.repartidor) ? ' - ZONA ' + getZonaRepartidor(pedidoInfoSeleccionado()?.repartidor) : '' }}
+          </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">DNI / Documento</label>
+            <span style="color: #334155; font-weight: 500;">{{ pedidoInfoSeleccionado()?.repartidor?.numeroDocumento || 'No registrado' }}</span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Correo Electrónico</label>
+            <span style="color: #334155; font-weight: 500;">{{ pedidoInfoSeleccionado()?.repartidor?.email }}</span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Teléfono Personal</label>
+            <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              📞 {{ pedidoInfoSeleccionado()?.repartidor?.telefono || 'No registrado' }}
+            </span>
+          </div>
+          @if (pedidoInfoSeleccionado()?.repartidor?.telefonoSecundario) {
+            <div>
+              <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem;">Teléfono Corporativo</label>
+              <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                🏢 {{ pedidoInfoSeleccionado()?.repartidor?.telefonoSecundario }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

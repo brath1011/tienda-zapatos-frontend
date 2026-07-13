@@ -1,0 +1,224 @@
+<div class="panel-admin">
+  <header class="panel-header">
+    <h1>{{ authService.esAdmin() ? 'Dashboard Global' : 'Mis Métricas' }}</h1>
+    <p>Resumen de ventas de la tienda UTP Fashion.</p>
+  </header>
+
+  <!-- Filtros Rápidos y Búsqueda -->
+  <div class="filtros-rapidos" style="margin-bottom: 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+    <button class="btn-filtro" [class.activo]="filtroActual() === 'hoy'" (click)="aplicarFiltro('hoy')">Hoy</button>
+    <button class="btn-filtro" [class.activo]="filtroActual() === 'semana'" (click)="aplicarFiltro('semana')">Esta Semana</button>
+    
+    <div style="width: 1px; height: 30px; background-color: #cbd5e1; margin: 0 0.25rem;"></div>
+    
+    <div style="display: flex; gap: 0.25rem; background: #f1f5f9; padding: 0.25rem; border-radius: 8px;">
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'lunes'" (click)="aplicarFiltro('lunes')" title="Lunes">L</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'martes'" (click)="aplicarFiltro('martes')" title="Martes">M</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'miercoles'" (click)="aplicarFiltro('miercoles')" title="Miércoles">X</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'jueves'" (click)="aplicarFiltro('jueves')" title="Jueves">J</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'viernes'" (click)="aplicarFiltro('viernes')" title="Viernes">V</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'sabado'" (click)="aplicarFiltro('sabado')" title="Sábado">S</button>
+      <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'domingo'" (click)="aplicarFiltro('domingo')" title="Domingo">D</button>
+    </div>
+
+    <div style="width: 1px; height: 30px; background-color: #cbd5e1; margin: 0 0.25rem;"></div>
+    
+    @if (authService.esAdmin()) {
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'mes'" (click)="aplicarFiltro('mes')">Este Mes</button>
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'anio'" (click)="aplicarFiltro('anio')">Este Año</button>
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'historico'" (click)="aplicarFiltro('historico')">Histórico</button>
+    }
+
+    <!-- Búsqueda personalizada por fecha -->
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Desde:</span>
+      <input type="date" [formControl]="fechaBusqueda" style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+      
+      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Hasta:</span>
+      <input type="date" [formControl]="fechaBusquedaFin" style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;" title="Dejar vacío para un solo día">
+      
+      <button class="btn-primario" (click)="buscarPorFecha()" style="padding: 0.5rem 1rem;">Buscar</button>
+    </div>
+  </div>
+
+  <div class="grid-dashboard">
+    <!-- Tarjeta de Ganancias -->
+    <div class="tarjeta-kpi">
+      <div class="icono">💰</div>
+      <div class="info">
+        <h3>{{ authService.esAdmin() ? 'Ingresos Totales' : 'Monto Recaudado' }}</h3>
+        <p class="valor">S/. {{ gananciasTotales() | number:'1.2-2' }}</p>
+      </div>
+    </div>
+
+    <!-- Generador de Reportes (SOLO ADMIN) -->
+    @if (authService.esAdmin()) {
+      <div class="tarjeta-blanca">
+        <h2>Exportar Reporte de Ventas</h2>
+        <p>Genera un archivo Excel con todas las ventas en un rango de fechas.</p>
+        
+        <form [formGroup]="reporteForm" (ngSubmit)="descargarReporte()" class="form-reporte">
+          <div class="campo">
+            <label>Fecha Inicio</label>
+            <input type="date" formControlName="fechaInicio">
+          </div>
+          
+          <div class="campo">
+            <label>Fecha Fin</label>
+            <input type="date" formControlName="fechaFin">
+          </div>
+
+          @if (reporteForm.invalid && reporteForm.touched) {
+            <small class="error">Selecciona ambas fechas.</small>
+          }
+
+          <button type="submit" class="btn-primario" style="margin-top: 1rem; width: 100%;">
+            📄 Descargar Excel
+          </button>
+        </form>
+      </div>
+    }
+  </div>
+
+  <!-- Sección de Estadísticas de Venta (Género, Tallas y Producto Estrella) -->
+  <div class="seccion-estadisticas" style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    <!-- Desglose por Género -->
+    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="margin-top: 0; font-size: 1.1rem; color: #0f172a; font-weight: bold; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+        🚻 Ventas por Género
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        @for (item of ventasPorGenero(); track item.genero) {
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: #475569; margin-bottom: 4px;">
+              <span>{{ item.genero }}</span>
+              <span>{{ item.cantidad }} unids. ({{ item.porcentaje }}%)</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+              <div [style.width.%]="item.porcentaje" 
+                   [style.background]="item.genero === 'Caballero' ? '#3b82f6' : (item.genero === 'Mujer' ? '#ec4899' : '#10b981')" 
+                   style="height: 100%; border-radius: 999px;">
+              </div>
+            </div>
+          </div>
+        }
+        @if (pedidosLista().length === 0) {
+          <p style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin: 1.5rem 0;">Sin datos de venta</p>
+        }
+      </div>
+    </div>
+
+    <!-- Tallas más Vendidas -->
+    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="margin-top: 0; font-size: 1.1rem; color: #0f172a; font-weight: bold; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+        👟 Tallas más Vendidas (Top 5)
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        @for (item of tallasMasVendidas(); track item.talla) {
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: #475569; margin-bottom: 4px;">
+              <span>Talla {{ item.talla }}</span>
+              <span>{{ item.cantidad }} unids. ({{ item.porcentaje }}%)</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+              <div [style.width.%]="item.porcentaje" style="height: 100%; background: #f59e0b; border-radius: 999px;"></div>
+            </div>
+          </div>
+        }
+        @if (tallasMasVendidas().length === 0) {
+          <p style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin: 1.5rem 0;">Sin datos de venta</p>
+        }
+      </div>
+    </div>
+
+    <!-- Producto Estrella / KPI Rápido -->
+    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <h3 style="margin-top: 0; font-size: 1.1rem; color: #0f172a; font-weight: bold; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+          ⭐ Zapatilla Estrella
+        </h3>
+        @if (zapatoMasVendido(); as zapato) {
+          <div style="text-align: center; margin: 1.5rem 0;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏆</div>
+            <h4 style="font-size: 1.25rem; font-weight: bold; color: #1e293b; margin: 0;">{{ zapato.nombre }}</h4>
+            <p style="color: #64748b; font-size: 0.9rem; margin: 4px 0 0 0;">{{ zapato.marca | uppercase }}</p>
+            <p style="font-size: 1rem; color: #0f172a; font-weight: bold; margin-top: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; display: inline-block; padding: 6px 16px; border-radius: 999px;">
+              {{ zapato.cantidad }} unidades vendidas
+            </p>
+          </div>
+        } @else {
+          <p style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin: 2rem 0;">Aún no hay ventas</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico Estadístico (SOLO ADMIN) -->
+  @if (authService.esAdmin()) {
+    <div class="grafico-container" style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h2>Rendimiento de Ventas</h2>
+      <div style="position: relative; height:40vh; width:100%">
+        <canvas #graficoCanvas></canvas>
+      </div>
+    </div>
+  }
+
+  <!-- Tabla de Auditoría (Para Vendedores y Administradores) -->
+  <div class="tabla-auditoria" style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <h2>Ventas del Periodo</h2>
+    <p style="color: #64748b; margin-bottom: 1rem;">Desglose de los pedidos cobrados en este rango de fechas.</p>
+    
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e2e8f0; background: #f8fafc;">
+            <th style="padding: 1rem;">ID</th>
+            <th style="padding: 1rem;">Cliente</th>
+            <th style="padding: 1rem;">Tipo</th>
+            <th style="padding: 1rem;">Estado</th>
+            <th style="padding: 1rem;">Fecha</th>
+            <th style="padding: 1rem;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pedido of pedidosLista(); track pedido.idPedido) {
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 1rem; font-weight: bold; color: #3b82f6;">#{{ pedido.idPedido }}</td>
+              <td style="padding: 1rem;">{{ pedido.usuario?.nombre || 'Presencial' }}</td>
+              <td style="padding: 1rem;">
+                <span style="background: {{ pedido.tipoPedido === 'WEB' ? '#dbeafe' : '#fef3c7' }}; 
+                             color: {{ pedido.tipoPedido === 'WEB' ? '#1e40af' : '#92400e' }}; 
+                             padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.85rem; font-weight: bold;">
+                  {{ pedido.tipoPedido }}
+                </span>
+              </td>
+              <td style="padding: 1rem;">
+                <span [style.color]="pedido.estado === 'DEVUELTO' ? '#ef4444' : '#10b981'" style="font-weight: bold;">
+                  {{ pedido.estado === 'LISTO_PARA_ENVIO' ? 'EN REPARTO' : (pedido.estado === 'ENTREGADO_PRESENCIAL' ? 'TIENDA FÍSICA' : pedido.estado) }}
+                </span>
+              </td>
+              <td style="padding: 1rem; color: #64748b; font-size: 0.9rem;">
+                {{ pedido.fecha | date:'dd/MM/yyyy' }}
+              </td>
+              <td style="padding: 1rem; font-weight: bold;">
+                <span [style.text-decoration]="pedido.estado === 'DEVUELTO' ? 'line-through' : 'none'">
+                  S/. {{ pedido.total | number:'1.2-2' }}
+                </span>
+                @if (pedido.fechaEntrega) {
+                  <br><small style="color: #10b981; font-weight: normal; font-size: 0.75rem;">📦 Entregado: {{ pedido.fechaEntrega | date:'shortTime' }}</small>
+                }
+              </td>
+            </tr>
+          }
+          @if (pedidosLista().length === 0) {
+            <tr>
+              <td colspan="5" style="padding: 2rem; text-align: center; color: #94a3b8;">
+                No hay ventas registradas en esta fecha.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -15,7 +15,10 @@ export class AuthService {
 
   readonly usuario = computed(() => this.session());
   readonly estaAutenticado = computed(() => Boolean(this.session()?.token));
-  readonly esAdmin = computed(() => this.session()?.rol === 'ADMIN');
+  readonly esAdmin = computed(() => this.session()?.rol === 'ADMINISTRADOR');
+  readonly esVentas = computed(() => this.session()?.rol === 'VENTAS');
+  readonly esRepartidor = computed(() => this.session()?.rol === 'REPARTIDOR');
+  readonly esCliente = computed(() => this.session()?.rol === 'CLIENTE');
 
   constructor(private readonly http: HttpClient) {}
 

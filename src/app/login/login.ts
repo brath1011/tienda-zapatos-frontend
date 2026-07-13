@@ -52,6 +52,9 @@ export class LoginComponent {
     if (typeof error === 'object' && error && 'error' in error) {
       const apiError = (error as { error?: unknown }).error;
       if (typeof apiError === 'string') return apiError;
+      if (typeof apiError === 'object' && apiError && 'error' in apiError) {
+        return (apiError as { error: string }).error;
+      }
     }
 
     return fallback;
