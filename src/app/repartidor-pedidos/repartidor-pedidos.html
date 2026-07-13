@@ -1,0 +1,137 @@
+<div class="panel-reparto">
+  <header class="panel-header">
+    <h1>Panel de Entregas <span style="font-size: 0.5em; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.6rem; border-radius: 20px; vertical-align: middle; margin-left: 0.5rem;" *ngIf="zonaRepartidor">📍 ZONA: {{ zonaRepartidor }}</span></h1>
+    <p>Gestión de repartos y registro de cajas entregadas.</p>
+  </header>
+
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.activo]="pestanaActiva() === 'PENDIENTES'" (click)="cambiarPestana('PENDIENTES')">
+      📦 Pendientes
+    </button>
+    <button class="tab-btn" [class.activo]="pestanaActiva() === 'HISTORIAL'" (click)="cambiarPestana('HISTORIAL')">
+      ✅ Mi Historial
+    </button>
+  </div>
+
+  @if (mensaje()) {
+    <div class="mensaje exito">{{ mensaje() }}</div>
+  }
+
+  <section class="contenedor-repartos">
+    @if (pestanaActiva() === 'PENDIENTES') {
+      <!-- LISTA DE PENDIENTES -->
+      @if (cargando()) {
+        <p class="cargando">Buscando cajas listas...</p>
+      } @else {
+        @for (pedido of pedidos(); track pedido.idPedido) {
+          <div class="tarjeta-reparto" [ngClass]="{'tarjeta-reembolsada': pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO'}">
+            <div class="tarjeta-cabecera">
+              <span class="id-pedido">Pedido #{{ pedido.idPedido }}</span>
+              <span class="badge badge-reparto" *ngIf="pedido.estado === 'LISTO_PARA_ENVIO'">📦 EN REPARTO</span>
+              <span class="badge" *ngIf="pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO'" style="background-color: #fee2e2; color: #ef4444; border: 1px solid #ef4444;">❌ REEMBOLSADO</span>
+            </div>
+            
+            <div class="tarjeta-cuerpo">
+              <div class="info-bloque">
+                <span class="etiqueta">Cliente:</span>
+                <strong class="valor">{{ pedido.usuario?.nombre || 'Cliente' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">DNI / Documento:</span>
+                <strong class="valor" style="color: #0f172a; background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">{{ pedido.usuario?.numeroDocumento || 'No registrado' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Celular:</span>
+                <strong class="valor celular">{{ pedido.usuario?.telefono || 'No registrado' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Dirección de Entrega:</span>
+                <strong class="valor direccion">{{ pedido.direccion?.direccionExacta || 'Por confirmar / Recojo en tienda' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Distrito:</span>
+                <span class="valor">{{ pedido.direccion?.distrito || 'No especificado' }}</span>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Método de pago:</span>
+                <span class="valor">{{ pedido.tipoPedido === 'WEB' ? 'Tarjeta/Digital (Pagado)' : 'Pago contraentrega/Tienda' }}</span>
+              </div>
+              
+              <div style="margin-top: 1rem; border-top: 1px dashed #cbd5e1; padding-top: 1rem; font-size: 0.85rem;">
+                <span style="display: block; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 0.35rem; font-size: 0.75rem; letter-spacing: 0.02em;">Contacto de Soporte de Ventas</span>
+                @if (pedido.vendedor) {
+                  <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.75rem; border-radius: 8px; color: #1e3a8a; line-height: 1.6;">
+                    <span style="display: block; margin-bottom: 0.5rem;"><strong>Email corporativo:</strong> {{ pedido.vendedor.email || '' }}</span>
+                    <span style="display: block; margin-bottom: 0.5rem;"><strong>Gmail de contacto:</strong> {{ pedido.vendedor.emailContacto || '' }}</span>
+                    <span style="display: block;"><strong>Celular personal:</strong> {{ pedido.vendedor.telefono || '' }} &nbsp;&nbsp; <strong>Celular corporativo:</strong> {{ pedido.vendedor.telefonoSecundario || '' }}</span>
+                  </div>
+                } @else {
+                  <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; border-radius: 8px; color: #475569; font-style: italic;">
+                    No se registró personal de ventas. Contacta a Soporte.
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="tarjeta-pie" style="display: flex; gap: 0.5rem; flex-direction: column;" *ngIf="pedido.estado === 'LISTO_PARA_ENVIO'">
+              <button class="btn-entregar" (click)="entregar(pedido)" style="width: 100%;">
+                ✅ Marcar como Entregado
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="tarjeta-reparto vacio">
+            <p>¡Buen trabajo! No hay pedidos pendientes de entregar en este momento.</p>
+          </div>
+        }
+      }
+    } @else {
+      <!-- LISTA DEL HISTORIAL -->
+      <div class="filtros-historial" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: center; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <label style="font-weight: bold; color: #475569;">Ver entregas del día:</label>
+        <input type="date" #fechaInput (change)="buscarHistorial(fechaInput.value)" style="padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; flex-grow: 1;">
+        <button (click)="cargarHistorial()" class="btn-secundario" style="padding: 0.5rem 1rem; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 6px; cursor: pointer;">Ver Todo</button>
+      </div>
+
+      @if (cargandoHistorial()) {
+        <p class="cargando">Cargando historial...</p>
+      } @else {
+        @for (pedido of historial(); track pedido.idPedido) {
+          <div class="tarjeta-reparto entregado">
+            <div class="tarjeta-cabecera">
+              <span class="id-pedido">Pedido #{{ pedido.idPedido }}</span>
+              <span class="badge badge-entregado">✅ ENTREGADO</span>
+            </div>
+            
+            <div class="tarjeta-cuerpo">
+              <div class="info-bloque">
+                <span class="etiqueta">Entregado a:</span>
+                <strong class="valor">{{ pedido.usuario?.nombre || 'Cliente' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">DNI / Documento:</span>
+                <strong class="valor" style="color: #0f172a; background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">{{ pedido.usuario?.numeroDocumento || 'No registrado' }}</strong>
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Fecha de Compra:</span>
+                <strong class="valor" style="color: #64748b; font-size: 0.9rem;">{{ pedido.fecha }}</strong> 
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Fecha de Entrega:</span>
+                <strong class="valor" style="color: #10b981;">{{ (pedido.fechaEntrega | date:'medium') || 'Fecha no registrada' }}</strong> 
+              </div>
+              <div class="info-bloque">
+                <span class="etiqueta">Dirección:</span>
+                <span class="valor direccion">{{ pedido.direccion?.direccionExacta || 'No registrada' }}</span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="tarjeta-reparto vacio">
+            <p>Aún no tienes entregas registradas en tu historial.</p>
+          </div>
+        }
+      }
+    }
+  </section>
+</div>

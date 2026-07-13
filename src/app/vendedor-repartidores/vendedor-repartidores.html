@@ -1,0 +1,68 @@
+<div class="panel-vendedor-repartidores" style="padding: 2rem; font-family: 'Outfit', 'Inter', sans-serif;">
+  <header style="margin-bottom: 2rem;">
+    <h1 style="margin: 0; font-size: 1.8rem; color: #0f172a; font-weight: 700;">Directorio de Repartidores</h1>
+    <p style="margin: 0.25rem 0 0 0; color: #64748b;">Visualiza la información de contacto de todos los repartidores activos de la tienda para coordinaciones rápidas.</p>
+  </header>
+
+  @if (mensajeError()) {
+    <div style="background: #fef2f2; color: #b91c1c; padding: 1rem; border-radius: 8px; border: 1px solid #fee2e2; margin-bottom: 1.5rem;">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  @if (cargando()) {
+    <p style="color: #64748b;">Cargando directorio de repartidores...</p>
+  } @else {
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+      @for (rep of repartidores(); track rep.id) {
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 1rem; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;"
+             onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 15px rgba(0,0,0,0.05)';"
+             onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)';">
+          
+          <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #f59e0b;"></div>
+          
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold;">
+              🚴
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: #0f172a; font-weight: 700;">{{ rep.nombre }}</h3>
+              <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;">Repartidor Autorizado</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; font-size: 0.9rem;">
+            <div>
+              <label style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.15rem;">DNI / Documento</label>
+              <span style="color: #334155; font-weight: 500;">{{ rep.numeroDocumento || 'No registrado' }}</span>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.15rem;">Correo de Acceso (Login)</label>
+              <span style="color: #334155; font-weight: 500;">{{ rep.email }}</span>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.15rem;">Gmail Personal (Contacto)</label>
+              <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                ✉️ {{ rep.emailContacto || 'No registrado' }}
+              </span>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.15rem;">Teléfono Personal</label>
+              <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                📞 {{ rep.telefono || 'No registrado' }}
+              </span>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.15rem;">Teléfono Corporativo</label>
+              <span style="color: #334155; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                🏢 {{ rep.telefonoSecundario || 'No registrado' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <p style="color: #64748b;">No hay repartidores creados en el sistema.</p>
+      }
+    </div>
+  }
+</div>

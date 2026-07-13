@@ -1,0 +1,153 @@
+<div class="contenedor-historial">
+  <h1 class="titulo">Mi Historial de Compras</h1>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando()" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando tus pedidos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="alerta alerta-error">
+    {{ error() }}
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!cargando() && !error() && pedidos().length === 0" class="alerta alerta-info">
+    Aún no has realizado ninguna compra. ¡Anímate a explorar nuestro catálogo!
+  </div>
+
+  <!-- Order List -->
+  <div *ngIf="!cargando() && pedidos().length > 0" class="lista-pedidos">
+    <div class="tarjeta-pedido" *ngFor="let pedido of pedidos()">
+      <div class="cabecera-pedido">
+        <div class="info-principal">
+          <h3>Pedido #{{ pedido.idPedido }}</h3>
+          <span class="fecha">{{ pedido.fecha | date:'mediumDate' }}</span>
+        </div>
+        <div class="estado">
+          <span class="badge" [ngClass]="{
+            'badge-pendiente': pedido.estado === 'PENDIENTE',
+            'badge-envio': pedido.estado === 'LISTO_PARA_ENVIO',
+            'badge-entregado': pedido.estado === 'ENTREGADO' || pedido.estado === 'ENTREGADO_PRESENCIAL',
+            'badge-reembolsado': pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO'
+          }">
+            {{ pedido.estado === 'LISTO_PARA_ENVIO' ? 'EN REPARTO' : (pedido.estado === 'ENTREGADO_PRESENCIAL' ? 'TIENDA FÍSICA' : pedido.estado) }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="cuerpo-pedido">
+        <div class="resumen-items">
+          <p><strong>Productos:</strong> {{ pedido.detalles.length }} ítem(s)</p>
+          <p><strong>Tipo:</strong> {{ pedido.tipoPedido === 'WEB' ? 'Envío a Domicilio' : 'Compra Física' }}</p>
+        </div>
+        <div class="total-pedido">
+          <span>Total Pagado:</span>
+          <strong>S/ {{ pedido.total | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="pie-pedido">
+        <button *ngIf="pedido.estado === 'PENDIENTE' || pedido.estado === 'LISTO_PARA_ENVIO'" class="btn btn-secundario" style="background: #e74c3c; color: white; margin-right: 10px;" (click)="solicitarReembolso(pedido)">
+          <i class="icono">↩️</i> Solicitar Reembolso
+        </button>
+        <button class="btn btn-primario" (click)="verBoleta(pedido)">
+          <i class="icono">📄</i> Ver Boleta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Boleta Flotante -->
+<div class="modal-overlay" *ngIf="boletaSeleccionada()" (click)="cerrarBoleta()">
+  <div class="modal-boleta" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
+    
+    <div class="boleta-header">
+      <h2>Moda UTP</h2>
+      <p>Comprobante de Pago Electrónico</p>
+      <span class="boleta-tipo">{{ boletaSeleccionada()?.comprobante.tipoComprobante }}</span>
+      <h3 *ngIf="boletaSeleccionada()?.estado === 'REEMBOLSADO'" style="color: #e74c3c; border: 2px solid #e74c3c; padding: 5px; margin-top: 10px; border-radius: 5px;">COMPRA CON REEMBOLSO</h3>
+    </div>
+    
+    <div class="boleta-info">
+      <div class="info-row">
+        <span>Nro:</span>
+        <strong>{{ boletaSeleccionada()?.comprobante.serieNumero }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Fecha de Emisión:</span>
+        <strong>{{ boletaSeleccionada()?.comprobante.fechaEmision | date:'longDate' }}</strong>
+      </div>
+    </div>
+    
+    <!-- DATOS DEL CLIENTE -->
+    <div class="boleta-cliente">
+      <h3>Datos del Cliente</h3>
+      <div class="info-row">
+        <span>Nombre:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.nombre || 'Cliente' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Documento:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.numeroDocumento || 'N/A' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Email:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.email }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Celular:</span>
+        <strong>{{ boletaSeleccionada()?.usuario?.telefono || 'N/A' }}</strong>
+      </div>
+      <div class="info-row">
+        <span>Dirección:</span>
+        <strong>{{ boletaSeleccionada()?.direccion?.direccionExacta || 'Por defecto / Recojo en Tienda' }}</strong>
+      </div>
+    </div>
+
+    <!-- LISTA DE PRODUCTOS -->
+    <div class="boleta-productos">
+      <h3>Detalle de Compra</h3>
+      <table class="tabla-productos">
+        <thead>
+          <tr>
+            <th>Cant.</th>
+            <th>Descripción</th>
+            <th>P. Unit</th>
+            <th>Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of boletaSeleccionada()?.detalles">
+            <td>{{ item.cantidad }}</td>
+            <td style="padding: 0.5rem 0;">{{ item.producto.nombre }} <small *ngIf="item.producto.marca">({{ item.producto.marca }})</small></td>
+            <td>S/{{ item.precioUnitario | number:'1.2-2' }}</td>
+            <td>S/{{ (item.cantidad * item.precioUnitario) | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="boleta-montos">
+      <div class="monto-row">
+        <span>Subtotal:</span>
+        <span>S/ {{ boletaSeleccionada()?.comprobante.subtotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="monto-row">
+        <span>I.G.V. (18%):</span>
+        <span>S/ {{ boletaSeleccionada()?.comprobante.igv | number:'1.2-2' }}</span>
+      </div>
+      <div class="monto-row total-row">
+        <span>TOTAL A PAGAR:</span>
+        <span>S/ {{ boletaSeleccionada()?.comprobante.total | number:'1.2-2' }}</span>
+      </div>
+    </div>
+    
+    <div class="boleta-footer">
+      <p>¡Gracias por tu preferencia!</p>
+    </div>
+  </div>
+</div>

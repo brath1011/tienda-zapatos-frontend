@@ -1,7 +1,7 @@
 <div class="contenedor-catalogo">
   <header class="cabecera-catalogo">
     <div>
-      <h1 class="titulo">Catálogo de zapatos</h1>
+      <h1 class="titulo">Catálogo de Zapatos</h1>
       <p>{{ productos().length }} productos registrados · {{ productosConStock() }} disponibles</p>
     </div>
     <button type="button" class="btn-secundario" (click)="cargarProductos()" [disabled]="cargando()">
@@ -17,141 +17,182 @@
     <div class="mensaje error">{{ mensajeError() }}</div>
   }
 
-  @if (auth.esAdmin()) {
-    <section class="panel-admin">
-      <form class="form-producto" [formGroup]="productoForm" (ngSubmit)="guardarProducto()" novalidate>
-        <h2>{{ productoEditando() ? 'Editar producto' : 'Crear producto' }}</h2>
-
-        <div class="grid-form">
-          <label>
-            Nombre
-            <input type="text" formControlName="nombre" placeholder="Air Max">
-          </label>
-
-          <label>
-            Marca
-            <input type="text" formControlName="marca" placeholder="Nike">
-          </label>
-
-          <label>
-            Talla
-            <select formControlName="talla">
-              @for (control of tallasArray.controls; track $index) {
-                <option [value]="control.value">{{ control.value || 'Sin talla' }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Color
-            <input type="text" formControlName="color" placeholder="Negro">
-          </label>
-
-          <label>
-            Categoría
-            <select formControlName="categoria">
-              @for (categoria of categorias; track categoria) {
-                <option [value]="categoria">{{ categoria }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Precio
-            <input type="number" formControlName="precio" min="1" step="0.01">
-          </label>
-
-          <label>
-            Stock
-            <input type="number" formControlName="stock" min="0">
-          </label>
-
-          <label>
-            Imagen URL
-            <input type="url" formControlName="imagenUrl" placeholder="https://example.com/zapato.jpg">
-          </label>
-        </div>
-
-        <label>
-          Descripción
-          <textarea rows="3" formControlName="descripcion" placeholder="Zapatilla deportiva"></textarea>
-        </label>
-
-        @if (productoForm.invalid && productoForm.touched) {
-          <small class="ayuda-error">Revisa los campos marcados. La imagen debe ser una URL http o https.</small>
-        }
-
-        <div class="acciones-form">
-          <button type="submit" class="btn-comprar" [disabled]="guardando()">
-            {{ guardando() ? 'Guardando...' : (productoEditando() ? 'Actualizar' : 'Crear') }}
-          </button>
-          <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Limpiar</button>
-        </div>
-      </form>
-
-      <form class="form-oferta" [formGroup]="ofertaForm" (ngSubmit)="aplicarOferta()">
-        <h2>Aplicar oferta</h2>
-        <label>
-          Producto
-          <select formControlName="idProducto">
-            <option [ngValue]="0">Selecciona un producto</option>
-            @for (prod of productos(); track prod.id) {
-              <option [ngValue]="prod.id">{{ prod.nombre }}</option>
-            }
-          </select>
-        </label>
-        <label>
-          Descuento %
-          <input type="number" formControlName="porcentaje" min="1" max="90">
-        </label>
-        <button type="submit" class="btn-secundario">Aplicar descuento</button>
-      </form>
-
-      <div class="tallas-dinamicas">
-        <h2>Tallas del formulario</h2>
-        @for (control of tallasArray.controls; track $index) {
-          <div class="fila-talla">
-            <input type="text" [formControl]="control" placeholder="Talla">
-            <button type="button" class="btn-icono" (click)="eliminarTalla($index)">Eliminar</button>
-          </div>
-        }
-        <button type="button" class="btn-secundario" (click)="agregarTalla()">Agregar talla</button>
-      </div>
-    </section>
-  }
-
   @if (cargando()) {
     <p class="estado">Cargando catálogo...</p>
   } @else if (productos().length === 0) {
     <p class="estado">No hay productos registrados.</p>
   } @else {
-    <div class="grid-productos">
-      @for (prod of productos(); track prod.id) {
-        <article class="tarjeta-producto" [class.sin-stock]="prod.stock === 0">
-          <img [src]="prod.imagenUrl" [alt]="prod.nombre" loading="lazy">
 
-          <span class="marca">{{ prod.marca | uppercase }}</span>
-          <h3>{{ prod.nombre }}</h3>
-          <p class="descripcion">{{ prod.descripcion }}</p>
-          <p class="detalles">{{ prod.categoria }} · Talla {{ prod.talla }} · {{ prod.color }}</p>
+    <!-- SECCIONES POR CATEGORÍA -->
+    @for (seccion of modelosPorCategoriaOrdenados; track seccion.cat) {
+      <section class="seccion-categoria">
+        <div class="seccion-header">
+          <h2 class="seccion-titulo">{{ seccion.cat }}</h2>
+          <span class="seccion-count">{{ seccion.grupos.length }} modelo(s)</span>
+        </div>
 
-          <p class="precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
-          <p class="precio-descuento">Referencial -10%: {{ prod.precio | descuentoPrice:10 | currency:'PEN':'symbol':'1.2-2' }}</p>
+        <div class="grid-productos">
+          @for (variantes of seccion.grupos; track variantes[0].nombre) {
+            @let prod = obtenerVarianteActiva(variantes);
+            <article class="tarjeta-producto" [class.sin-stock]="calcularTotalStock(prod) === 0">
+              <div class="tarjeta-imagen" (click)="verDetalle(prod)" style="cursor: pointer;">
+                <span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; z-index: 10;">{{ prod.genero || 'Caballero' }}</span>
+                <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" loading="lazy">
+              </div>
+              <span class="marca">{{ prod.marca | uppercase }}</span>
+              <h3>{{ prod.nombre }}</h3>
 
-          @if (prod.stock > 0) {
-            <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
-          } @else {
-            <span class="etiqueta-agotado">Agotado</span>
+              <!-- Mini descripción breve -->
+              @if (prod.descripcion) {
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ prod.descripcion }}
+                </p>
+              }
+              
+              <!-- Selector de colores -->
+              <div class="selector-color" style="margin-bottom: 10px; margin-top: 8px;">
+                <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #475569;">Color: {{ prod.color }}</p>
+                <div style="display: flex; gap: 8px;">
+                  @for (variante of variantes; track variante.id) {
+                    <div (click)="seleccionarVariante(prod.nombre, variante.id!)"
+                         [style.border]="prod.id === variante.id ? '2px solid #2563eb' : '2px solid #e2e8f0'"
+                         style="width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background-color: #f8fafc; overflow: hidden; display: flex; align-items: center; justify-content: center;"
+                         [title]="variante.color">
+                      <img [src]="getPrimeraImagen(variante.imagen)" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <p class="precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+
+              <!-- Botón Ver datos -->
+              <button type="button" class="btn-ver-datos" (click)="verDetalle(prod)">
+                🔍 Ver datos del producto
+              </button>
+
+              @if (calcularTotalStock(prod) > 0) {
+                <div style="margin-bottom: 10px;">
+                  <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #475569;">Selecciona tu Talla:</p>
+                  <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    @for (talla of tallasDisponibles(prod); track talla) {
+                      <button type="button" 
+                              (click)="seleccionarTalla(prod.id!, talla)" 
+                              [style.background]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#f1f5f9'"
+                              [style.color]="tallaSeleccionadaPorProducto[prod.id!] === talla ? 'white' : '#475569'"
+                              style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;">
+                        {{ talla }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
+              } @else {
+                <span class="etiqueta-agotado">Agotado</span>
+              }
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  <!-- MODAL DE DETALLE -->
+  @if (productoDetalle(); as prod) {
+    <div class="modal-backdrop" (click)="cerrarDetalle()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; z-index: 9999; overflow-y: auto; padding: 20px;">
+      <div class="modal-detalle" (click)="$event.stopPropagation()">
+        
+        <button (click)="cerrarDetalle()" style="position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10;">&times;</button>
+
+        <!-- Columna Izquierda: Imágenes -->
+        <div class="modal-imagenes">
+          <div style="background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; height: 360px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          </div>
+          <!-- Galería 4x2 -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            @for (img of getImagenesGaleria(prod.imagen); track $index) {
+              @if ($index > 0 && img.trim() !== '') {
+                <div style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; height: 100px; overflow: hidden;">
+                  <img [src]="img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Detalles -->
+        <div class="modal-info">
+          <span style="color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem;">{{ prod.marca }}</span>
+          <h2 style="font-size: 1.9rem; color: #0f172a; margin: 5px 0 8px 0; font-weight: 800;">{{ prod.nombre }}</h2>
+          
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <span style="background: #e2e8f0; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">{{ prod.categoria }}</span>
+            <span style="background: #dbeafe; color: #1e40af; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">{{ prod.genero || 'Caballero' }}</span>
+          </div>
+
+          <p style="font-size: 1.7rem; font-weight: bold; color: #2563eb; margin: 0 0 15px 0;">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+
+          <!-- Descripción breve -->
+          @if (prod.descripcion) {
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem;">{{ prod.descripcion }}</p>
           }
 
-          @if (auth.esAdmin()) {
-            <div class="acciones-admin">
-              <button type="button" class="btn-secundario" (click)="editarProducto(prod)">Editar</button>
-              <button type="button" class="btn-peligro" (click)="eliminarProducto(prod)">Eliminar</button>
+          <!-- Selector de Colores -->
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #334155;">Color: <span style="color: #0f172a;">{{ prod.color }}</span></p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              @for (variantes of modelosAgrupados(); track variantes[0].nombre) {
+                @if (variantes[0].nombre === prod.nombre) {
+                  @for (variante of variantes; track variante.id) {
+                    <div (click)="seleccionarVariante(prod.nombre, variante.id!)"
+                         [style.border]="prod.id === variante.id ? '2px solid #2563eb' : '2px solid #cbd5e1'"
+                         style="width: 45px; height: 45px; border-radius: 8px; cursor: pointer; overflow: hidden;"
+                         [title]="variante.color">
+                      <img [src]="getPrimeraImagen(variante.imagen)" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                  }
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Selector de Tallas -->
+          @if (calcularTotalStock(prod) > 0) {
+            <div style="margin-bottom: 20px;">
+              <p style="font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #334155;">Selecciona tu Talla:</p>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                @for (talla of tallasDisponibles(prod); track talla) {
+                  <button type="button" 
+                          (click)="seleccionarTalla(prod.id!, talla)" 
+                          [style.background]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#f8fafc'"
+                          [style.color]="tallaSeleccionadaPorProducto[prod.id!] === talla ? 'white' : '#475569'"
+                          [style.borderColor]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#cbd5e1'"
+                          style="border-width: 1px; border-style: solid; border-radius: 6px; padding: 10px 15px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: all 0.2s;">
+                    {{ talla }}
+                  </button>
+                }
+              </div>
+            </div>
+            <button class="btn-comprar" (click)="agregarAlCarrito(prod)" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px;">Añadir al carrito</button>
+          } @else {
+            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold;">
+              Este color está agotado
             </div>
           }
-        </article>
-      }
+
+          <!-- DESCRIPCIÓN GENERAL (se muestra al hacer click en ver datos) -->
+          @if (prod.descripcionGeneral) {
+            <div style="margin-top: 25px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
+              <h3 style="font-size: 1rem; font-weight: bold; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                📋 Descripción General
+              </h3>
+              <p style="color: #475569; line-height: 1.8; font-size: 0.9rem; white-space: pre-wrap;">{{ prod.descripcionGeneral }}</p>
+            </div>
+          }
+        </div>
+
+      </div>
     </div>
   }
 </div>

@@ -23,8 +23,7 @@ export class RegistroComponent {
   readonly registroForm = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    rol: this.fb.nonNullable.control<RolUsuario>('USER', [Validators.required])
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   registrar(): void {
@@ -38,7 +37,10 @@ export class RegistroComponent {
     this.mensaje.set('');
     this.mensajeError.set('');
 
-    this.auth.register(this.registroForm.getRawValue()).subscribe({
+    const formValues = this.registroForm.getRawValue();
+    const payload = { ...formValues, rol: 'CLIENTE' as const };
+
+    this.auth.register(payload).subscribe({
       next: (respuesta) => {
         this.mensaje.set(respuesta || 'Usuario registrado correctamente.');
         setTimeout(() => this.router.navigate(['/login']), 700);

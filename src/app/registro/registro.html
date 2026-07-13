@@ -27,13 +27,7 @@
       }
     </div>
 
-    <div class="campo">
-      <label for="rol">Tipo de cuenta</label>
-      <select id="rol" formControlName="rol">
-        <option value="USER">Cliente</option>
-        <option value="ADMIN">Administrador</option>
-      </select>
-    </div>
+
 
     @if (mensaje()) {
       <div class="exito-global">{{ mensaje() }}</div>

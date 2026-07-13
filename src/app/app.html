@@ -1,4 +1,57 @@
 <app-navbar></app-navbar>
+
 <main class="contenedor-principal">
   <router-outlet></router-outlet>
 </main>
+
+@if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
+  <footer class="footer-oscuro">
+    <div class="footer-contenido">
+      <div class="footer-columna">
+        <h3>UTP Fashion</h3>
+        <p>La mejor tienda de zapatillas 100% originales con despacho inmediato y atención personalizada.</p>
+        <div class="redes-sociales">
+          <a href="https://facebook.com" target="_blank" class="red-enlace">🔵 Facebook</a>
+          <a href="https://instagram.com" target="_blank" class="red-enlace">📸 Instagram</a>
+          <a href="https://tiktok.com" target="_blank" class="red-enlace">🎵 TikTok</a>
+        </div>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>Enlaces Rápidos</h3>
+        <ul>
+          <li><a routerLink="/inicio">Inicio</a></li>
+          <li><a routerLink="/catalogo">Catálogo</a></li>
+          <li><a routerLink="/perfil">Mi Cuenta</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>Atención al Cliente</h3>
+        <ul>
+          <li><a href="#">Preguntas Frecuentes</a></li>
+          <li><a href="#">Términos y Condiciones</a></li>
+          <li><a href="#">Políticas de Devolución</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>Contacto</h3>
+        <p>📍 Av. Petit Thouars 116, Lima, Perú</p>
+        <p>📞 +51 987 654 321</p>
+        <p>✉️ soporte@utpfashion.com</p>
+      </div>
+    </div>
+    
+    <div class="footer-inferior">
+      <p>&copy; 2026 UTP Fashion. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/51987654321?text=Hola!%20Estoy%20interesado%20en%20comprar%20unas%20zapatillas." 
+     target="_blank" 
+     class="whatsapp-flotante">
+    <span class="icono-wa">💬</span>
+    <span class="texto-wa">¿Necesitas ayuda?</span>
+  </a>
+}

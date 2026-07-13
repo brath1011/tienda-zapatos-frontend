@@ -66,9 +66,74 @@
     gap: 1rem;
   }
 
-  .usuario {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
+  .dropdown-usuario {
+    position: relative;
+    
+    .btn-usuario-dropdown {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      .flechita {
+        font-size: 0.8rem;
+        transition: transform 0.2s ease;
+        &.abierto {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      min-width: 150px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+
+      .dropdown-item {
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        color: #1e293b;
+        font-weight: 500;
+        text-align: left;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        font-size: 0.95rem;
+
+        &:hover {
+          background: #f1f5f9;
+        }
+
+        &.btn-salir {
+          border-top: 1px solid #e2e8f0;
+          color: #ef4444;
+
+          &:hover {
+            background: #fef2f2;
+          }
+        }
+      }
+    }
   }
 
   .btn-login {

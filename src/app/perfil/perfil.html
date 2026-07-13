@@ -1,0 +1,243 @@
+<div class="perfil-dashboard-container">
+  <aside class="perfil-sidebar">
+    <div class="sidebar-header">
+      <h2>Mi Cuenta</h2>
+      <p class="role-badge">{{ authService.usuario()?.rol || 'CLIENTE' }}</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a class="nav-item" [class.active]="pestanaActiva() === 'DATOS'" (click)="pestanaActiva.set('DATOS')">
+        <span class="icon">👤</span>
+        <span>Perfil y Direcciones</span>
+      </a>
+      @if (!authService.esAdmin() && !authService.esVentas() && !authService.esRepartidor()) {
+        <a class="nav-item" [class.active]="pestanaActiva() === 'COMPRAS'" (click)="pestanaActiva.set('COMPRAS')">
+          <span class="icon">🛍️</span>
+          <span>Historial de Pedidos</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <main class="perfil-content">
+    @if (pestanaActiva() === 'DATOS') {
+      <header class="cabecera">
+        <h1 class="titulo">Mis Datos</h1>
+        <p>Gestiona tu información personal y de contacto.</p>
+      </header>
+
+      @if (mensaje()) {
+        <div class="mensaje exito">{{ mensaje() }}</div>
+      }
+
+      @if (mensajeError()) {
+        <div class="mensaje error">{{ mensajeError() }}</div>
+      }
+
+
+
+
+      
+      <div class="grid-secciones">
+        <!-- SECCIÓN DATOS PERSONALES -->
+        <section class="panel">
+          <h2>Datos Personales</h2>
+          <form [formGroup]="perfilForm" (ngSubmit)="actualizarPerfil()" class="formulario">
+            <div class="campo">
+              <label>Nombre Completo</label>
+              <input type="text" formControlName="nombre">
+            </div>
+            <div class="campo">
+              <label>Tipo de Documento</label>
+              <select formControlName="tipoDocumento">
+                <option value="">Seleccionar</option>
+                <option value="DNI">DNI</option>
+                <option value="CE">Carnet de Extranjería</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Número de Documento</label>
+              <input type="text" formControlName="numeroDocumento">
+            </div>
+            <div class="campo">
+              <label>Teléfono Personal</label>
+              <input type="tel" formControlName="telefono">
+            </div>
+            @if (authService.esAdmin() || authService.esVentas() || authService.esRepartidor()) {
+              <div class="campo">
+                <label>Teléfono Corporativo / Secundario</label>
+                <input type="tel" formControlName="telefonoSecundario">
+              </div>
+              <div class="campo">
+                <label>Gmail de Contacto Personal</label>
+                <input type="email" formControlName="emailContacto">
+              </div>
+            }
+            <button type="submit" class="btn-primario" [disabled]="perfilForm.invalid">Actualizar Datos</button>
+          </form>
+        </section>
+
+        <!-- SECCIÓN CONTRASEÑA -->
+        <section class="panel">
+          <h2>Cambiar Contraseña</h2>
+          <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()" class="formulario">
+            <div class="campo">
+              <label>Contraseña Actual (requerida)</label>
+              <div style="display: flex; gap: 10px;">
+                <input [type]="mostrarPasswordActual() ? 'text' : 'password'" formControlName="passwordActual" style="flex: 1;">
+                <button type="button" class="btn-secundario" (click)="togglePasswordActual()" style="padding: 0 15px;">
+                  {{ mostrarPasswordActual() ? 'Ocultar' : 'Ver' }}
+                </button>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Nueva Contraseña</label>
+              <div style="display: flex; gap: 10px;">
+                <input [type]="mostrarNuevaPassword() ? 'text' : 'password'" formControlName="nuevaPassword" style="flex: 1;">
+                <button type="button" class="btn-secundario" (click)="toggleNuevaPassword()" style="padding: 0 15px;">
+                  {{ mostrarNuevaPassword() ? 'Ocultar' : 'Ver' }}
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="btn-primario" [disabled]="passwordForm.invalid">Cambiar Contraseña</button>
+          </form>
+        </section>
+
+        <!-- SECCIÓN DIRECCIONES (Solo para Clientes) -->
+        @if (!authService.esAdmin() && !authService.esVentas() && !authService.esRepartidor()) {
+          <section class="panel panel-largo">
+            <h2>Mis Direcciones</h2>
+            
+            <div class="lista-direcciones">
+              @for (dir of direcciones(); track dir.idDireccion) {
+                <article class="tarjeta-direccion">
+                  <div class="info-dir">
+                    <h3>📍 {{ dir.distrito }}</h3>
+                    <p>{{ dir.direccionExacta }}</p>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-editar" (click)="editarDireccion(dir)" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;" title="Editar">✏️</button>
+                    <button class="btn-eliminar" (click)="eliminarDireccion(dir.idDireccion)" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;" title="Eliminar">🗑️</button>
+                  </div>
+                </article>
+              } @empty {
+                <p class="texto-vacio">No tienes direcciones guardadas.</p>
+              }
+            </div>
+
+            <form [formGroup]="direccionForm" (ngSubmit)="agregarDireccion()" class="formulario">
+              <div class="grid-3-cols" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div class="campo">
+                  <label>Departamento *</label>
+                  <select formControlName="departamento" style="width: 100%; padding: 0.5rem;">
+                    <option value="">Seleccione departamento</option>
+                    @for (dep of departamentos; track dep) {
+                      <option [value]="dep">{{ dep }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="campo">
+                  <label>Provincia *</label>
+                  <select formControlName="provincia" style="width: 100%; padding: 0.5rem;">
+                    <option value="">Seleccione provincia</option>
+                    @for (prov of provincias; track prov) {
+                      <option [value]="prov">{{ prov }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="campo">
+                  <label>Distrito *</label>
+                  <select formControlName="distrito" style="width: 100%; padding: 0.5rem;">
+                    <option value="">Seleccione distrito</option>
+                    @for (dist of distritos; track dist) {
+                      <option [value]="dist">{{ dist }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="campo" style="margin-bottom: 1rem;">
+                <label>Avenida / Calle / Jirón *</label>
+                <input type="text" formControlName="calleJiron" placeholder="Ej. Av. Los Rosales" style="width: 100%; padding: 0.5rem;">
+              </div>
+
+              <div class="grid-2-cols" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div class="campo">
+                  <label>Número *</label>
+                  <input type="text" formControlName="numero" placeholder="Ej. 123" style="width: 100%; padding: 0.5rem;">
+                </div>
+                <div class="campo">
+                  <label>Dpto./ Interior/ Piso/ Lote (opcional)</label>
+                  <input type="text" formControlName="dptoInterior" placeholder="Ej. Dpto 101" style="width: 100%; padding: 0.5rem;">
+                </div>
+              </div>
+              
+              <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" class="btn-secundario" [disabled]="direccionForm.invalid" style="padding: 0.75rem 1.5rem; cursor: pointer;">
+                  {{ direccionEditandoId() ? 'Actualizar Dirección' : 'Añadir Dirección' }}
+                </button>
+                @if (direccionEditandoId()) {
+                  <button type="button" (click)="cancelarEdicionDireccion()" style="background: none; border: none; color: #ef4444; font-weight: 600; cursor: pointer;">Cancelar</button>
+                }
+              </div>
+            </form>
+          </section>
+        }
+
+        <!-- SECCIÓN CONTACTO DEL ADMIN (Solo para Ventas) -->
+        @if (authService.esVentas() && contactoAdmin()) {
+          <section class="panel panel-largo">
+            <h2>Contacto de Soporte / Administrador</h2>
+            <div class="contacto-admin-card" style="display: flex; gap: 20px; align-items: center; background: #e0f2fe; padding: 1.5rem; border-radius: 12px; border: 1px solid #bae6fd; margin-top: 1rem;">
+              <div class="contacto-icon" style="font-size: 2.5rem; background: #bae6fd; color: #0369a1; padding: 1rem; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">👑</div>
+              <div class="contacto-info">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #0369a1;">{{ contactoAdmin().nombre }} (Administrador)</h3>
+                <p style="margin: 0.35rem 0 0 0; color: #075985; font-size: 0.95rem;">
+                  <strong>Email corporativo:</strong> {{ contactoAdmin().email }}
+                </p>
+                <p style="margin: 0.25rem 0 0 0; color: #075985; font-size: 0.95rem;">
+                  <strong>Gmail de contacto:</strong> {{ contactoAdmin().emailContacto || 'No registrado' }}
+                </p>
+                <p style="margin: 0.25rem 0 0 0; color: #075985; font-size: 0.95rem;">
+                  <strong>Celular personal:</strong> {{ contactoAdmin().telefono || 'No registrado' }}
+                </p>
+                <p style="margin: 0.25rem 0 0 0; color: #075985; font-size: 0.95rem;">
+                  <strong>Celular corporativo:</strong> {{ contactoAdmin().telefonoSecundario || 'No registrado' }}
+                </p>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- SECCIÓN CONTACTO DE SOPORTE DE VENTAS (Solo para Repartidor) -->
+        @if (authService.esRepartidor() && ventas().length > 0) {
+          <section class="panel panel-largo">
+            <h2>Contacto de Soporte de Ventas</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">Comunícate con cualquiera de nuestros agentes de ventas en tienda si tienes dudas con un pedido o entrega:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem;">
+              @for (vendedor of ventas(); track vendedor.id) {
+                <div class="contacto-vendedor-card" style="display: flex; gap: 15px; align-items: center; background: #f0fdf4; padding: 1.25rem; border-radius: 12px; border: 1px solid #bbf7d0;">
+                  <div class="contacto-icon" style="font-size: 2rem; background: #bbf7d0; color: #166534; padding: 0.5rem; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">👤</div>
+                  <div class="contacto-info" style="line-height: 1.6;">
+                    <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #166534;">{{ vendedor.nombre }}</h3>
+                    <span style="display: block; margin-bottom: 0.25rem; color: #14532d; font-size: 0.85rem;"><strong>Email corporativo:</strong> {{ vendedor.email || '' }}</span>
+                    <span style="display: block; margin-bottom: 0.25rem; color: #14532d; font-size: 0.85rem;"><strong>Gmail de contacto:</strong> {{ vendedor.emailContacto || '' }}</span>
+                    <span style="display: block; color: #14532d; font-size: 0.85rem;"><strong>Celular personal:</strong> {{ vendedor.telefono || '' }} &nbsp;&nbsp; <strong><br>Celular corporativo:</strong> {{ vendedor.telefonoSecundario || '' }}</span><br>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    } @else {
+      <header class="cabecera">
+        <h1 class="titulo">Mis Compras</h1>
+        <p>Revisa el historial de tus pedidos y tus boletas.</p>
+      </header>
+      <div class="contenedor-mis-compras-perfil" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <app-mis-compras></app-mis-compras>
+      </div>
+    }
+  </main>
+</div>

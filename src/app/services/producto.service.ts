@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Zapato } from '../models/api.models';
 
@@ -13,7 +14,9 @@ export class ProductoService {
   constructor(private readonly http: HttpClient) {}
 
   listar(): Observable<Zapato[]> {
-    return this.http.get<Zapato[]>(this.baseUrl);
+    return this.http.get<any>(this.baseUrl).pipe(
+      map(res => res.content ? res.content : res)
+    );
   }
 
   buscarPorId(id: number): Observable<Zapato> {
@@ -30,5 +33,11 @@ export class ProductoService {
 
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  subirImagen(archivo: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', archivo);
+    return this.http.post<{ url: string }>(`${this.baseUrl}/upload`, formData);
   }
 }
