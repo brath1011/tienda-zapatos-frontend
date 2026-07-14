@@ -92,6 +92,8 @@ export interface Pedido {
   fecha: string; // Fecha de compra
   fechaEntrega?: string; // Fecha en la que se entregó (opcional porque puede estar pendiente)
   total: number;
+  subtotal?: number;
+  costoEnvio?: number;
   estado: string;
   usuario?: Cliente;
   direccion?: Direccion;

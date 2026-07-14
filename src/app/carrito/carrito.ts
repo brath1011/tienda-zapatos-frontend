@@ -26,6 +26,7 @@ export class CarritoComponent implements OnInit {
   readonly procesando = signal(false);
   readonly mensaje = signal('');
   readonly mensajeError = signal('');
+  readonly costoEnvio = signal<number>(0);
   
   // 1 = Carro de compra, 2 = Detalles de pago, 3 = Orden completada
   readonly pasoActual = signal<number>(1);
@@ -64,9 +65,25 @@ export class CarritoComponent implements OnInit {
       if (dep && UBIGEO_DATA[dep]) {
         this.provincias = Object.keys(UBIGEO_DATA[dep]);
         this.pagoForm.controls.provincia.enable();
+        
+        // Calcular costo de envío dinámicamente
+        let costo = 0;
+        const d = dep.toUpperCase();
+        if (d.includes('LIMA') || d.includes('CALLAO')) {
+            costo = 0;
+        } else if (d.includes('ICA') || d.includes('ANCASH') || d.includes('LIBERTAD') || d.includes('LAMBAYEQUE') || d.includes('JUNIN')) {
+            costo = 15;
+        } else if (d.includes('LORETO')) {
+            costo = 35;
+        } else {
+            costo = 28;
+        }
+        this.costoEnvio.set(costo);
+
       } else {
         this.provincias = [];
         this.pagoForm.controls.provincia.disable();
+        this.costoEnvio.set(0);
       }
     });
 
