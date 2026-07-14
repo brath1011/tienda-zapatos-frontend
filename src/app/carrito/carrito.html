@@ -194,17 +194,16 @@
   
         <div class="totales">
           <div class="fila-total">
-            <span>Envío</span>
-            <!-- Costo ficticio de ejemplo o 0 si no hay lógica -->
-            <span>S/ 0.00</span>
-          </div>
-          <div class="fila-total">
             <span>Subtotal</span>
             <span>S/ {{ carritoSvc.totalGlobal() | number:'1.2-2' }}</span>
           </div>
+          <div class="fila-total">
+            <span>Envío</span>
+            <span>S/ {{ costoEnvio() | number:'1.2-2' }}</span>
+          </div>
           <div class="fila-total total-final">
-            <span>Total</span>
-            <span>S/ {{ carritoSvc.totalGlobal() | number:'1.2-2' }}</span>
+            <span>Total a Pagar</span>
+            <span>S/ {{ (carritoSvc.totalGlobal() + costoEnvio()) | number:'1.2-2' }}</span>
           </div>
         </div>
   

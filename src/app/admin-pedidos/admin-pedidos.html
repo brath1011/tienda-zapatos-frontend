@@ -206,16 +206,29 @@
     
     <div class="boleta-montos" style="position: relative; z-index: 1;">
       <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-        <span>Subtotal:</span>
-        <span>PEN {{ boletaSeleccionada()?.comprobante?.subtotal | number:'1.2-2' }}</span>
+        <span>Costo Zapatos (Subtotal):</span>
+        <span>PEN {{ boletaSeleccionada()?.subtotal || boletaSeleccionada()?.comprobante?.subtotal | number:'1.2-2' }}</span>
       </div>
+      
+      @if (boletaSeleccionada()?.costoEnvio && boletaSeleccionada()!.costoEnvio! > 0) {
+        <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #b45309;">
+          <span>Costo de Envío (Provincias):</span>
+          <span>PEN {{ boletaSeleccionada()?.costoEnvio | number:'1.2-2' }}</span>
+        </div>
+      } @else {
+        <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #047857;">
+          <span>Costo de Envío (Lima y Callao):</span>
+          <span>GRATIS</span>
+        </div>
+      }
+
       <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
         <span>I.G.V. (18%):</span>
         <span>PEN {{ boletaSeleccionada()?.comprobante?.igv | number:'1.2-2' }}</span>
       </div>
       <div class="monto-row total-row" style="display: flex; justify-content: space-between; border-top: 1px solid #ccc; padding-top: 0.5rem; font-weight: bold; font-size: 1.1rem; color: #059669;">
         <span>TOTAL A PAGAR:</span>
-        <span>PEN {{ boletaSeleccionada()?.comprobante?.total | number:'1.2-2' }}</span>
+        <span>PEN {{ boletaSeleccionada()?.total || boletaSeleccionada()?.comprobante?.total | number:'1.2-2' }}</span>
       </div>
     </div>
   </div>
