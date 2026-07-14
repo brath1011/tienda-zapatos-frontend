@@ -1,0 +1,126 @@
+<div class="descuentos-container">
+  <div class="header">
+    <h1>Descuentos Especiales 🏷️</h1>
+    <p>Aplica descuentos directos por modelo y color específico.</p>
+  </div>
+
+  @if (mensaje()) {
+    <div class="alert success">{{ mensaje() }}</div>
+  }
+  @if (mensajeError()) {
+    <div class="alert error">{{ mensajeError() }}</div>
+  }
+
+  <div class="crear-descuento-card">
+    <h2>1. Seleccionar Modelo</h2>
+    <div class="modelos-grid">
+      <select [ngModel]="modeloSeleccionado()" (ngModelChange)="alSeleccionarModelo($event)" class="select-modelo">
+        <option value="">-- Elige un modelo de zapatilla --</option>
+        @for (modelo of modelosUnicos(); track modelo) {
+          <option [value]="modelo">{{ modelo }}</option>
+        }
+      </select>
+    </div>
+
+    @if (modeloSeleccionado()) {
+      <div class="colores-section">
+        <h2>2. Seleccionar Colores a descontar</h2>
+        <p>Haz clic en los colores a los que quieras aplicarles el descuento:</p>
+        
+        <div class="colores-grid">
+          @for (colorObj of coloresDelModelo(); track colorObj.color) {
+            <div class="color-card" 
+                 [class.selected]="coloresSeleccionados().has(colorObj.color)"
+                 (click)="toggleColor(colorObj.color)">
+              <div class="color-img-wrapper">
+                <img [src]="colorObj.imagen" [alt]="colorObj.color">
+                @if (coloresSeleccionados().has(colorObj.color)) {
+                  <div class="check-overlay">✅</div>
+                }
+              </div>
+              <span>{{ colorObj.color }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h2>3. Configurar Descuento</h2>
+        <div class="config-grid">
+          
+          <div class="form-group">
+            <label>Porcentaje de Descuento (%)</label>
+            <input type="number" [ngModel]="porcentajeDescuento()" (ngModelChange)="porcentajeDescuento.set($event)" min="1" max="100">
+          </div>
+
+          <div class="form-group options-group">
+            <div class="radio-card special active">
+              <div class="radio-info">
+                <strong>Descuento Especial (Liquidación)</strong>
+                <p>⚠️ Automáticamente anula los reembolsos (Venta Final).</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="btn-aplicar" (click)="aplicarDescuento()" [disabled]="cargando()">
+          {{ cargando() ? 'Aplicando...' : 'Aplicar Descuento a ' + coloresSeleccionados().size + ' color(es)' }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="lista-descuentos-card">
+    <div class="lista-header">
+      <h2>Descuentos Activos</h2>
+      <span class="badge">{{ productosEnDescuentoTotal() }} productos con precio reducido actualmente</span>
+    </div>
+
+    @if (campanasActivas().length === 0) {
+      <p class="vacio">No hay ningún descuento especial activo en este momento.</p>
+    } @else {
+      <table class="tabla-descuentos">
+        <thead>
+          <tr>
+            <th>Nombre / Modelo</th>
+            <th>Colores</th>
+            <th>Descuento</th>
+            <th>Políticas</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (campana of campanasActivas(); track campana.idCampana) {
+            <tr>
+              <td>
+                <strong>{{ campana.filtroModelo }}</strong><br>
+                <small>{{ campana.nombre }}</small>
+              </td>
+              <td>
+                <div class="colores-tags">
+                  @for (color of campana.filtroColor?.split(',') || []; track color) {
+                    <span class="tag-color">{{ color }}</span>
+                  }
+                </div>
+              </td>
+              <td><span class="tag-descuento">-{{ campana.porcentajeDescuento }}%</span></td>
+              <td>
+                @if (campana.sinReembolso) {
+                  <span class="tag-warning">Especial (Sin Reembolso)</span>
+                } @else {
+                  <span class="tag-ok">Predeterminado</span>
+                }
+              </td>
+              <td>
+                <button class="btn-quitar" (click)="quitarDescuento(campana.idCampana!)">
+                  Quitar Descuento
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

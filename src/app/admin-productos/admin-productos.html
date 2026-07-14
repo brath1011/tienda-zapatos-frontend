@@ -12,158 +12,132 @@
     <div class="mensaje error">{{ mensajeError() }}</div>
   }
 
-  <div class="grid-admin">
-    <section class="panel">
-      <form class="form-producto" [formGroup]="productoForm" (ngSubmit)="guardarProducto()" novalidate>
-        <h2>{{ productoEditando() ? 'Editar producto' : 'Crear producto' }}</h2>
+  <section class="panel">
+    <form class="form-producto" [formGroup]="productoForm" (ngSubmit)="guardarProducto()" novalidate>
+      <h2>{{ productoEditando() ? 'Editar producto' : 'Crear producto' }}</h2>
 
-        <div class="grid-form">
-          <label>
-            Nombre
-            <input type="text" formControlName="nombre" placeholder="Air Max">
-          </label>
-
-          <label>
-            Marca
-            <input type="text" formControlName="marca" placeholder="Nike">
-          </label>
-
-          <label>
-            Género
-            <select formControlName="genero">
-              @for (genero of generos; track genero) {
-                <option [value]="genero">{{ genero }}</option>
-              }
-            </select>
-          </label>
-
-
-
-          <label>
-            Categoría
-            <select formControlName="categoria">
-              @for (categoria of categorias; track categoria) {
-                <option [value]="categoria">{{ categoria }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Precio
-            <input type="number" formControlName="precio" min="1" step="0.01">
-          </label>
-        </div>
-
-        <label style="margin-top: 15px; display: block;">
-          Descripción Breve *
-          <textarea rows="2" formControlName="descripcion" placeholder="Ej: Zapatilla deportiva ligera..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;"></textarea>
+      <div class="grid-form">
+        <label>
+          Nombre
+          <input type="text" formControlName="nombre" placeholder="Air Max">
         </label>
 
-        <label style="margin-top: 15px; display: block;">
-          Descripción General *
-          <textarea rows="4" formControlName="descripcionGeneral" placeholder="Más información, detalles, materiales..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;"></textarea>
+        <label>
+          Marca
+          <input type="text" formControlName="marca" placeholder="Nike">
         </label>
 
-        <div style="grid-column: 1 / -1; margin-top: 15px;">
-          <h3 style="font-size: 1.2rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">Variantes (Colores y Fotos)</h3>
-          
-          <div formArrayName="variantes">
-            @for (varianteCtrl of variantes.controls; track $index; let varIndex = $index) {
-              <div [formGroupName]="varIndex" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
-                
-                @if (variantes.length > 1) {
-                  <button type="button" (click)="quitarVariante(varIndex)" style="position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                    X Eliminar Variante
-                  </button>
-                }
-
-                <label style="display: block; margin-bottom: 15px; max-width: 300px;">
-                  <strong>Color *</strong>
-                  <input type="text" formControlName="color" placeholder="Ej. Negro, Rojo con Blanco..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; margin-top: 5px;">
-                </label>
-
-                <div class="tallas-grid-container" style="margin-bottom: 20px;">
-                  <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #475569;">Stock por Talla</h4>
-                  <div formGroupName="tallasStock" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    @for (talla of tallasFiltradas(); track talla) {
-                      <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin: 0;">{{ talla }}</label>
-                        <input type="number" [formControlName]="talla" min="0" style="width: 100%; text-align: center; padding: 5px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px;">
-                      </div>
-                    }
-                  </div>
-                </div>
-
-                <div class="galeria-grid" style="margin-bottom: 10px;">
-                  <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #475569;">Galería de Imágenes (8 posiciones)</h4>
-                  <div formArrayName="imagenes" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    @for (imgCtrl of getImagenesControls(varIndex).controls; track $index; let imgIndex = $index) {
-                      <div style="background: white; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
-                        <div style="flex-grow: 1;">
-                          <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px; color: #334155;">{{ etiquetasImagenes[imgIndex] }}</label>
-                          <input type="file" accept="image/*" (change)="alSeleccionarImagen($event, varIndex, imgIndex)" style="font-size: 0.8rem;">
-                        </div>
-                        <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 4px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                          @if (variantes.value[varIndex].imagenes[imgIndex]) {
-                            <img [src]="variantes.value[varIndex].imagenes[imgIndex]" style="width: 100%; height: 100%; object-fit: cover;">
-                          } @else {
-                            <span style="font-size: 0.7rem; color: #94a3b8; text-align: center;">Sin<br>foto</span>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-          
-          <button type="button" (click)="agregarVariante()" class="btn-secundario" style="margin-bottom: 15px; width: 100%; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
-            + Agregar Otro Color
-          </button>
-        </div>
-
-        @if (productoForm.invalid && productoForm.touched) {
-          <div class="mensaje error" style="margin-bottom: 15px;">{{ mensajeError() || 'Revisa los campos marcados. Todos los datos son requeridos.' }}</div>
-        }
-
-        <div class="acciones-form">
-          <button type="submit" class="btn-primario" [disabled]="guardando()">
-            {{ guardando() ? 'Guardando...' : (productoEditando() ? 'Actualizar' : 'Crear') }}
-          </button>
-          @if (productoEditando()) {
-            <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
-          } @else {
-            <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Limpiar</button>
-          }
-        </div>
-      </form>
-    </section>
-
-    <section class="panel">
-      <form class="form-oferta" [formGroup]="ofertaForm" (ngSubmit)="aplicarOferta()">
-        <h2>Aplicar oferta</h2>
-        <p>Aplica un descuento a un producto específico.</p>
-        
-        <label style="display: block; margin-top: 15px;">
-          Selecciona el producto
-          <select formControlName="idProducto" style="width: 100%;">
-            <option [ngValue]="0">-- Selecciona un producto --</option>
-            @for (prod of productos(); track prod.id) {
-              <option [ngValue]="prod.id">{{ prod.nombre }} (S/. {{ prod.precio }})</option>
+        <label>
+          Género
+          <select formControlName="genero">
+            @for (genero of generos; track genero) {
+              <option [value]="genero">{{ genero }}</option>
             }
           </select>
         </label>
-        
-        <label style="display: block; margin-top: 15px;">
-          Porcentaje de Descuento (%)
-          <input type="number" formControlName="porcentaje" min="1" max="90" style="width: 100%;">
+
+
+
+        <label>
+          Categoría
+          <select formControlName="categoria">
+            @for (categoria of categorias; track categoria) {
+              <option [value]="categoria">{{ categoria }}</option>
+            }
+          </select>
         </label>
+
+        <label>
+          Precio
+          <input type="number" formControlName="precio" min="1" step="0.01">
+        </label>
+      </div>
+
+      <label style="margin-top: 15px; display: block;">
+        Descripción Breve *
+        <textarea rows="2" formControlName="descripcion" placeholder="Ej: Zapatilla deportiva ligera..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;"></textarea>
+      </label>
+
+      <label style="margin-top: 15px; display: block;">
+        Descripción General *
+        <textarea rows="4" formControlName="descripcionGeneral" placeholder="Más información, detalles, materiales..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1;"></textarea>
+      </label>
+
+      <div style="grid-column: 1 / -1; margin-top: 15px;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #e2e8f0;">Variantes (Colores y Fotos)</h3>
         
-        <button type="submit" class="btn-secundario" style="margin-top: 20px;">Aplicar descuento</button>
-      </form>
-    </section>
-  </div>
+        <div formArrayName="variantes">
+          @for (varianteCtrl of variantes.controls; track $index; let varIndex = $index) {
+            <div [formGroupName]="varIndex" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+              
+              @if (variantes.length > 1) {
+                <button type="button" (click)="quitarVariante(varIndex)" style="position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                  X Eliminar Variante
+                </button>
+              }
+
+              <label style="display: block; margin-bottom: 15px; max-width: 300px;">
+                <strong>Color *</strong>
+                <input type="text" formControlName="color" placeholder="Ej. Negro, Rojo con Blanco..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; margin-top: 5px;">
+              </label>
+
+              <div class="tallas-grid-container" style="margin-bottom: 20px;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #475569;">Stock por Talla</h4>
+                <div formGroupName="tallasStock" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  @for (talla of tallasFiltradas(); track talla) {
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                      <label style="font-size: 0.75rem; font-weight: bold; color: #64748b; margin: 0;">{{ talla }}</label>
+                      <input type="number" [formControlName]="talla" min="0" style="width: 100%; text-align: center; padding: 5px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="galeria-grid" style="margin-bottom: 10px;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #475569;">Galería de Imágenes (8 posiciones)</h4>
+                <div formArrayName="imagenes" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  @for (imgCtrl of getImagenesControls(varIndex).controls; track $index; let imgIndex = $index) {
+                    <div style="background: white; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
+                      <div style="flex-grow: 1;">
+                        <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px; color: #334155;">{{ etiquetasImagenes[imgIndex] }}</label>
+                        <input type="file" accept="image/*" (change)="alSeleccionarImagen($event, varIndex, imgIndex)" style="font-size: 0.8rem;">
+                      </div>
+                      <div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 4px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        @if (variantes.value[varIndex].imagenes[imgIndex]) {
+                          <img [src]="variantes.value[varIndex].imagenes[imgIndex]" style="width: 100%; height: 100%; object-fit: cover;">
+                        } @else {
+                          <span style="font-size: 0.7rem; color: #94a3b8; text-align: center;">Sin<br>foto</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        
+        <button type="button" (click)="agregarVariante()" class="btn-secundario" style="margin-bottom: 15px; width: 100%; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
+          + Agregar Otro Color
+        </button>
+      </div>
+
+      @if (productoForm.invalid && productoForm.touched) {
+        <div class="mensaje error" style="margin-bottom: 15px;">{{ mensajeError() || 'Revisa los campos marcados. Todos los datos son requeridos.' }}</div>
+      }
+
+      <div class="acciones-form">
+        <button type="submit" class="btn-primario" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando...' : (productoEditando() ? 'Actualizar' : 'Crear') }}
+        </button>
+        @if (productoEditando()) {
+          <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
+        } @else {
+          <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Limpiar</button>
+        }
+      </div>
+    </form>
+  </section>
 
   <section class="panel panel-largo" style="margin-top: 30px;">
     <h2>Lista de Productos</h2>
@@ -219,8 +193,8 @@
               <td>S/. {{ grupo.representante.precio }}</td>
               <td>
                 <button class="btn-secundario" (click)="verStockDetalle(grupo.representante)" style="margin-right: 6px; margin-bottom: 4px; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;" title="Ver Stock por Colores">ℹ️ Stock</button>
-                <button class="btn-secundario" (click)="editarProducto(grupo.representante)" style="margin-right: 6px; margin-bottom: 4px;">Editar</button>
-                <button class="btn-peligro" (click)="eliminarProducto(grupo.representante)" style="margin-bottom: 4px;">Eliminar</button>
+                <button class="btn-secundario" (click)="editarProducto(grupo)" style="margin-right: 6px; margin-bottom: 4px;">Editar</button>
+                <button class="btn-peligro" (click)="eliminarProducto(grupo)" style="margin-bottom: 4px;">Eliminar</button>
               </td>
             </tr>
           } @empty {

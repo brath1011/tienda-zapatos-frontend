@@ -3,7 +3,6 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../environments/environment';
 import { ProductoService } from '../services/producto.service';
-import { OfertaService } from '../services/oferta.service';
 import { Zapato } from '../models/api.models';
 
 @Component({
@@ -16,12 +15,11 @@ import { Zapato } from '../models/api.models';
 export class AdminProductosComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly productosApi = inject(ProductoService);
-  private readonly ofertasApi = inject(OfertaService);
 
   readonly productos = signal<Zapato[]>([]);
   readonly cargando = signal(false);
   readonly guardando = signal(false);
-  readonly productoEditando = signal<Zapato | null>(null);
+  readonly productoEditando = signal<boolean>(false);
   readonly productoVerStock = signal<Zapato | null>(null);
   readonly variantesDelModelo = signal<Zapato[]>([]);
   readonly imagenPreview = signal('');
@@ -85,6 +83,7 @@ export class AdminProductosComponent implements OnInit {
 
   crearVariante() {
     return this.fb.group({
+      id: [null as number | null],
       color: ['', [Validators.required]],
       imagenes: this.fb.array(Array(8).fill('')), // 8 imágenes vacías
       tallasStock: this.fb.group({
@@ -102,18 +101,31 @@ export class AdminProductosComponent implements OnInit {
 
   quitarVariante(index: number): void {
     if (this.variantes.length > 1) {
-      this.variantes.removeAt(index);
+      const id = this.variantes.at(index).get('id')?.value;
+      if (id) {
+        if (confirm('¿Seguro que deseas eliminar definitivamente este color?')) {
+          this.cargando.set(true);
+          this.productosApi.eliminar(id).subscribe({
+            next: () => {
+              this.mensaje.set('Variante eliminada correctamente.');
+              this.variantes.removeAt(index);
+              this.cargarProductos();
+            },
+            error: () => {
+              this.mensajeError.set('No se pudo eliminar la variante.');
+              this.cargando.set(false);
+            }
+          });
+        }
+      } else {
+        this.variantes.removeAt(index);
+      }
     }
   }
 
   getImagenesControls(varianteIndex: number): import('@angular/forms').FormArray {
     return this.variantes.at(varianteIndex).get('imagenes') as import('@angular/forms').FormArray;
   }
-
-  readonly ofertaForm = this.fb.nonNullable.group({
-    idProducto: [0, [Validators.required, Validators.min(1)]],
-    porcentaje: [10, [Validators.required, Validators.min(1), Validators.max(90)]]
-  });
 
   ngOnInit(): void {
     this.cargarProductos();
@@ -200,65 +212,29 @@ export class AdminProductosComponent implements OnInit {
 
     const editando = this.productoEditando();
 
-    if (editando?.id) {
-      // Variante 0 → ACTUALIZAR el producto existente
-      const variante0 = formValues.variantes[0];
-      const productoAEditar = {
+    const requests = formValues.variantes.map((variante: any) => {
+      const prodData = {
         ...baseInfo,
-        id: editando.id,
-        color: variante0.color,
-        imagen: variante0.imagenes.join(','),
-        tallasStock: variante0.tallasStock
+        id: variante.id,
+        color: variante.color,
+        imagen: variante.imagenes.join(','),
+        tallasStock: variante.tallasStock
       };
+      if (variante.id) {
+        return this.productosApi.actualizar(variante.id, prodData).toPromise();
+      } else {
+        return this.productosApi.crear(prodData).toPromise();
+      }
+    });
 
-      // Variantes extras (índice 1, 2, ...) → CREAR como productos nuevos
-      const variantesExtra = formValues.variantes.slice(1);
-      const requestsNuevos = variantesExtra.map((variante: any) => {
-        const nuevoProd = {
-          ...baseInfo,
-          color: variante.color,
-          imagen: variante.imagenes.join(','),
-          tallasStock: variante.tallasStock
-        };
-        return this.productosApi.crear(nuevoProd).toPromise();
-      });
-
-      // Ejecutar el UPDATE y todos los CREATE en paralelo
-      const updatePromise = this.productosApi.actualizar(editando.id, productoAEditar).toPromise();
-
-      Promise.all([updatePromise, ...requestsNuevos])
-        .then(() => {
-          const msg = variantesExtra.length > 0
-            ? `Producto actualizado y ${variantesExtra.length} color(es) nuevo(s) creado(s).`
-            : 'Producto actualizado correctamente.';
-          this.mensaje.set(msg);
-          this.cancelarEdicion();
-          this.cargarProductos();
-        })
-        .catch(err => this.handleError(err))
-        .finally(() => this.guardando.set(false));
-
-    } else {
-      // Estamos creando desde cero — un POST por cada variante
-      const requests = formValues.variantes.map((variante: any) => {
-        const nuevoProd = {
-          ...baseInfo,
-          color: variante.color,
-          imagen: variante.imagenes.join(','),
-          tallasStock: variante.tallasStock
-        };
-        return this.productosApi.crear(nuevoProd).toPromise();
-      });
-
-      Promise.all(requests)
-        .then(() => {
-          this.mensaje.set('Zapatos (Variantes) creados correctamente.');
-          this.cancelarEdicion();
-          this.cargarProductos();
-        })
-        .catch(err => this.handleError(err))
-        .finally(() => this.guardando.set(false));
-    }
+    Promise.all(requests)
+      .then(() => {
+        this.mensaje.set(editando ? 'Producto y sus variantes actualizados correctamente.' : 'Zapatos (Variantes) creados correctamente.');
+        this.cancelarEdicion();
+        this.cargarProductos();
+      })
+      .catch(err => this.handleError(err))
+      .finally(() => this.guardando.set(false));
   }
 
   handleError = (error: any) => {
@@ -273,83 +249,67 @@ export class AdminProductosComponent implements OnInit {
     this.guardando.set(false);
   };
 
-  editarProducto(producto: Zapato): void {
-    this.generoSeleccionado.set((producto.genero as any) || 'Caballero');
-    this.productoEditando.set(producto);
+  editarProducto(grupo: any): void {
+    const representante = grupo.representante as Zapato;
+    const variantes = grupo.variantes as Zapato[];
+    
+    this.generoSeleccionado.set((representante.genero as any) || 'Caballero');
+    this.productoEditando.set(true);
 
-    // 1. Limpiar variantes y crear una nueva
     this.variantes.clear();
-    const varGroup = this.crearVariante();
-    this.variantes.push(varGroup); // Agregar PRIMERO al FormArray antes de setear valores
 
-    // 2. Setear COLOR
-    varGroup.get('color')?.setValue(producto.color || '');
+    for (const producto of variantes) {
+      const varGroup = this.crearVariante();
+      this.variantes.push(varGroup);
 
-    // 3. Setear IMAGENES individualmente (patchValue no funciona bien en FormArray anidado)
-    const imagenesFA = varGroup.get('imagenes') as import('@angular/forms').FormArray;
-    const imgArray = (producto.imagen || '').split(',');
-    for (let i = 0; i < 8; i++) {
-      imagenesFA.at(i)?.setValue(imgArray[i]?.trim() || '');
+      varGroup.get('id')?.setValue(producto.id || null);
+      varGroup.get('color')?.setValue(producto.color || '');
+
+      const imagenesFA = varGroup.get('imagenes') as import('@angular/forms').FormArray;
+      const imgArray = (producto.imagen || '').split(',');
+      for (let i = 0; i < 8; i++) {
+        imagenesFA.at(i)?.setValue(imgArray[i]?.trim() || '');
+      }
+
+      const tallasStockFG = varGroup.get('tallasStock') as import('@angular/forms').FormGroup;
+      for (const talla of this.tallasDisponibles) {
+        const val = producto.tallasStock?.[talla] ?? 0;
+        tallasStockFG.get(talla)?.setValue(Number(val));
+      }
     }
 
-    // 4. Setear TALLAS-STOCK individualmente (garantiza que no queden en 0)
-    const tallasStockFG = varGroup.get('tallasStock') as import('@angular/forms').FormGroup;
-    for (const talla of this.tallasDisponibles) {
-      const val = producto.tallasStock?.[talla] ?? 0;
-      tallasStockFG.get(talla)?.setValue(Number(val));
-    }
-
-    // 5. Setear datos generales del formulario principal
     this.productoForm.patchValue({
-      nombre: producto.nombre,
-      marca: producto.marca,
-      genero: producto.genero || 'Caballero',
-      categoria: producto.categoria,
-      precio: producto.precio,
-      descripcion: producto.descripcion || '',
-      descripcionGeneral: producto.descripcionGeneral || ''
+      nombre: representante.nombre,
+      marca: representante.marca,
+      genero: representante.genero || 'Caballero',
+      categoria: representante.categoria,
+      precio: representante.precio,
+      descripcion: representante.descripcion || '',
+      descripcionGeneral: representante.descripcionGeneral || ''
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  eliminarProducto(producto: Zapato): void {
-    if (!producto.id || !confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
+  eliminarProducto(grupo: any): void {
+    const variantes = grupo.variantes as Zapato[];
+    if (!confirm(`¿Estás seguro de que deseas eliminar TODOS los colores (${variantes.length}) de este modelo?`)) return;
 
-    this.productosApi.eliminar(producto.id).subscribe({
-      next: () => {
-        this.mensaje.set('Producto eliminado correctamente.');
+    this.cargando.set(true);
+    const requests = variantes.map(v => this.productosApi.eliminar(v.id!).toPromise());
+
+    Promise.all(requests).then(() => {
+        this.mensaje.set('Producto y todas sus variantes eliminadas correctamente.');
         this.cargarProductos();
-      },
-      error: (error) => this.mensajeError.set('No se pudo eliminar el producto.')
-    });
-  }
-
-  aplicarOferta(): void {
-    if (this.ofertaForm.invalid) {
-      this.ofertaForm.markAllAsTouched();
-      this.mensajeError.set('Selecciona un producto y escribe un porcentaje valido.');
-      return;
-    }
-
-    const formValue = this.ofertaForm.getRawValue();
-    const idProducto = Number(formValue.idProducto);
-    const porcentaje = Number(formValue.porcentaje);
-    this.mensaje.set('');
-    this.mensajeError.set('');
-
-    this.ofertasApi.aplicarDescuento(idProducto, porcentaje).subscribe({
-      next: () => {
-        this.mensaje.set('Descuento aplicado correctamente.');
-        this.cargarProductos();
-      },
-      error: (error) => this.mensajeError.set('No se pudo aplicar el descuento.')
+    }).catch(() => {
+        this.mensajeError.set('No se pudo eliminar completamente el producto.');
+        this.cargando.set(false);
     });
   }
 
   cancelarEdicion(): void {
     this.generoSeleccionado.set('Caballero');
-    this.productoEditando.set(null);
+    this.productoEditando.set(false);
     this.productoForm.reset({
       nombre: '',
       marca: '',

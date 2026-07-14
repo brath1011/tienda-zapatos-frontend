@@ -34,6 +34,7 @@ export const routes: Routes = [
       { path: 'pedidos', component: AdminPedidosComponent },
       { path: 'punto-venta', component: PuntoVentaComponent },
       { path: 'usuarios', component: AdminUsuariosComponent },
+      { path: 'descuentos', loadComponent: () => import('./admin-descuentos/admin-descuentos').then(m => m.AdminDescuentosComponent) },
       { path: 'repartos', component: RepartidorPedidosComponent },
       { path: 'repartidores', component: VendedorRepartidoresComponent }
     ]

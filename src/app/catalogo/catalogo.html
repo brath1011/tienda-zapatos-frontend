@@ -2,7 +2,7 @@
   <header class="cabecera-catalogo">
     <div>
       <h1 class="titulo">Catálogo de Zapatos</h1>
-      <p>{{ productos().length }} productos registrados · {{ productosConStock() }} disponibles</p>
+      <p>{{ productosFiltrados().length }} productos encontrados · {{ productosConStock() }} disponibles</p>
     </div>
     <button type="button" class="btn-secundario" (click)="cargarProductos()" [disabled]="cargando()">
       {{ cargando() ? 'Cargando...' : 'Actualizar' }}
@@ -17,179 +17,383 @@
     <div class="mensaje error">{{ mensajeError() }}</div>
   }
 
-  @if (cargando()) {
-    <p class="estado">Cargando catálogo...</p>
-  } @else if (productos().length === 0) {
-    <p class="estado">No hay productos registrados.</p>
-  } @else {
+  <div class="layout-principal">
+    <!-- SIDEBAR DE FILTROS -->
+    <aside class="sidebar-filtros">
 
-    <!-- SECCIONES POR CATEGORÍA -->
-    @for (seccion of modelosPorCategoriaOrdenados; track seccion.cat) {
-      <section class="seccion-categoria">
-        <div class="seccion-header">
-          <h2 class="seccion-titulo">{{ seccion.cat }}</h2>
-          <span class="seccion-count">{{ seccion.grupos.length }} modelo(s)</span>
+      <!-- Encabezado del sidebar con botón de limpiar -->
+      <div class="sidebar-header">
+        <span class="sidebar-titulo-principal">Filtros</span>
+        @if (filtrosActivos() > 0) {
+          <button class="btn-limpiar-filtros" (click)="limpiarFiltros()">
+            Limpiar ({{ filtrosActivos() }})
+          </button>
+        }
+      </div>
+
+      <!-- 1. GÉNERO -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('genero')">
+          <span class="filtro-titulo">Género</span>
+          <span class="icono-flecha" [class.rotado]="filtroGeneroAbierto()">&#9662;</span>
         </div>
+        @if (filtroGeneroAbierto()) {
+          <div class="filtro-contenido">
+            @for (g of ['Hombre', 'Mujer', 'Unisex']; track g) {
+              <label class="filtro-opcion">
+                <input type="checkbox" [checked]="filtroGenero() === g" (change)="seleccionarFiltroGenero(g)"> {{ g }}
+              </label>
+            }
+          </div>
+        }
+      </div>
 
-        <div class="grid-productos">
-          @for (variantes of seccion.grupos; track variantes[0].nombre) {
-            @let prod = obtenerVarianteActiva(variantes);
-            <article class="tarjeta-producto" [class.sin-stock]="calcularTotalStock(prod) === 0">
-              <div class="tarjeta-imagen" (click)="verDetalle(prod)" style="cursor: pointer;">
-                <span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; z-index: 10;">{{ prod.genero || 'Caballero' }}</span>
-                <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" loading="lazy">
-              </div>
-              <span class="marca">{{ prod.marca | uppercase }}</span>
-              <h3>{{ prod.nombre }}</h3>
-
-              <!-- Mini descripción breve -->
-              @if (prod.descripcion) {
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                  {{ prod.descripcion }}
-                </p>
+      <!-- 2. CATEGORÍA (dinámica, según productos reales) -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('categoria')">
+          <span class="filtro-titulo">Categoría</span>
+          <span class="icono-flecha" [class.rotado]="filtroCategoriaAbierto()">&#9662;</span>
+        </div>
+        @if (filtroCategoriaAbierto()) {
+          <div class="filtro-contenido">
+            @if (categoriasDisponibles().length === 0) {
+              <p class="filtro-vacio">Sin categorías aún</p>
+            } @else {
+              @for (cat of categoriasDisponibles(); track cat) {
+                <label class="filtro-opcion">
+                  <input type="checkbox"
+                    [checked]="filtroCategoria() === cat"
+                    (change)="toggleFiltroCheck(filtroCategoria, cat, '')"> {{ cat }}
+                </label>
               }
-              
-              <!-- Selector de colores -->
-              <div class="selector-color" style="margin-bottom: 10px; margin-top: 8px;">
-                <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #475569;">Color: {{ prod.color }}</p>
-                <div style="display: flex; gap: 8px;">
-                  @for (variante of variantes; track variante.id) {
-                    <div (click)="seleccionarVariante(prod.nombre, variante.id!)"
-                         [style.border]="prod.id === variante.id ? '2px solid #2563eb' : '2px solid #e2e8f0'"
-                         style="width: 36px; height: 36px; border-radius: 50%; cursor: pointer; background-color: #f8fafc; overflow: hidden; display: flex; align-items: center; justify-content: center;"
-                         [title]="variante.color">
-                      <img [src]="getPrimeraImagen(variante.imagen)" style="width: 100%; height: 100%; object-fit: cover;">
+            }
+          </div>
+        }
+      </div>
+
+      <!-- 3. TALLA (dinámica, con agotadas tachadas) -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('talla')">
+          <span class="filtro-titulo">Talla</span>
+          <span class="icono-flecha" [class.rotado]="filtroTallaAbierto()">&#9662;</span>
+        </div>
+        @if (filtroTallaAbierto()) {
+          <div class="filtro-contenido">
+            @if (tallasDisponiblesGlobal().length === 0) {
+              <p class="filtro-vacio">Sin tallas aún</p>
+            } @else {
+              <div class="tallas-grid-filtro">
+                @for (talla of tallasDisponiblesGlobal(); track talla) {
+                  @let hayStock = stockGlobalDeTalla(talla) > 0;
+                  <button type="button"
+                    class="btn-talla-filtro"
+                    [class.seleccionada]="filtroTalla() === talla"
+                    [class.sin-stock-talla]="!hayStock"
+                    [disabled]="!hayStock"
+                    (click)="toggleFiltroCheck(filtroTalla, talla, '')">
+                    {{ talla }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- 4. COLOR (chips con nombre del color, dinámico) -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('color')">
+          <span class="filtro-titulo">Color</span>
+          <span class="icono-flecha" [class.rotado]="filtroColorAbierto()">&#9662;</span>
+        </div>
+        @if (filtroColorAbierto()) {
+          <div class="filtro-contenido">
+            @if (coloresDisponibles().length === 0) {
+              <p class="filtro-vacio">Sin colores aún</p>
+            } @else {
+              @for (color of coloresDisponibles(); track color) {
+                <label class="filtro-opcion">
+                  <input type="checkbox"
+                    [checked]="filtroColor() === color"
+                    (change)="toggleFiltroCheck(filtroColor, color, '')"> {{ color }}
+                </label>
+              }
+            }
+          </div>
+        }
+      </div>
+
+      <!-- 5. PRECIO (slider dinámico) -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('precio')">
+          <span class="filtro-titulo">Precio</span>
+          <span class="icono-flecha" [class.rotado]="filtroPrecioAbierto()">&#9662;</span>
+        </div>
+        @if (filtroPrecioAbierto()) {
+          <div class="filtro-contenido">
+            <div class="precio-rango-valores">
+              <span>S/ 0</span>
+              <span class="precio-actual">S/ {{ filtroPrecioMax() }}</span>
+            </div>
+            <input type="range"
+              class="slider-precio"
+              [min]="0"
+              [max]="precioMaxDisponible()"
+              [value]="filtroPrecioMax()"
+              (input)="filtroPrecioMax.set(+$any($event.target).value)">
+          </div>
+        }
+      </div>
+
+      <!-- 6. EN DESCUENTO -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('descuento')">
+          <span class="filtro-titulo">En descuento</span>
+          <span class="icono-flecha" [class.rotado]="filtroDescuentoAbierto()">&#9662;</span>
+        </div>
+        @if (filtroDescuentoAbierto()) {
+          <div class="filtro-contenido">
+            <p class="filtro-vacio">🕐 Próximamente, cuando se configure descuentos en el panel.</p>
+          </div>
+        }
+      </div>
+
+      <!-- 7. MARCA (dinámica) -->
+      <div class="filtro-seccion">
+        <div class="filtro-cabecera" (click)="toggleFiltro('marca')">
+          <span class="filtro-titulo">Marca</span>
+          <span class="icono-flecha" [class.rotado]="filtroMarcaAbierto()">&#9662;</span>
+        </div>
+        @if (filtroMarcaAbierto()) {
+          <div class="filtro-contenido">
+            @if (marcasDisponibles().length === 0) {
+              <p class="filtro-vacio">Sin marcas aún</p>
+            } @else {
+              @for (marca of marcasDisponibles(); track marca) {
+                <label class="filtro-opcion">
+                  <input type="checkbox"
+                    [checked]="filtroMarca() === marca"
+                    (change)="toggleFiltroCheck(filtroMarca, marca, '')"> {{ marca }}
+                </label>
+              }
+            }
+          </div>
+        }
+      </div>
+
+    </aside>
+
+    <main class="contenido-productos">
+      @if (cargando()) {
+        <p class="estado">Cargando catálogo...</p>
+      } @else if (modelosPorCategoriaOrdenados.length === 0) {
+        <p class="estado">No se encontraron productos con los filtros seleccionados.</p>
+      } @else {
+        <!-- SECCIONES POR CATEGORÍA -->
+        @for (seccion of modelosPorCategoriaOrdenados; track seccion.cat) {
+          <section class="seccion-categoria">
+            <div class="seccion-header">
+              <h2 class="seccion-titulo">{{ seccion.cat }}</h2>
+              <span class="seccion-count">{{ seccion.grupos.length }} modelo(s)</span>
+            </div>
+
+            <div class="grid-productos">
+              @for (variantes of seccion.grupos; track variantes[0].nombre) {
+                @let prod = obtenerVarianteActiva(variantes);
+                <article class="tarjeta-producto" [class.sin-stock]="calcularTotalStock(prod) === 0" (click)="verDetalle(prod)" style="cursor: pointer;">
+                  <div class="tarjeta-imagen" style="position: relative;">
+                    
+                    <!-- Etiquetas de Categoría / Mas Vendido -->
+                    <div class="etiquetas-flotantes">
+                      @if (esMasVendido(prod)) {
+                        <span class="etiqueta-mas-vendido">Lo Más Vendido</span>
+                      }
+                      <span class="etiqueta-genero">{{ prod.genero || 'Caballero' }}</span>
                     </div>
-                  }
-                </div>
-              </div>
 
-              <p class="precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
-
-              <!-- Botón Ver datos -->
-              <button type="button" class="btn-ver-datos" (click)="verDetalle(prod)">
-                🔍 Ver datos del producto
-              </button>
-
-              @if (calcularTotalStock(prod) > 0) {
-                <div style="margin-bottom: 10px;">
-                  <p style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #475569;">Selecciona tu Talla:</p>
-                  <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    @for (talla of tallasDisponibles(prod); track talla) {
-                      <button type="button" 
-                              (click)="seleccionarTalla(prod.id!, talla)" 
-                              [style.background]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#f1f5f9'"
-                              [style.color]="tallaSeleccionadaPorProducto[prod.id!] === talla ? 'white' : '#475569'"
-                              style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold;">
-                        {{ talla }}
-                      </button>
-                    }
+                    <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" loading="lazy">
                   </div>
-                </div>
-                <button class="btn-comprar" (click)="agregarAlCarrito(prod)">Añadir al carrito</button>
-              } @else {
-                <span class="etiqueta-agotado">Agotado</span>
-              }
-            </article>
-          }
-        </div>
-      </section>
-    }
-  }
+                  
+                  <span class="marca">{{ prod.marca | uppercase }}</span>
+                  <h3 class="producto-titulo">{{ prod.nombre }}</h3>
 
-  <!-- MODAL DE DETALLE -->
+                  <!-- Mini descripción breve -->
+                  @if (prod.descripcion) {
+                    <p class="producto-descripcion-corta">
+                      {{ prod.descripcion }}
+                    </p>
+                  }
+                  
+                  <!-- Selector de colores -->
+                  <div class="selector-color">
+                    <p class="selector-color-titulo">Color: {{ prod.color }}</p>
+                    <div class="color-circulos">
+                      @for (variante of variantes; track variante.id) {
+                        <div (click)="$event.stopPropagation(); seleccionarVariante(prod.nombre, variante.id!)"
+                             [style.border]="prod.id === variante.id ? '2px solid #111111' : '2px solid #e2e8f0'"
+                             class="color-circulo-img"
+                             [title]="variante.color">
+                          <img [src]="getPrimeraImagen(variante.imagen)">
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  @if (prod.precioDescuento) {
+                    <p class="precio" style="display: flex; gap: 8px; align-items: baseline;">
+                      <span style="text-decoration: line-through; color: #94a3b8; font-size: 0.9em;">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</span>
+                      <span style="color: #ef4444; font-weight: bold;">{{ prod.precioDescuento | currency:'PEN':'symbol':'1.2-2' }}</span>
+                    </p>
+                  } @else {
+                    <p class="precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+                  }
+
+                  <!-- Botón Ver datos (Visual, el click lo maneja el artículo) -->
+                  <button type="button" class="btn-ver-datos">
+                    🔍 Ver datos del producto
+                  </button>
+
+                  @if (calcularTotalStock(prod) > 0) {
+                    <div class="talla-seccion-tarjeta">
+                      <p class="talla-titulo-tarjeta">Tallas disponibles:</p>
+                      <div class="talla-lista-tarjeta">
+                        @for (talla of tallasDisponibles(prod); track talla) {
+                          <button type="button" 
+                                  (click)="$event.stopPropagation(); seleccionarTalla(prod.id!, talla)" 
+                                  [class.seleccionada]="tallaSeleccionadaPorProducto[prod.id!] === talla">
+                            {{ talla }}
+                          </button>
+                        }
+                      </div>
+                    </div>
+                    <button class="btn-comprar" (click)="$event.stopPropagation(); agregarAlCarrito(prod)">Añadir al carrito</button>
+                  } @else {
+                    <span class="etiqueta-agotado">Agotado</span>
+                  }
+                </article>
+              }
+            </div>
+          </section>
+        }
+      }
+    </main>
+  </div>
+
+  <!-- MODAL DE DETALLE (Nike-Style) -->
   @if (productoDetalle(); as prod) {
-    <div class="modal-backdrop" (click)="cerrarDetalle()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; z-index: 9999; overflow-y: auto; padding: 20px;">
+    <div class="modal-backdrop" (click)="cerrarDetalle()">
       <div class="modal-detalle" (click)="$event.stopPropagation()">
         
-        <button (click)="cerrarDetalle()" style="position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10;">&times;</button>
+        <!-- Botón cerrar -->
+        <button (click)="cerrarDetalle()" class="modal-cerrar-nike">&times;</button>
 
-        <!-- Columna Izquierda: Imágenes -->
-        <div class="modal-imagenes">
-          <div style="background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; height: 360px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-            <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        @if (cargandoDetalle()) {
+          <div class="pantalla-carga-blanca">
+            <div class="spinner-moderno"></div>
           </div>
-          <!-- Galería 4x2 -->
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+        }
+
+        <!-- Columna Izquierda: Galería de las 8 imágenes en grid vertical (Estilo Nike) -->
+        <div class="modal-imagenes-galeria">
+          <div class="grid-imagenes-nike">
             @for (img of getImagenesGaleria(prod.imagen); track $index) {
-              @if ($index > 0 && img.trim() !== '') {
-                <div style="background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; height: 100px; overflow: hidden;">
-                  <img [src]="img" style="width: 100%; height: 100%; object-fit: cover;">
+              @if (img.trim() !== '') {
+                <div class="imagen-item-nike">
+                  <img [src]="img" [alt]="prod.nombre + ' vista ' + ($index + 1)">
                 </div>
               }
             }
           </div>
         </div>
 
-        <!-- Columna Derecha: Detalles -->
-        <div class="modal-info">
-          <span style="color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem;">{{ prod.marca }}</span>
-          <h2 style="font-size: 1.9rem; color: #0f172a; margin: 5px 0 8px 0; font-weight: 800;">{{ prod.nombre }}</h2>
-          
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <span style="background: #e2e8f0; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">{{ prod.categoria }}</span>
-            <span style="background: #dbeafe; color: #1e40af; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">{{ prod.genero || 'Caballero' }}</span>
-          </div>
+        <!-- Columna Derecha: Panel de Detalles Sticky (Estilo Nike) -->
+        <div class="modal-info-panel">
+          <div class="sticky-detalles">
+            
+            <!-- Etiquetas -->
+            @if (esMasVendido(prod)) {
+              <span class="detalle-mas-vendido-tag">Lo Más Vendido</span>
+            }
+            <span class="detalle-genero-tag">Calzado para {{ prod.genero || 'Caballero' }}</span>
 
-          <p style="font-size: 1.7rem; font-weight: bold; color: #2563eb; margin: 0 0 15px 0;">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+            <h1 class="detalle-nombre">{{ prod.nombre }}</h1>
+            <p class="detalle-marca">Marca: {{ prod.marca }}</p>
+            <p class="detalle-categoria">Categoría: {{ prod.categoria }}</p>
 
-          <!-- Descripción breve -->
-          @if (prod.descripcion) {
-            <p style="color: #475569; line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem;">{{ prod.descripcion }}</p>
-          }
+            @if (prod.precioDescuento) {
+              <div style="margin-bottom: 15px;">
+                <p class="detalle-precio" style="text-decoration: line-through; color: #94a3b8; font-size: 1.2rem; margin-bottom: 0;">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+                <p class="detalle-precio" style="color: #ef4444; font-size: 1.8rem; font-weight: 800; margin-top: 5px;">{{ prod.precioDescuento | currency:'PEN':'symbol':'1.2-2' }} <span style="font-size: 0.9rem; font-weight: normal; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; vertical-align: middle;">¡En oferta!</span></p>
+              </div>
+            } @else {
+              <p class="detalle-precio">{{ prod.precio | currency:'PEN':'symbol':'1.2-2' }}</p>
+            }
 
-          <!-- Selector de Colores -->
-          <div style="margin-bottom: 20px;">
-            <p style="font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #334155;">Color: <span style="color: #0f172a;">{{ prod.color }}</span></p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              @for (variantes of modelosAgrupados(); track variantes[0].nombre) {
-                @if (variantes[0].nombre === prod.nombre) {
-                  @for (variante of variantes; track variante.id) {
-                    <div (click)="seleccionarVariante(prod.nombre, variante.id!)"
-                         [style.border]="prod.id === variante.id ? '2px solid #2563eb' : '2px solid #cbd5e1'"
-                         style="width: 45px; height: 45px; border-radius: 8px; cursor: pointer; overflow: hidden;"
-                         [title]="variante.color">
-                      <img [src]="getPrimeraImagen(variante.imagen)" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
+            <!-- Selector de Colores (Variantes) -->
+            <div class="detalle-variantes-container">
+              <p class="titulo-seccion">Colores Disponibles: <span class="valor-color">{{ prod.color }}</span></p>
+              <div class="variantes-lista-imagenes">
+                @for (variantes of modelosAgrupados(); track variantes[0].nombre) {
+                  @if (variantes[0].nombre === prod.nombre) {
+                    @for (variante of variantes; track variante.id) {
+                      <div (click)="seleccionarVariante(prod.nombre, variante.id!)"
+                           [class.activa]="prod.id === variante.id"
+                           class="variante-imagen-circulo"
+                           [title]="variante.color">
+                        <img [src]="getPrimeraImagen(variante.imagen)">
+                      </div>
+                    }
                   }
-                }
-              }
-            </div>
-          </div>
-
-          <!-- Selector de Tallas -->
-          @if (calcularTotalStock(prod) > 0) {
-            <div style="margin-bottom: 20px;">
-              <p style="font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #334155;">Selecciona tu Talla:</p>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                @for (talla of tallasDisponibles(prod); track talla) {
-                  <button type="button" 
-                          (click)="seleccionarTalla(prod.id!, talla)" 
-                          [style.background]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#f8fafc'"
-                          [style.color]="tallaSeleccionadaPorProducto[prod.id!] === talla ? 'white' : '#475569'"
-                          [style.borderColor]="tallaSeleccionadaPorProducto[prod.id!] === talla ? '#2563eb' : '#cbd5e1'"
-                          style="border-width: 1px; border-style: solid; border-radius: 6px; padding: 10px 15px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: all 0.2s;">
-                    {{ talla }}
-                  </button>
                 }
               </div>
             </div>
-            <button class="btn-comprar" (click)="agregarAlCarrito(prod)" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 8px;">Añadir al carrito</button>
-          } @else {
-            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold;">
-              Este color está agotado
-            </div>
-          }
 
-          <!-- DESCRIPCIÓN GENERAL (se muestra al hacer click en ver datos) -->
-          @if (prod.descripcionGeneral) {
-            <div style="margin-top: 25px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
-              <h3 style="font-size: 1rem; font-weight: bold; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                📋 Descripción General
-              </h3>
-              <p style="color: #475569; line-height: 1.8; font-size: 0.9rem; white-space: pre-wrap;">{{ prod.descripcionGeneral }}</p>
-            </div>
-          }
+            <!-- Selector de Tallas (Nike-Style Grid) -->
+            @if (calcularTotalStock(prod) > 0) {
+              <div class="detalle-tallas-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <p class="titulo-seccion" style="margin: 0;">Selecciona tu talla:</p>
+                  <span style="font-size: 0.8rem; color: #707070; text-decoration: underline; cursor: pointer;">Guía de tallas</span>
+                </div>
+                
+                <div class="tallas-grid-nike">
+                  @for (talla of tallasDisponibles(prod); track talla) {
+                    <button type="button" 
+                            (click)="seleccionarTalla(prod.id!, talla)" 
+                            [class.seleccionada]="tallaSeleccionadaPorProducto[prod.id!] === talla"
+                            class="btn-talla-nike">
+                      {{ talla }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Botón Agregar Carrito (Nike-Style Negro) -->
+              <button class="btn-agregar-carrito-nike" (click)="agregarAlCarrito(prod)">
+                Añadir al carrito
+              </button>
+            } @else {
+              <div class="sin-stock-aviso">
+                Este color está temporalmente agotado
+              </div>
+            }
+
+            <!-- Descripción Corta -->
+            @if (prod.descripcion) {
+              <div class="descripcion-seccion">
+                <p class="descripcion-texto">{{ prod.descripcion }}</p>
+              </div>
+            }
+
+            <!-- DESCRIPCIÓN GENERAL EXTENDIDA (Nike-Style) -->
+            @if (prod.descripcionGeneral) {
+              <div class="descripcion-general-seccion">
+                <h3 class="titulo-seccion-general">📋 Datos y Detalles del Calzado</h3>
+                <p class="descripcion-general-cuerpo">{{ prod.descripcionGeneral }}</p>
+              </div>
+            }
+
+          </div>
         </div>
 
       </div>

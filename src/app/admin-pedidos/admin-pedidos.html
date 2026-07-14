@@ -8,26 +8,47 @@
     <div class="mensaje exito">{{ mensaje() }}</div>
   }
 
-  <div class="filtros-container" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
-    <div style="flex: 1; min-width: 200px;">
-      <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Desde (o Día Único)</label>
-      <input type="date" [ngModel]="fechaInicioFiltro()" (ngModelChange)="fechaInicioFiltro.set($event)" 
-             style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
+  <div class="filtros-container" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem;">
+    <!-- Filtros Rápidos -->
+    <div class="filtros-rapidos" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem;">
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'hoy'" (click)="aplicarFiltro('hoy')">Hoy</button>
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'ayer'" (click)="aplicarFiltro('ayer')">Ayer</button>
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'semana'" (click)="aplicarFiltro('semana')">Esta Semana</button>
+      
+      <div style="width: 1px; height: 30px; background-color: #cbd5e1; margin: 0 0.25rem;"></div>
+      
+      <div style="display: flex; gap: 0.25rem; background: #f1f5f9; padding: 0.25rem; border-radius: 8px;">
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'lunes'" (click)="aplicarFiltro('lunes')" title="Lunes">L</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'martes'" (click)="aplicarFiltro('martes')" title="Martes">M</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'miercoles'" (click)="aplicarFiltro('miercoles')" title="Miércoles">X</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'jueves'" (click)="aplicarFiltro('jueves')" title="Jueves">J</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'viernes'" (click)="aplicarFiltro('viernes')" title="Viernes">V</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'sabado'" (click)="aplicarFiltro('sabado')" title="Sábado">S</button>
+        <button class="btn-filtro" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;" [class.activo]="filtroActual() === 'domingo'" (click)="aplicarFiltro('domingo')" title="Domingo">D</button>
+      </div>
+
+      <div style="width: 1px; height: 30px; background-color: #cbd5e1; margin: 0 0.25rem;"></div>
+      
+      <button class="btn-filtro" [class.activo]="filtroActual() === 'todos'" (click)="aplicarFiltro('todos')">Todos (Histórico)</button>
     </div>
-    <div style="flex: 1; min-width: 200px;">
-      <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Hasta (Opcional)</label>
-      <input type="date" [ngModel]="fechaFinFiltro()" (ngModelChange)="fechaFinFiltro.set($event)" 
-             style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
-    </div>
-    <div style="display: flex; gap: 0.5rem;">
-      <button (click)="buscarPorFechas()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
-        🔍 Buscar
-      </button>
-      @if (fechaInicioFiltro() || fechaFinFiltro()) {
-        <button (click)="limpiarFiltros()" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" title="Limpiar y ver todos">
-          ✖ Limpiar
+
+    <!-- Búsqueda por rango de fechas -->
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; border-top: 1px dashed #e2e8f0; padding-top: 1rem;">
+      <div style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Desde (o Día Único)</label>
+        <input type="date" [ngModel]="fechaInicioFiltro()" (ngModelChange)="fechaInicioFiltro.set($event); filtroActual.set('custom')" 
+               style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
+      </div>
+      <div style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase;">Hasta (Opcional)</label>
+        <input type="date" [ngModel]="fechaFinFiltro()" (ngModelChange)="fechaFinFiltro.set($event); filtroActual.set('custom')" 
+               style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; color: #334155;">
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button (click)="buscarPorFechas()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+          🔍 Buscar
         </button>
-      }
+      </div>
     </div>
   </div>
 
@@ -110,23 +131,23 @@
 
 <!-- Modal de Boleta Flotante -->
 <div class="modal-overlay" *ngIf="boletaSeleccionada()" (click)="cerrarBoleta()">
-  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative;">
+  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative; overflow: hidden;">
+    <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
     
-    @if (boletaSeleccionada()?.estado === 'DEVUELTO') {
-      <div class="sello-anulado">
-        PEDIDO ANULADO / DEVOLUCIÓN
+    <!-- WATERMARK REEMBOLSO -->
+    @if (boletaSeleccionada()?.estado === 'REEMBOLSADO' || boletaSeleccionada()?.estado === 'DEVUELTO') {
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; color: rgba(231, 76, 60, 0.15); font-weight: 900; z-index: 0; pointer-events: none; border: 5px solid rgba(231, 76, 60, 0.15); padding: 15px; text-transform: uppercase; white-space: nowrap;">
+        PEDIDO REEMBOLSADO
       </div>
     }
 
-    <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
-    
-    <div class="boleta-header">
-      <h2>Moda UTP</h2>
+    <div class="boleta-header" style="position: relative; z-index: 1;">
+      <h2>UTPShop</h2>
       <p>Comprobante de Pago Electrónico</p>
       <span class="boleta-tipo">{{ boletaSeleccionada()?.comprobante?.tipoComprobante }}</span>
     </div>
     
-    <div class="boleta-info">
+    <div class="boleta-info" style="position: relative; z-index: 1;">
       <div class="info-row">
         <span>Nro:</span>
         <strong>{{ boletaSeleccionada()?.comprobante?.serieNumero }}</strong>
@@ -137,7 +158,7 @@
       </div>
     </div>
     
-    <div class="boleta-cliente">
+    <div class="boleta-cliente" style="position: relative; z-index: 1;">
       <h3>Datos del Cliente</h3>
       <div class="info-row">
         <span>Nombre:</span>
@@ -161,7 +182,7 @@
       </div>
     </div>
 
-    <div class="boleta-productos">
+    <div class="boleta-productos" style="position: relative; z-index: 1;">
       <h3>Detalle de Compra</h3>
       <table class="tabla-productos" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
         <thead>
@@ -183,7 +204,7 @@
       </table>
     </div>
     
-    <div class="boleta-montos">
+    <div class="boleta-montos" style="position: relative; z-index: 1;">
       <div class="monto-row" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
         <span>Subtotal:</span>
         <span>PEN {{ boletaSeleccionada()?.comprobante?.subtotal | number:'1.2-2' }}</span>
@@ -228,20 +249,30 @@
       @if (nuevoEstadoPropuesto() === 'LISTO_PARA_ENVIO') {
         <div class="form-group" style="margin-top: 1rem; padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
           
-          <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
-            <p style="margin: 0; color: #0369a1; font-size: 0.9rem;">
-              <strong>📍 Información de Envío:</strong><br>
-              El cliente compró en la zona <strong>{{ getZonaPedido(pedidoAEditar()?.direccion?.distrito || '') }}</strong> 
-              (Lima, Lima, {{ pedidoAEditar()?.direccion?.distrito || 'No especificado' }}).
-            </p>
-          </div>
+          @if (determinarZona(pedidoAEditar()?.direccion) === 'Fuera de Lima') {
+            <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px;">
+              <p style="margin: 0; color: #c2410c; font-size: 0.9rem;">
+                <strong>📍 Pedido fuera de Lima / Provincias (Se enviará por agencia externa)</strong><br>
+                El cliente compró desde {{ (pedidoAEditar()?.direccion?.direccionExacta || '').split('-')[0] || 'Provincia' }}. 
+                Debes asignar a un repartidor encargado de despachos en agencia.
+              </p>
+            </div>
+          } @else {
+            <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px;">
+              <p style="margin: 0; color: #0369a1; font-size: 0.9rem;">
+                <strong>📍 Información de Envío:</strong><br>
+                El cliente compró en la zona <strong>{{ determinarZona(pedidoAEditar()?.direccion) }}</strong> 
+                ({{ (pedidoAEditar()?.direccion?.direccionExacta || '').split('-')[0] || 'No especificado' }}).
+              </p>
+            </div>
+          }
 
           <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #1e293b;">👤 Asignar a Repartidor Específico:</label>
           <select [ngModel]="repartidorSeleccionado()" (ngModelChange)="repartidorSeleccionado.set(+$event)" class="select-moderno">
             <option [ngValue]="null" disabled selected>-- Selecciona un Repartidor --</option>
             @for (repa of repartidores(); track repa.id) {
               <option [value]="repa.id">
-                {{ getZonaRepartidor(repa).toUpperCase().includes( (getZonaPedido(pedidoAEditar()?.direccion?.distrito || '') || '').toUpperCase() ) ? '✅' : '⚠️' }}
+                {{ getZonaRepartidor(repa).toUpperCase().includes( (determinarZona(pedidoAEditar()?.direccion) || '').toUpperCase() ) ? '✅' : '⚠️' }}
                 {{ repa.nombre }} 
                 {{ getZonaRepartidor(repa) ? '[Zona: ' + getZonaRepartidor(repa) + ']' : '' }}
                 {{ repa.telefono ? ' - 📞 ' + repa.telefono : '' }}
