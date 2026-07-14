@@ -96,4 +96,13 @@ export class PedidoService {
   misEntregasFechas(inicio: string, fin: string): Observable<Pedido[]> {
     return this.http.get<Pedido[]>(`${this.baseUrl}/mis-entregas/fechas?inicio=${inicio}&fin=${fin}`);
   }
+
+  /**
+   * Abre una conexión SSE con el backend para recibir notificaciones en tiempo real.
+   * El token JWT se pasa como query param porque EventSource no soporta headers personalizados.
+   * Devuelve el EventSource para que el componente lo cierre en ngOnDestroy.
+   */
+  suscribirNotificaciones(token: string): EventSource {
+    return new EventSource(`${this.baseUrl}/notificaciones?token=${encodeURIComponent(token)}`);
+  }
 }

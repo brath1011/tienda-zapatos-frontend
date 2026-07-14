@@ -3,6 +3,7 @@ import { LoginComponent } from './login/login';
 import { RegistroComponent } from './registro/registro';
 import { InicioComponent } from './inicio/inicio';
 import { CatalogoComponent } from './catalogo/catalogo';
+import { ProductoDetalleComponent } from './producto-detalle/producto-detalle';
 import { CarritoComponent } from './carrito/carrito';
 import { PerfilComponent } from './perfil/perfil';
 import { AdminProductosComponent } from './admin-productos/admin-productos';
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   { path: 'inicio', component: InicioComponent },
   { path: 'catalogo', component: CatalogoComponent },
+  { path: 'producto/:id', component: ProductoDetalleComponent },
   { path: 'carrito', component: CarritoComponent, canActivate: [authGuard] },
   { path: 'mis-compras', component: MisComprasComponent, canActivate: [authGuard] },
   { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },

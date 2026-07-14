@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CarritoService } from '../services/carrito.service';
 import { OfertaService } from '../services/oferta.service';
@@ -20,6 +20,7 @@ export class CatalogoComponent implements OnInit {
   private readonly ofertasApi = inject(OfertaService);
   private readonly carritoSvc = inject(CarritoService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly auth = inject(AuthService);
   readonly productos = signal<Zapato[]>([]);
@@ -259,34 +260,7 @@ export class CatalogoComponent implements OnInit {
   }
 
   verDetalle(producto: Zapato): void {
-    this.productoDetalle.set(producto);
-    this.cargandoDetalle.set(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    const imagenesUrls = this.getImagenesGaleria(producto.imagen);
-    let cargadas = 0;
-    let finalizado = false;
-
-    const finalizar = () => {
-      if (finalizado) return;
-      finalizado = true;
-      this.cargandoDetalle.set(false);
-    };
-
-    if (imagenesUrls.length === 0) { finalizar(); return; }
-
-    const timeoutId = setTimeout(() => finalizar(), 3000);
-    const checkLoad = () => {
-      cargadas++;
-      if (cargadas === imagenesUrls.length) { clearTimeout(timeoutId); finalizar(); }
-    };
-
-    imagenesUrls.forEach(url => {
-      const img = new Image();
-      img.onload = checkLoad;
-      img.onerror = checkLoad;
-      img.src = url;
-    });
+    this.router.navigate(['/producto', producto.id]);
   }
 
   cerrarDetalle(): void {

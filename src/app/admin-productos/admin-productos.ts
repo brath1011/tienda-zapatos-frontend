@@ -152,7 +152,7 @@ export class AdminProductosComponent implements OnInit {
       this.cargando.set(true);
       this.productosApi.subirImagen(archivo).subscribe({
         next: (res) => {
-          const urlCompleta = `${environment.apiUrl}${res.url}`;
+          const urlCompleta = res.url.startsWith('http') ? res.url : `${environment.apiUrl}${res.url}`;
           const formArrayImagenes = this.getImagenesControls(varianteIndex);
           formArrayImagenes.at(imagenIndex).setValue(urlCompleta);
           this.cargando.set(false);

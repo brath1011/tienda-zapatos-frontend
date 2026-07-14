@@ -86,7 +86,7 @@
                             <span>{{ item.cantidad }}</span>
                             <button (click)="aumentarCantidad(item)">+</button>
                           </div>
-                          <span class="subtotal">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'symbol':'1.2-2' }}</span>
+                          <span class="subtotal">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'S/ ':'1.2-2' }}</span>
                           <button (click)="eliminarItem(item)" class="btn-eliminar" title="Eliminar">🗑</button>
                         </div>
                       </div>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="carrito-total">
                   <span>Total</span>
-                  <span>{{ carritoSvc.totalGlobal() | currency:'PEN':'symbol':'1.2-2' }}</span>
+                  <span>{{ carritoSvc.totalGlobal() | currency:'PEN':'S/ ':'1.2-2' }}</span>
                 </div>
                 <button (click)="cerrarCarrito()" routerLink="/carrito" class="btn-ir-carrito">
                   Ir al carrito
