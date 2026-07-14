@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PedidoService } from '../services/pedido.service';
 import { AuthService } from '../services/auth.service';
 import { Pedido } from '../models/api.models';
-import { obtenerZonaPorDistrito } from '../utils/ubigeo.data';
+import { obtenerZonaPorDistrito, determinarZonaPedido } from '../utils/ubigeo.data';
 
 import { FormsModule } from '@angular/forms';
 
@@ -23,8 +23,8 @@ export class AdminPedidosComponent implements OnInit {
   readonly mensaje = signal('');
   readonly boletaSeleccionada = signal<Pedido | null>(null); // Añadido para ver boleta
   readonly pedidoInfoSeleccionado = signal<Pedido | null>(null); // Añadido para ver info extra (repartidor y entrega)
-  readonly getZonaPedido = obtenerZonaPorDistrito; // Expuesto al HTML
-  
+  readonly getZonaPedido = obtenerZonaPorDistrito; // Expuesto al HTML (legacy)
+  readonly determinarZona = determinarZonaPedido; // Para uso global
   // Repartidores
   readonly repartidores = signal<any[]>([]);
   
@@ -37,8 +37,66 @@ export class AdminPedidosComponent implements OnInit {
   readonly pedidoAEliminar = signal<Pedido | null>(null);
 
   ngOnInit(): void {
-    this.cargarPedidos();
+    this.aplicarFiltro('hoy');
     this.cargarRepartidores();
+  }
+
+  readonly filtroActual = signal<string>('hoy');
+
+  private obtenerFechaLocal(fecha: Date): string {
+    const tzOffset = fecha.getTimezoneOffset() * 60000;
+    return new Date(fecha.getTime() - tzOffset).toISOString().split('T')[0];
+  }
+
+  aplicarFiltro(rango: string): void {
+    this.filtroActual.set(rango);
+    const hoy = new Date();
+    let inicio = '';
+    let fin = this.obtenerFechaLocal(hoy);
+
+    if (rango === 'hoy') {
+      inicio = fin;
+    } else if (rango === 'ayer') {
+      const ayer = new Date();
+      ayer.setDate(hoy.getDate() - 1);
+      inicio = this.obtenerFechaLocal(ayer);
+      fin = inicio;
+    } else if (rango === 'semana') {
+      const semana = new Date();
+      semana.setDate(hoy.getDate() - 7);
+      inicio = this.obtenerFechaLocal(semana);
+    } else if (['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'].includes(rango)) {
+      const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+      const targetDay = dias.indexOf(rango);
+      const currentDay = hoy.getDay();
+      
+      const diff = currentDay >= targetDay ? currentDay - targetDay : currentDay + 7 - targetDay;
+      const targetDate = new Date();
+      targetDate.setDate(hoy.getDate() - diff);
+      
+      inicio = this.obtenerFechaLocal(targetDate);
+      fin = inicio;
+    }
+
+    if (rango === 'todos') {
+      this.cargarPedidos();
+      this.fechaInicioFiltro.set('');
+      this.fechaFinFiltro.set('');
+    } else {
+      this.cargando.set(true);
+      this.fechaInicioFiltro.set(inicio);
+      this.fechaFinFiltro.set(fin);
+      this.pedidoService.listarPorFechas(inicio, fin).subscribe({
+        next: (data) => {
+          this.pedidos.set(data.sort((a, b) => b.idPedido - a.idPedido));
+          this.cargando.set(false);
+        },
+        error: () => {
+          this.cargando.set(false);
+          alert('Error al buscar pedidos por filtro');
+        }
+      });
+    }
   }
 
   cargarRepartidores(): void {
@@ -89,9 +147,7 @@ export class AdminPedidosComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.fechaInicioFiltro.set('');
-    this.fechaFinFiltro.set('');
-    this.cargarPedidos();
+    this.aplicarFiltro('todos');
   }
 
   abrirModalEstado(pedido: Pedido): void {
@@ -124,14 +180,13 @@ export class AdminPedidosComponent implements OnInit {
       }
       
       const repartidorObj = this.repartidores().find(r => r.id === repartidorSel);
-      const distritoPedido = pedido.direccion?.distrito;
-      const zonaPedido = distritoPedido ? obtenerZonaPorDistrito(distritoPedido) : null;
+      const zonaPedido = pedido.direccion ? determinarZonaPedido(pedido.direccion) : null;
       const zonaRepartidor = this.getZonaRepartidor(repartidorObj).toUpperCase();
       const zonaPedidoUpperCase = zonaPedido ? zonaPedido.toUpperCase() : null;
 
       if (repartidorObj && zonaPedidoUpperCase && zonaRepartidor) {
         if (!zonaRepartidor.includes(zonaPedidoUpperCase)) {
-          const confirmar = confirm(`⚠️ ADVERTENCIA DE LOGÍSTICA:\nEste pedido pertenece al distrito de ${distritoPedido} (Zona ${zonaPedidoUpperCase}).\nEstás intentando asignarlo a ${repartidorObj.nombre} que cubre la Zona ${zonaRepartidor}.\n\n¿Estás seguro de continuar con esta asignación cruzada?`);
+          const confirmar = confirm(`⚠️ ADVERTENCIA DE LOGÍSTICA:\nEste pedido pertenece a la Zona ${zonaPedidoUpperCase}.\nEstás intentando asignarlo a ${repartidorObj.nombre} que cubre la Zona ${zonaRepartidor}.\n\n¿Estás seguro de continuar con esta asignación cruzada?`);
           if (!confirmar) {
             return;
           }

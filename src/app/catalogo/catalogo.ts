@@ -1,37 +1,177 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CarritoService } from '../services/carrito.service';
 import { OfertaService } from '../services/oferta.service';
 import { ProductoService } from '../services/producto.service';
 import { Zapato } from '../models/api.models';
-import { DescuentoPricePipe } from '../pipes/descuento.pipe';
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.scss'
 })
 export class CatalogoComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
   private readonly productosApi = inject(ProductoService);
   private readonly ofertasApi = inject(OfertaService);
   private readonly carritoSvc = inject(CarritoService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly auth = inject(AuthService);
   readonly productos = signal<Zapato[]>([]);
   readonly cargando = signal(false);
   readonly mensaje = signal('');
   readonly mensajeError = signal('');
-  
-  readonly categorias = ['Deportivo', 'Casual', 'Formal', 'Urbano', 'Botas'];
-  readonly productosConStock = computed(() => this.productos().filter((producto) => this.calcularTotalStock(producto) > 0).length);
+
+  // ─── FILTROS ACTIVOS ───────────────────────────────────────────
+  readonly filtroGenero = signal<string>('Todos');
+  readonly filtroBusqueda = signal<string>('');
+  readonly filtroNuevo = signal<boolean>(false);
+  readonly filtroCategoria = signal<string>('');    // '' = todas
+  readonly filtroColor = signal<string>('');         // '' = todos
+  readonly filtroTalla = signal<string>('');         // '' = todas
+  readonly filtroMarca = signal<string>('');         // '' = todas
+  readonly filtroPrecioMax = signal<number>(9999);
+  readonly filtroSoloEnDescuento = signal<boolean>(false);
+
+  // ─── ACORDEONES ABIERTOS/CERRADOS ──────────────────────────────
+  readonly filtroGeneroAbierto = signal(true);
+  readonly filtroTallaAbierto = signal(false);
+  readonly filtroCategoriaAbierto = signal(false);
+  readonly filtroColorAbierto = signal(false);
+  readonly filtroPrecioAbierto = signal(false);
+  readonly filtroDescuentoAbierto = signal(false);
+  readonly filtroMarcaAbierto = signal(false);
+
+  toggleFiltro(filtro: string): void {
+    switch (filtro) {
+      case 'genero': this.filtroGeneroAbierto.update(v => !v); break;
+      case 'talla': this.filtroTallaAbierto.update(v => !v); break;
+      case 'categoria': this.filtroCategoriaAbierto.update(v => !v); break;
+      case 'color': this.filtroColorAbierto.update(v => !v); break;
+      case 'precio': this.filtroPrecioAbierto.update(v => !v); break;
+      case 'descuento': this.filtroDescuentoAbierto.update(v => !v); break;
+      case 'marca': this.filtroMarcaAbierto.update(v => !v); break;
+    }
+  }
+
+  // ─── OPCIONES DINÁMICAS EXTRAÍDAS DE LOS PRODUCTOS ─────────────
+  readonly coloresDisponibles = computed(() =>
+    [...new Set(this.productos().map(p => p.color).filter(c => !!c))].sort()
+  );
+
+  readonly marcasDisponibles = computed(() =>
+    [...new Set(this.productos().map(p => p.marca).filter(m => !!m))].sort()
+  );
+
+  readonly categoriasDisponibles = computed(() =>
+    [...new Set(this.productos().map(p => p.categoria).filter(c => !!c))].sort()
+  );
+
+  // Todas las tallas únicas que existen en todos los productos
+  readonly tallasDisponiblesGlobal = computed(() => {
+    const set = new Set<string>();
+    for (const p of this.productos()) {
+      if (p.tallasStock) {
+        Object.keys(p.tallasStock).forEach(t => set.add(t));
+      }
+    }
+    return [...set].sort((a, b) => parseFloat(a) - parseFloat(b));
+  });
+
+  // Stock total de una talla en todos los productos (para saber si mostrar opaca)
+  stockGlobalDeTalla(talla: string): number {
+    return this.productos().reduce((total, p) => {
+      return total + (p.tallasStock?.[talla] || 0);
+    }, 0);
+  }
+
+  readonly precioMaxDisponible = computed(() => {
+    const precios = this.productos().map(p => p.precio);
+    return precios.length ? Math.ceil(Math.max(...precios)) : 9999;
+  });
+
+  // ─── FILTRADO COMPLETO ─────────────────────────────────────────
+  readonly productosFiltrados = computed(() => {
+    let prods = this.productos();
+
+    // 1. Filtro de género (desde URL o barra lateral)
+    const gen = this.filtroGenero();
+    if (gen !== 'Todos') {
+      prods = prods.filter(p => {
+        const pGen = (p.genero || 'Caballero').toLowerCase();
+        if (gen.toLowerCase() === 'hombre') return pGen === 'caballero' || pGen === 'unisex';
+        if (gen.toLowerCase() === 'mujer') return pGen === 'mujer' || pGen === 'unisex';
+        return pGen === gen.toLowerCase();
+      });
+    }
+
+    // 2. Filtro de búsqueda por texto
+    const query = this.filtroBusqueda().trim().toLowerCase();
+    if (query) {
+      prods = prods.filter(p =>
+        p.nombre.toLowerCase().includes(query) ||
+        p.marca.toLowerCase().includes(query) ||
+        p.categoria.toLowerCase().includes(query) ||
+        (p.color && p.color.toLowerCase().includes(query))
+      );
+    }
+
+    // 3. Filtro "Lo nuevo"
+    const nuevo = this.filtroNuevo();
+    if (nuevo && prods.length > 0) {
+      const sortedIds = [...prods].map(p => p.id || 0).sort((a, b) => b - a);
+      const thresholdId = sortedIds[Math.min(3, sortedIds.length - 1)];
+      prods = prods.filter(p => (p.id || 0) >= thresholdId);
+    }
+
+    // 4. Filtro por CATEGORÍA
+    const cat = this.filtroCategoria();
+    if (cat) {
+      prods = prods.filter(p => p.categoria.toLowerCase() === cat.toLowerCase());
+    }
+
+    // 5. Filtro por COLOR
+    const color = this.filtroColor();
+    if (color) {
+      prods = prods.filter(p => p.color.toLowerCase() === color.toLowerCase());
+    }
+
+    // 6. Filtro por TALLA (que tenga stock en esa talla)
+    const talla = this.filtroTalla();
+    if (talla) {
+      prods = prods.filter(p => (p.tallasStock?.[talla] || 0) > 0);
+    }
+
+    // 7. Filtro por MARCA
+    const marca = this.filtroMarca();
+    if (marca) {
+      prods = prods.filter(p => p.marca.toLowerCase() === marca.toLowerCase());
+    }
+
+    // 8. Filtro por PRECIO MÁXIMO
+    const precioMax = this.filtroPrecioMax();
+    if (precioMax < this.precioMaxDisponible()) {
+      prods = prods.filter(p => p.precio <= precioMax);
+    }
+
+    // 9. Filtro "solo en descuento" (placeholder — cuando se agregue campo descuento)
+    // if (this.filtroSoloEnDescuento()) { ... }
+
+    return prods;
+  });
+
+  readonly productosConStock = computed(() =>
+    this.productosFiltrados().filter(p => this.calcularTotalStock(p) > 0).length
+  );
 
   readonly modelosAgrupados = computed(() => {
-    const productosArray = this.productos();
+    const productosArray = this.productosFiltrados();
     const map = new Map<string, Zapato[]>();
     for (const p of productosArray) {
       const clave = `${p.nombre.trim().toLowerCase()}|${(p.genero || 'Caballero')}|${p.categoria}`;
@@ -41,7 +181,6 @@ export class CatalogoComponent implements OnInit {
     return Array.from(map.values());
   });
 
-  // Agrupar por categoría para mostrar secciones en el catálogo
   readonly modelosPorCategoria = computed(() => {
     const grupos = this.modelosAgrupados();
     const catMap = new Map<string, Zapato[][]>();
@@ -61,11 +200,53 @@ export class CatalogoComponent implements OnInit {
     );
   }
 
+  // ─── CONTEO DE FILTROS ACTIVOS ─────────────────────────────────
+  readonly filtrosActivos = computed(() => {
+    let n = 0;
+    if (this.filtroGenero() !== 'Todos') n++;
+    if (this.filtroCategoria()) n++;
+    if (this.filtroColor()) n++;
+    if (this.filtroTalla()) n++;
+    if (this.filtroMarca()) n++;
+    if (this.filtroPrecioMax() < this.precioMaxDisponible()) n++;
+    return n;
+  });
+
+  limpiarFiltros(): void {
+    this.filtroGenero.set('Todos');
+    this.filtroCategoria.set('');
+    this.filtroColor.set('');
+    this.filtroTalla.set('');
+    this.filtroMarca.set('');
+    this.filtroPrecioMax.set(this.precioMaxDisponible());
+    this.filtroSoloEnDescuento.set(false);
+  }
+
+  seleccionarFiltroGenero(genero: string): void {
+    this.filtroGenero.set(this.filtroGenero() === genero ? 'Todos' : genero);
+  }
+
+  toggleFiltroCheck<T>(señal: ReturnType<typeof signal<T>>, valor: T, vacio: T): void {
+    señal.set(señal() === valor ? vacio : valor);
+  }
+
+  // ─── ESTADO DE DETALLE ─────────────────────────────────────────
   varianteSeleccionadaPorModelo = signal<{ [nombre: string]: number }>({});
   productoDetalle = signal<Zapato | null>(null);
+  cargandoDetalle = signal<boolean>(false);
+
+  esMasVendido(producto: Zapato): boolean {
+    return producto.nombre.toLowerCase().includes('force') || (producto.id || 0) % 2 === 0;
+  }
 
   ngOnInit(): void {
     this.cargarProductos();
+
+    this.route.queryParams.subscribe(params => {
+      this.filtroGenero.set(params['genero'] || 'Todos');
+      this.filtroBusqueda.set(params['buscar'] || '');
+      this.filtroNuevo.set(params['nuevo'] === 'true');
+    });
   }
 
   getPrimeraImagen(imagenStr?: string): string {
@@ -79,8 +260,7 @@ export class CatalogoComponent implements OnInit {
   }
 
   verDetalle(producto: Zapato): void {
-    this.productoDetalle.set(producto);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.router.navigate(['/producto', producto.id]);
   }
 
   cerrarDetalle(): void {
@@ -98,18 +278,31 @@ export class CatalogoComponent implements OnInit {
   }
 
   seleccionarVariante(modeloNombre: string, idProducto: number): void {
-    this.varianteSeleccionadaPorModelo.update(current => ({
-      ...current,
-      [modeloNombre]: idProducto
-    }));
-    // Actualizar el detalle si está abierto
+    this.varianteSeleccionadaPorModelo.update(current => ({ ...current, [modeloNombre]: idProducto }));
     const abierto = this.productoDetalle();
     if (abierto && abierto.nombre === modeloNombre) {
-       const variantesDelModelo = this.modelosAgrupados().find(v => v[0].nombre === modeloNombre);
-       if (variantesDelModelo) {
-         const nueva = variantesDelModelo.find(v => v.id === idProducto);
-         if (nueva) this.productoDetalle.set(nueva);
-       }
+      const variantesDelModelo = this.modelosAgrupados().find(v => v[0].nombre === modeloNombre);
+      if (variantesDelModelo) {
+        const nueva = variantesDelModelo.find(v => v.id === idProducto);
+        if (nueva && nueva.id !== abierto.id) {
+          this.cargandoDetalle.set(true);
+          const imagenesUrls = this.getImagenesGaleria(nueva.imagen);
+          let cargadas = 0;
+          let finalizado = false;
+          const finalizar = () => {
+            if (finalizado) return;
+            finalizado = true;
+            this.productoDetalle.set(nueva);
+            this.cargandoDetalle.set(false);
+          };
+          if (imagenesUrls.length === 0) { finalizar(); return; }
+          const timeoutId = setTimeout(() => finalizar(), 3000);
+          const checkLoad = () => { cargadas++; if (cargadas === imagenesUrls.length) { clearTimeout(timeoutId); finalizar(); } };
+          imagenesUrls.forEach(url => { const img = new Image(); img.onload = checkLoad; img.onerror = checkLoad; img.src = url; });
+        } else if (nueva) {
+          this.productoDetalle.set(nueva);
+        }
+      }
     }
   }
 
@@ -122,17 +315,26 @@ export class CatalogoComponent implements OnInit {
     if (!producto.tallasStock) return [];
     return Object.entries(producto.tallasStock)
       .filter(([_, stock]) => stock > 0)
-      .map(([talla, _]) => talla)
-      .sort((a, b) => parseInt(a) - parseInt(b));
+      .map(([talla]) => talla)
+      .sort((a, b) => parseFloat(a) - parseFloat(b));
+  }
+
+  todasLasTallasDelProducto(producto: Zapato): { talla: string; stock: number }[] {
+    if (!producto.tallasStock) return [];
+    return Object.entries(producto.tallasStock)
+      .map(([talla, stock]) => ({ talla, stock: stock || 0 }))
+      .sort((a, b) => parseFloat(a.talla) - parseFloat(b.talla));
   }
 
   cargarProductos(): void {
     this.cargando.set(true);
     this.mensajeError.set('');
-
     this.productosApi.listar().subscribe({
-      next: (productos) => this.productos.set(productos),
-      error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo cargar el catálogo. Verifica que el backend esté en http://localhost:8090.')),
+      next: (productos) => {
+        this.productos.set(productos);
+        this.filtroPrecioMax.set(Math.ceil(Math.max(...productos.map(p => p.precio), 0)));
+      },
+      error: (error) => this.mensajeError.set(this.obtenerMensajeError(error, 'No se pudo cargar el catálogo.')),
       complete: () => this.cargando.set(false)
     });
   }
@@ -148,36 +350,29 @@ export class CatalogoComponent implements OnInit {
       this.mensajeError.set('Inicia sesión para agregar productos al carrito.');
       return;
     }
-
     const tallaSeleccionada = this.tallaSeleccionadaPorProducto[producto.id!];
     if (!tallaSeleccionada) {
       this.mensajeError.set(`Selecciona una talla para ${producto.nombre} antes de añadir al carrito.`);
       return;
     }
-
     this.mensaje.set('');
     this.mensajeError.set('');
-
     this.carritoSvc.agregarItem(producto, 1, tallaSeleccionada).subscribe({
       next: (agregado) => {
         if (agregado) {
           this.mensaje.set(`Talla ${tallaSeleccionada} de ${producto.nombre} agregada al carrito.`);
           return;
         }
-
         this.mensajeError.set(this.carritoSvc.mensaje() || 'No se pudo agregar el producto al carrito.');
       }
     });
   }
-
-
 
   private obtenerMensajeError(error: unknown, fallback: string): string {
     if (typeof error === 'object' && error && 'error' in error) {
       const apiError = (error as { error?: unknown }).error;
       if (typeof apiError === 'string') return apiError;
     }
-
     return fallback;
   }
 }

@@ -1,0 +1,432 @@
+.contenedor-detalle {
+  padding: 2rem 2.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  min-height: 80vh;
+
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
+
+  .nav-volver {
+    margin-bottom: 2rem;
+    
+    .btn-volver {
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #707070;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #111111;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .detalle-layout {
+    display: flex;
+    gap: 3rem;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+
+    @media (max-width: 900px) {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }
+
+  // Columna Izquierda: Galería de imágenes
+  .modal-imagenes-galeria {
+    width: 60%;
+    padding: 2.5rem;
+    background-color: #ffffff;
+
+    @media (max-width: 900px) {
+      width: 100%;
+      padding: 1rem;
+    }
+
+    .grid-imagenes-nike {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .imagen-item-nike {
+      aspect-ratio: 1 / 1;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+
+  // Columna Derecha: Panel de Información
+  .modal-info-panel {
+    width: 40%;
+    padding: 2.5rem;
+    border-left: 1px solid #f3f4f6;
+    background-color: #ffffff;
+
+    @media (max-width: 900px) {
+      width: 100%;
+      padding: 1.5rem;
+      border-left: none;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .sticky-detalles {
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .detalle-mas-vendido-tag {
+      align-self: flex-start;
+      background-color: #f97316;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .detalle-genero-tag {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #707070;
+      margin-bottom: 6px;
+    }
+
+    .detalle-nombre {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #111111;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .detalle-marca, .detalle-categoria {
+      font-size: 0.9rem;
+      color: #707070;
+      font-weight: 500;
+      margin: 2px 0;
+    }
+
+    .detalle-precio {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #111111;
+      margin: 1.5rem 0;
+    }
+
+    // Variantes de Colores
+    .detalle-variantes-container {
+      margin-bottom: 1.75rem;
+
+      .titulo-seccion {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #111111;
+        margin: 0 0 10px 0;
+
+        .valor-color {
+          color: #707070;
+          font-weight: 600;
+        }
+      }
+
+      .variantes-lista-imagenes {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .variante-imagen-circulo {
+          width: 48px;
+          height: 48px;
+          border-radius: 8px;
+          cursor: pointer;
+          overflow: hidden;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          transition: all 0.2s;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          &:hover {
+            transform: scale(1.05);
+            border-color: #111111;
+          }
+
+          &.activa {
+            border-color: #111111;
+            border-width: 2px;
+          }
+        }
+      }
+    }
+
+    // Tallas Nike Style Grid
+    .detalle-tallas-container {
+      margin-bottom: 2rem;
+
+      .titulo-seccion {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #111111;
+      }
+
+      .tallas-grid-nike {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .btn-talla-nike {
+        background-color: #ffffff;
+        color: #111111;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 12px 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+
+        &:hover {
+          border-color: #111111;
+        }
+
+        &.seleccionada {
+          background-color: #111111;
+          color: #ffffff;
+          border-color: #111111;
+        }
+      }
+    }
+
+    .btn-agregar-carrito-nike {
+      width: 100%;
+      background-color: #111111;
+      color: #ffffff;
+      border: none;
+      border-radius: 30px;
+      padding: 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2rem;
+
+      &:hover {
+        background-color: #333333;
+      }
+    }
+
+    .sin-stock-aviso {
+      width: 100%;
+      background-color: #f3f4f6;
+      color: #707070;
+      padding: 18px;
+      border-radius: 30px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .descripcion-seccion {
+      margin-bottom: 2rem;
+      
+      .descripcion-texto {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #111111;
+      }
+    }
+
+    .descripcion-general-seccion {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1.5rem;
+
+      .titulo-seccion-general {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #111111;
+        margin-bottom: 1rem;
+      }
+
+      .descripcion-general-cuerpo {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #4b5563;
+        white-space: pre-line;
+      }
+    }
+  }
+}
+
+.pantalla-carga-blanca {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.spinner-moderno {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top-color: #111111;
+  border-radius: 50%;
+  animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.mensaje {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  &.exito {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  &.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+}
+
+.seccion-relacionados {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+  
+  .titulo-relacionados {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 2rem;
+    letter-spacing: -0.01em;
+  }
+
+  .grid-relacionados {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tarjeta-relacionado {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+      border-color: #e5e7eb;
+    }
+
+    .imagen-relacionado {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f9fafb;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      border: 1px solid #f1f5f9;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+    }
+
+    &:hover .imagen-relacionado img {
+      transform: scale(1.05);
+    }
+
+    .info-relacionado {
+      display: flex;
+      flex-direction: column;
+
+      .marca-relacionado {
+        color: #707070;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+      }
+
+      .nombre-relacionado {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111111;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+      }
+
+      .precio-relacionado {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #111111;
+        margin: 0;
+        margin-top: auto;
+      }
+    }
+  }
+}

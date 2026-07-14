@@ -62,17 +62,22 @@
 
 <!-- Modal de Boleta Flotante -->
 <div class="modal-overlay" *ngIf="boletaSeleccionada()" (click)="cerrarBoleta()">
-  <div class="modal-boleta" (click)="$event.stopPropagation()">
+  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative; overflow: hidden;">
     <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
     
-    <div class="boleta-header">
-      <h2>Moda UTP</h2>
+    <!-- WATERMARK REEMBOLSO -->
+    <div *ngIf="boletaSeleccionada()?.estado === 'REEMBOLSADO' || boletaSeleccionada()?.estado === 'DEVUELTO'" 
+         style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; color: rgba(231, 76, 60, 0.15); font-weight: 900; z-index: 0; pointer-events: none; border: 5px solid rgba(231, 76, 60, 0.15); padding: 15px; text-transform: uppercase; white-space: nowrap;">
+      PEDIDO REEMBOLSADO
+    </div>
+
+    <div class="boleta-header" style="position: relative; z-index: 1;">
+      <h2>UTPShop</h2>
       <p>Comprobante de Pago Electrónico</p>
-      <span class="boleta-tipo">{{ boletaSeleccionada()?.comprobante.tipoComprobante }}</span>
-      <h3 *ngIf="boletaSeleccionada()?.estado === 'REEMBOLSADO'" style="color: #e74c3c; border: 2px solid #e74c3c; padding: 5px; margin-top: 10px; border-radius: 5px;">COMPRA CON REEMBOLSO</h3>
+      <span class="boleta-tipo">{{ boletaSeleccionada()?.comprobante?.tipoComprobante }}</span>
     </div>
     
-    <div class="boleta-info">
+    <div class="boleta-info" style="position: relative; z-index: 1;">
       <div class="info-row">
         <span>Nro:</span>
         <strong>{{ boletaSeleccionada()?.comprobante.serieNumero }}</strong>
@@ -84,7 +89,7 @@
     </div>
     
     <!-- DATOS DEL CLIENTE -->
-    <div class="boleta-cliente">
+    <div class="boleta-cliente" style="position: relative; z-index: 1;">
       <h3>Datos del Cliente</h3>
       <div class="info-row">
         <span>Nombre:</span>
@@ -109,7 +114,7 @@
     </div>
 
     <!-- LISTA DE PRODUCTOS -->
-    <div class="boleta-productos">
+    <div class="boleta-productos" style="position: relative; z-index: 1;">
       <h3>Detalle de Compra</h3>
       <table class="tabla-productos">
         <thead>
@@ -131,7 +136,7 @@
       </table>
     </div>
     
-    <div class="boleta-montos">
+    <div class="boleta-montos" style="position: relative; z-index: 1;">
       <div class="monto-row">
         <span>Subtotal:</span>
         <span>S/ {{ boletaSeleccionada()?.comprobante.subtotal | number:'1.2-2' }}</span>
@@ -146,7 +151,7 @@
       </div>
     </div>
     
-    <div class="boleta-footer">
+    <div class="boleta-footer" style="position: relative; z-index: 1;">
       <p>¡Gracias por tu preferencia!</p>
     </div>
   </div>

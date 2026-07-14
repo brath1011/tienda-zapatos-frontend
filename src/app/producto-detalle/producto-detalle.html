@@ -1,0 +1,148 @@
+<div class="contenedor-detalle">
+  <div class="nav-volver">
+    <button (click)="volverCatalogo()" class="btn-volver">← Volver al catálogo</button>
+  </div>
+
+  @if (cargando()) {
+    <div class="pantalla-carga-blanca">
+      <div class="spinner-moderno"></div>
+    </div>
+  } @else if (productoActual(); as prod) {
+    <div class="detalle-layout">
+      
+      <!-- Columna Izquierda: Galería de las 8 imágenes en grid vertical (Estilo Nike) -->
+      <div class="modal-imagenes-galeria">
+        <div class="grid-imagenes-nike">
+          @for (img of getImagenesGaleria(prod.imagen); track $index) {
+            @if (img.trim() !== '') {
+              <div class="imagen-item-nike">
+                <img [src]="img" [alt]="prod.nombre + ' vista ' + ($index + 1)">
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Panel de Detalles Sticky (Estilo Nike) -->
+      <div class="modal-info-panel">
+        <div class="sticky-detalles">
+          
+          @if (mensaje()) {
+            <div class="mensaje exito">{{ mensaje() }}</div>
+          }
+          @if (mensajeError()) {
+            <div class="mensaje error">{{ mensajeError() }}</div>
+          }
+
+          <!-- Etiquetas -->
+          @if (esMasVendido(prod)) {
+            <span class="detalle-mas-vendido-tag">Lo Más Vendido</span>
+          }
+          <span class="detalle-genero-tag">Calzado para {{ prod.genero || 'Caballero' }}</span>
+
+          <h1 class="detalle-nombre">{{ prod.nombre }}</h1>
+          <p class="detalle-marca">Marca: {{ prod.marca }}</p>
+          <p class="detalle-categoria">Categoría: {{ prod.categoria }}</p>
+
+          @if (prod.precioDescuento) {
+            <div style="margin-bottom: 15px;">
+              <p class="detalle-precio" style="text-decoration: line-through; color: #94a3b8; font-size: 1.2rem; margin-bottom: 0;">{{ prod.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
+              <p class="detalle-precio" style="color: #ef4444; font-size: 1.8rem; font-weight: 800; margin-top: 5px;">{{ prod.precioDescuento | currency:'PEN':'S/ ':'1.2-2' }} <span style="font-size: 0.9rem; font-weight: normal; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; vertical-align: middle;">¡En oferta!</span></p>
+            </div>
+          } @else {
+            <p class="detalle-precio">{{ prod.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
+          }
+
+          <!-- Selector de Colores (Variantes) -->
+          @if (variantesMismoModelo().length > 1) {
+            <div class="detalle-variantes-container">
+              <p class="titulo-seccion">Colores Disponibles: <span class="valor-color">{{ prod.color }}</span></p>
+              <div class="variantes-lista-imagenes">
+                @for (variante of variantesMismoModelo(); track variante.id) {
+                  <div (click)="seleccionarVariante(variante.id!)"
+                       [class.activa]="prod.id === variante.id"
+                       class="variante-imagen-circulo"
+                       [title]="variante.color">
+                    <img [src]="getPrimeraImagen(variante.imagen)">
+                  </div>
+                }
+              </div>
+            </div>
+          } @else if (prod.color) {
+            <div class="detalle-variantes-container">
+              <p class="titulo-seccion">Color: <span class="valor-color">{{ prod.color }}</span></p>
+            </div>
+          }
+
+          <!-- Selector de Tallas (Nike-Style Grid) -->
+          @if (calcularTotalStock(prod) > 0) {
+            <div class="detalle-tallas-container">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <p class="titulo-seccion" style="margin: 0;">Selecciona tu talla:</p>
+                <span style="font-size: 0.8rem; color: #707070; text-decoration: underline; cursor: pointer;">Guía de tallas</span>
+              </div>
+              
+              <div class="tallas-grid-nike">
+                @for (talla of tallasDisponibles(prod); track talla) {
+                  <button type="button" 
+                          (click)="seleccionarTalla(talla)" 
+                          [class.seleccionada]="tallaSeleccionada() === talla"
+                          class="btn-talla-nike">
+                    {{ talla }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Botón Agregar Carrito (Nike-Style Negro) -->
+            <button class="btn-agregar-carrito-nike" (click)="agregarAlCarrito()">
+              Añadir al carrito
+            </button>
+          } @else {
+            <div class="sin-stock-aviso">
+              Este color está temporalmente agotado
+            </div>
+          }
+
+          <!-- Descripción Corta -->
+          @if (prod.descripcion) {
+            <div class="descripcion-seccion">
+              <p class="descripcion-texto">{{ prod.descripcion }}</p>
+            </div>
+          }
+
+          <!-- DESCRIPCIÓN GENERAL EXTENDIDA (Nike-Style) -->
+          @if (prod.descripcionGeneral) {
+            <div class="descripcion-general-seccion">
+              <h3 class="titulo-seccion-general">📋 Datos y Detalles del Calzado</h3>
+              <p class="descripcion-general-cuerpo">{{ prod.descripcionGeneral }}</p>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: TAMBIÉN TE PUEDE INTERESAR -->
+    @if (productosRelacionados().length > 0) {
+      <div class="seccion-relacionados">
+        <h2 class="titulo-relacionados">También te puede interesar</h2>
+        <div class="grid-relacionados">
+          @for (relacionado of productosRelacionados(); track relacionado.id) {
+            <article class="tarjeta-relacionado" (click)="seleccionarVariante(relacionado.id!)">
+              <div class="imagen-relacionado">
+                <img [src]="getPrimeraImagen(relacionado.imagen)" [alt]="relacionado.nombre">
+              </div>
+              <div class="info-relacionado">
+                <span class="marca-relacionado">{{ relacionado.marca }}</span>
+                <h3 class="nombre-relacionado">{{ relacionado.nombre }}</h3>
+                <p class="precio-relacionado">{{ relacionado.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+
+  }
+</div>

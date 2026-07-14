@@ -124,6 +124,9 @@ export const ZONAS_LIMA = {
     "Miraflores", "Surquillo", "San Borja", "Santiago de Surco",
     "Barranco", "Pueblo Libre", "San Miguel", "Magdalena del Mar",
     "Jesús María", "San Luis"
+  ],
+  CALLAO: [
+    "Callao", "Bellavista", "Carmen de la Legua Reynoso", "La Perla", "La Punta", "Ventanilla", "Mi Perú"
   ]
 };
 
@@ -139,4 +142,24 @@ export function obtenerZonaPorDistrito(distrito: string): string {
   // Si es un distrito de provincia u otro que no mapeamos, 
   // le daremos un fallback, por ejemplo CENTRO o NORTE
   return 'CENTRO'; 
+}
+
+export function determinarZonaPedido(direccion: any): string {
+  if (!direccion || !direccion.direccionExacta) return 'CENTRO';
+  
+  const partes = direccion.direccionExacta.split(',');
+  if (partes.length < 2) {
+    return obtenerZonaPorDistrito(direccion.distrito);
+  }
+  
+  const departamento = partes[0].trim().toUpperCase();
+  const distrito = partes.length > 2 ? partes[2].split('-')[0].trim() : direccion.distrito;
+  
+  // Si no es ni LIMA ni CALLAO, entonces es provincia externa
+  if (departamento !== 'LIMA' && departamento !== 'CALLAO') {
+    return 'Fuera de Lima';
+  }
+  
+  // Si es Lima o Callao, obtenemos la zona local
+  return obtenerZonaPorDistrito(distrito);
 }

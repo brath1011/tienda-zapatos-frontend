@@ -153,6 +153,7 @@
                 <option value="Centro" [selected]="usuarioSeleccionado().zona?.includes('Centro')">Lima Centro</option>
                 <option value="Este" [selected]="usuarioSeleccionado().zona?.includes('Este')">Lima Este</option>
                 <option value="Callao" [selected]="usuarioSeleccionado().zona?.includes('Callao')">Callao</option>
+                <option value="Fuera de Lima" [selected]="usuarioSeleccionado().zona?.includes('Fuera de Lima')">Fuera de Lima / Provincias</option>
               </select>
               
               <button (click)="actualizarZona(usuarioSeleccionado(), zonaSelect)" style="width: 100%; padding: 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">

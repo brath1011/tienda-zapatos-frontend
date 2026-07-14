@@ -18,6 +18,13 @@ export class NavbarComponent {
 
   menuAbierto = signal(false);
   carritoAbierto = signal(false);
+  buscarTermino = signal('');
+
+  buscar(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.buscarTermino.set(value);
+    this.router.navigate(['/catalogo'], { queryParams: { buscar: value || null }, queryParamsHandling: 'merge' });
+  }
 
   toggleMenu(): void {
     this.menuAbierto.update(v => !v);
@@ -47,6 +54,11 @@ export class NavbarComponent {
     if (item.producto.id) {
       this.carritoSvc.eliminarProducto(item.producto.id, item.tallaSeleccionada).subscribe();
     }
+  }
+
+  getPrimeraImagen(imagenStr?: string): string {
+    if (!imagenStr) return 'assets/no-image.png';
+    return imagenStr.split(',')[0];
   }
 
   cerrarSesion(): void {

@@ -1,81 +1,128 @@
 <nav class="navbar-moderno">
-  <div class="logo">
-    <span class="icono">100% original</span> UTP Fashion
+  <!-- Izquierda: Logo Nike-Style / UTP Fashion -->
+  <div class="logo" routerLink="/inicio" style="cursor: pointer;">
+    <svg class="swoosh-logo" viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+      <path d="M21 6.5c-1.2 1.5-3.2 3.2-5.7 4.8-2.5 1.6-5.1 2.8-7.8 3.5-1.8.5-3.3.7-4.5.7-.6 0-1-.1-1.2-.2 0 0-.1 0-.1-.1.1-.3.4-.8 1-1.6.6-.8 1.4-1.9 2.5-3.2.3-.4.7-.6 1.1-.6.3 0 .7.1 1.2.4.9.5 2.1.8 3.7.8 1.9 0 4.1-.6 6.5-1.9 2.4-1.3 4.2-2.7 5.3-4.2.1 0 .2.1.2.2v.4z"/>
+    </svg>
+    <span class="logo-texto">UTPShop</span>
   </div>
+
+  <!-- Centro: Enlaces de Categoría (Nike-Style) -->
   <ul class="enlaces">
-    <li><a routerLink="/inicio" routerLinkActive="activo">Inicio</a></li>
     @if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
-      <li><a routerLink="/catalogo" routerLinkActive="activo">Catálogo</a></li>
+      <li>
+        <a [routerLink]="['/catalogo']" [queryParams]="{ nuevo: true }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
+          Lo nuevo
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
+          Hombre
+        </a>
+      </li>
+      <li>
+        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
+          Mujer
+        </a>
+      </li>
+      <li>
+        <a routerLink="/catalogo" [routerLinkActiveOptions]="{matrixParams: 'ignored', queryParams: 'ignored', paths: 'subset', fragment: 'ignored'}" routerLinkActive="activo">
+          Ver todo
+        </a>
+      </li>
+    } @else if (auth.esRepartidor()) {
+      <li><a routerLink="/admin/repartos" routerLinkActive="activo">Mis Repartos</a></li>
+    } @else {
+      <li><a routerLink="/admin" routerLinkActive="activo">Panel Admin</a></li>
+    }
+  </ul>
+
+  <!-- Derecha: Búsqueda, Carrito, Iniciar Sesión -->
+  <div class="acciones">
+    
+    <!-- Barra de Búsqueda (Nike-Style) -->
+    @if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
+      <div class="buscador-container">
+        <span class="lupa-icon">🔍</span>
+        <input type="text" 
+               class="input-buscar" 
+               placeholder="Buscar" 
+               [value]="buscarTermino()"
+               (input)="buscar($event)">
+      </div>
+    }
+
+    <!-- Carrito de Compras -->
+    @if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
       @if (auth.estaAutenticado()) {
-        <li style="position: relative;">
-          <a (click)="toggleCarrito()" style="cursor: pointer;" [class.activo]="carritoAbierto()">
-            Carrito <span class="badge">{{ carritoSvc.cantidadGlobal() }}</span>
-          </a>
+        <div class="carrito-container" style="position: relative;">
+          <button class="btn-carrito" (click)="toggleCarrito()" [class.activo]="carritoAbierto()" title="Ver carrito">
+            🛍️
+            <span class="badge">{{ carritoSvc.cantidadGlobal() }}</span>
+          </button>
           
           <!-- CARRITO FLOTANTE -->
           @if (carritoAbierto()) {
-            <div class="carrito-flotante" style="position: absolute; top: 100%; right: 0; background: white; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; z-index: 1000; padding: 1rem; color: #333;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
-                <h3 style="margin: 0; font-size: 1.1rem;">Carrito de compras</h3>
-                <button (click)="cerrarCarrito()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">&times;</button>
+            <div class="carrito-flotante">
+              <div class="carrito-header">
+                <h3>Carrito de compras</h3>
+                <button (click)="cerrarCarrito()" class="btn-cerrar">&times;</button>
               </div>
               
               @if (carritoSvc.cantidadGlobal() === 0) {
-                <p style="text-align: center; color: #666; padding: 1rem 0;">Tu carrito está vacío</p>
+                <p class="carrito-vacio">Tu carrito está vacío</p>
               } @else {
-                <div style="max-height: 250px; overflow-y: auto;">
+                <div class="carrito-items-list">
                   @for (item of carritoSvc.items(); track $index) {
                     @let producto = carritoSvc.getProducto(item);
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid #f5f5f5; padding-bottom: 0.5rem;">
-                      <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px;"></div>
-                      <div style="flex: 1; font-size: 0.85rem;">
-                        <strong style="display: block;">{{ producto?.nombre }}</strong>
-                        <span style="color: #666;">{{ producto?.color | uppercase }} - TALLA {{ item.tallaSeleccionada }}</span>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                          <div style="display: flex; align-items: center; gap: 0.5rem; background: #eee; padding: 0.1rem 0.3rem; border-radius: 4px;">
-                            <button (click)="disminuirCantidad(item)" style="border: none; background: none; cursor: pointer; font-weight: bold; font-size: 1.1rem; padding: 0 0.3rem;">-</button>
-                            <span style="min-width: 1rem; text-align: center;">{{ item.cantidad }}</span>
-                            <button (click)="aumentarCantidad(item)" style="border: none; background: none; cursor: pointer; font-weight: bold; font-size: 1.1rem; padding: 0 0.3rem;">+</button>
+                    <div class="carrito-item">
+                      <img [src]="getPrimeraImagen(producto?.imagen)" class="carrito-item-img" alt="zapatilla">
+                      <div class="carrito-item-detalles">
+                        <strong>{{ producto?.nombre }}</strong>
+                        <span class="carrito-item-meta">{{ producto?.color }} · Talla {{ item.tallaSeleccionada }}</span>
+                        <div class="carrito-item-acciones">
+                          <div class="cantidad-selector">
+                            <button (click)="disminuirCantidad(item)">-</button>
+                            <span>{{ item.cantidad }}</span>
+                            <button (click)="aumentarCantidad(item)">+</button>
                           </div>
-                          <div style="display: flex; align-items: center; gap: 1rem;">
-                            <strong style="font-size: 1rem;">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'symbol':'1.2-2' }}</strong>
-                            <button (click)="eliminarItem(item)" style="border: none; background: none; cursor: pointer; color: #e31837; font-size: 1rem;" title="Eliminar">🗑</button>
-                          </div>
+                          <span class="subtotal">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'S/ ':'1.2-2' }}</span>
+                          <button (click)="eliminarItem(item)" class="btn-eliminar" title="Eliminar">🗑</button>
                         </div>
                       </div>
                     </div>
                   }
                 </div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; padding: 0.5rem 0;">
+                <div class="carrito-total">
                   <span>Total</span>
-                  <span>{{ carritoSvc.totalGlobal() | currency:'PEN':'symbol':'1.2-2' }}</span>
+                  <span>{{ carritoSvc.totalGlobal() | currency:'PEN':'S/ ':'1.2-2' }}</span>
                 </div>
-                <button (click)="cerrarCarrito()" routerLink="/carrito" style="width: 100%; padding: 0.75rem; background: black; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <button (click)="cerrarCarrito()" routerLink="/carrito" class="btn-ir-carrito">
                   Ir al carrito
                 </button>
               }
             </div>
           }
-        </li>
+        </div>
       }
-    } 
-    @else if (auth.esRepartidor()) {
-      <li><a routerLink="/admin/repartos" routerLinkActive="activo">Mis Repartos</a></li>
     }
-    @else {
-      <li><a routerLink="/admin" routerLinkActive="activo">Panel Admin</a></li>
-    }
-  </ul>
-  <div class="acciones">
+
+    <!-- Usuario / Iniciar Sesión -->
     @if (auth.estaAutenticado()) {
       <div class="dropdown-usuario" (click)="toggleMenu()">
         <button class="btn-usuario-dropdown">
-          {{ auth.usuario()?.email }}
+          👤
+          <span class="usuario-email">{{ auth.usuario()?.email }}</span>
           <span class="flechita" [class.abierto]="menuAbierto()">⌄</span>
         </button>
         @if (menuAbierto()) {
           <div class="dropdown-menu">
             <a routerLink="/perfil" class="dropdown-item">Mi Cuenta</a>
+            @if (auth.esAdmin() || auth.esVentas() || auth.esRepartidor()) {
+              <a routerLink="/admin" class="dropdown-item">Panel Control</a>
+            } @else {
+              <a routerLink="/mis-compras" class="dropdown-item">Mis Compras</a>
+            }
             <button class="dropdown-item btn-salir" (click)="cerrarSesion()">Cerrar sesión</button>
           </div>
         }
@@ -83,5 +130,6 @@
     } @else {
       <a routerLink="/login" class="btn-login">Iniciar Sesión</a>
     }
+
   </div>
 </nav>

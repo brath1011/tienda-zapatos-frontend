@@ -204,5 +204,77 @@
         }
       }
     }
+
+    /* Estilos personalizados para ordenamiento y fijación */
+    &.tarjeta-fijada {
+      border: 1px solid #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      
+      .tarjeta-cabecera {
+        background-color: #eff6ff;
+        
+        .num-parada {
+          background-color: #2563eb !important;
+        }
+      }
+    }
+
+    .controles-orden {
+      margin-right: auto;
+      margin-left: 1rem;
+      
+      .btn-orden {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.8rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        padding: 0;
+
+        &:hover:not(:disabled) {
+          background-color: #e2e8f0;
+          color: #0f172a;
+          border-color: #94a3b8;
+        }
+
+        &:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+        }
+      }
+
+      .btn-fijar {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        font-size: 0.9rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        padding: 0;
+
+        &:hover {
+          background-color: #f1f5f9;
+          border-color: #94a3b8;
+        }
+
+        &.fijado {
+          background-color: #dbeafe;
+          border-color: #bfdbfe;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+      }
+    }
   }
 }

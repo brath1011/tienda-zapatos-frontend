@@ -42,6 +42,7 @@ export interface Zapato {
   descripcion: string;
   descripcionGeneral?: string;
   imagen: string; // Asegurado para coincidir con la DB
+  precioDescuento?: number;
 }
 
 export interface CarritoItem {

@@ -24,9 +24,25 @@
         <p class="cargando">Buscando cajas listas...</p>
       } @else {
         @for (pedido of pedidos(); track pedido.idPedido) {
-          <div class="tarjeta-reparto" [ngClass]="{'tarjeta-reembolsada': pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO'}">
+          <div class="tarjeta-reparto" [ngClass]="{'tarjeta-reembolsada': pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO', 'tarjeta-fijada': esPedidoFijado(pedido.idPedido)}">
             <div class="tarjeta-cabecera">
-              <span class="id-pedido">Pedido #{{ pedido.idPedido }}</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="num-parada" style="background: #3b82f6; color: white; border-radius: 4px; padding: 0.15rem 0.4rem; font-size: 0.8rem; font-weight: bold;">#{{ $index + 1 }}</span>
+                <span class="id-pedido">Pedido #{{ pedido.idPedido }}</span>
+              </div>
+              
+              <div class="controles-orden" style="display: flex; align-items: center; gap: 0.35rem;">
+                <button class="btn-orden" [disabled]="$first || esPedidoFijado(pedido.idPedido) || esPedidoFijado(pedidos()[$index - 1].idPedido)" (click)="moverPedido($index, 'ARRIBA')" title="Mover arriba">
+                  ▲
+                </button>
+                <button class="btn-orden" [disabled]="$last || esPedidoFijado(pedido.idPedido) || esPedidoFijado(pedidos()[$index + 1].idPedido)" (click)="moverPedido($index, 'ABAJO')" title="Mover abajo">
+                  ▼
+                </button>
+                <button class="btn-fijar" [class.fijado]="esPedidoFijado(pedido.idPedido)" (click)="cambiarFijacion(pedido.idPedido)" [title]="esPedidoFijado(pedido.idPedido) ? 'Desbloquear posición' : 'Bloquear posición'">
+                  {{ esPedidoFijado(pedido.idPedido) ? '🔒' : '🔓' }}
+                </button>
+              </div>
+
               <span class="badge badge-reparto" *ngIf="pedido.estado === 'LISTO_PARA_ENVIO'">📦 EN REPARTO</span>
               <span class="badge" *ngIf="pedido.estado === 'REEMBOLSADO' || pedido.estado === 'DEVUELTO'" style="background-color: #fee2e2; color: #ef4444; border: 1px solid #ef4444;">❌ REEMBOLSADO</span>
             </div>
