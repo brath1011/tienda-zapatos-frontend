@@ -194,12 +194,12 @@
           <section class="seccion-categoria">
             <div class="seccion-header">
               <h2 class="seccion-titulo">{{ seccion.cat }}</h2>
-              <span class="seccion-count">{{ seccion.grupos.length }} modelo(s)</span>
+              <span class="seccion-count">{{ seccion.tarjetas.length }} modelo(s)</span>
             </div>
 
             <div class="grid-productos">
-              @for (variantes of seccion.grupos; track variantes[0].nombre) {
-                @let prod = obtenerVarianteActiva(variantes);
+              @for (tarjeta of seccion.tarjetas; track tarjeta.base.id) {
+                @let prod = obtenerVarianteParaTarjeta(tarjeta.base.id!, tarjeta.base, tarjeta.variantes);
                 <article class="tarjeta-producto" [class.sin-stock]="calcularTotalStock(prod) === 0" (click)="verDetalle(prod)" style="cursor: pointer;">
                   <div class="tarjeta-imagen" style="position: relative;">
                     
@@ -208,28 +208,21 @@
                       @if (esMasVendido(prod)) {
                         <span class="etiqueta-mas-vendido">Lo Más Vendido</span>
                       }
-                      <span class="etiqueta-genero">{{ prod.genero || 'Caballero' }}</span>
                     </div>
 
-                    <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" loading="lazy">
+                    <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" loading="lazy" [class.cargando]="cargandoVariantePorTarjeta()[tarjeta.base.id!]">
+                    
+                    @if (cargandoVariantePorTarjeta()[tarjeta.base.id!]) {
+                      <div class="spinner-overlay">
+                        <div class="spinner"></div>
+                      </div>
+                    }
                   </div>
                   
-                  <span class="marca">{{ prod.marca | uppercase }}</span>
-                  <h3 class="producto-titulo">{{ prod.nombre }}</h3>
-
-                  <!-- Mini descripción breve -->
-                  @if (prod.descripcion) {
-                    <p class="producto-descripcion-corta">
-                      {{ prod.descripcion }}
-                    </p>
-                  }
-                  
-                  <!-- Selector de colores -->
-                  <div class="selector-color">
-                    <p class="selector-color-titulo">Color: {{ prod.color }}</p>
+                  <div class="selector-color" style="margin-bottom: 12px; margin-top: 4px;">
                     <div class="color-circulos">
-                      @for (variante of variantes; track variante.id) {
-                        <div (click)="$event.stopPropagation(); seleccionarVariante(prod.nombre, variante.id!)"
+                      @for (variante of tarjeta.variantes; track variante.id) {
+                        <div (click)="$event.stopPropagation(); seleccionarVariante(tarjeta.base.id!, variante.imagen!, variante.id!)"
                              [style.border]="prod.id === variante.id ? '2px solid #111111' : '2px solid #e2e8f0'"
                              class="color-circulo-img"
                              [title]="variante.color">
@@ -238,6 +231,14 @@
                       }
                     </div>
                   </div>
+
+                  <h3 class="producto-titulo">{{ prod.nombre }}</h3>
+                  <p class="producto-subtitulo" style="color: #707070; font-size: 0.95rem; margin: 0 0 4px 0;">
+                    Zapatillas para {{ (prod.genero || 'Caballero') | titlecase }}
+                  </p>
+                  <p class="producto-colores-count" style="color: #707070; font-size: 0.95rem; margin: 0 0 12px 0;">
+                    {{ tarjeta.variantes.length }} {{ tarjeta.variantes.length === 1 ? 'Color' : 'Colores' }}
+                  </p>
 
                   @if (prod.precioDescuento) {
                     <p class="precio" style="display: flex; gap: 8px; align-items: baseline;">
@@ -248,27 +249,8 @@
                     <p class="precio">{{ prod.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
                   }
 
-                  <!-- Botón Ver datos (Visual, el click lo maneja el artículo) -->
-                  <button type="button" class="btn-ver-datos">
-                    🔍 Ver datos del producto
-                  </button>
-
-                  @if (calcularTotalStock(prod) > 0) {
-                    <div class="talla-seccion-tarjeta">
-                      <p class="talla-titulo-tarjeta">Tallas disponibles:</p>
-                      <div class="talla-lista-tarjeta">
-                        @for (talla of tallasDisponibles(prod); track talla) {
-                          <button type="button" 
-                                  (click)="$event.stopPropagation(); seleccionarTalla(prod.id!, talla)" 
-                                  [class.seleccionada]="tallaSeleccionadaPorProducto[prod.id!] === talla">
-                            {{ talla }}
-                          </button>
-                        }
-                      </div>
-                    </div>
-                    <button class="btn-comprar" (click)="$event.stopPropagation(); agregarAlCarrito(prod)">Añadir al carrito</button>
-                  } @else {
-                    <span class="etiqueta-agotado">Agotado</span>
+                  @if (calcularTotalStock(prod) === 0) {
+                    <span class="etiqueta-agotado" style="margin-top: 12px; display: inline-block;">Agotado</span>
                   }
                 </article>
               }

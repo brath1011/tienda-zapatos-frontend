@@ -170,32 +170,48 @@ export class CatalogoComponent implements OnInit {
     this.productosFiltrados().filter(p => this.calcularTotalStock(p) > 0).length
   );
 
-  readonly modelosAgrupados = computed(() => {
+  readonly tarjetasPorCategoria = computed(() => {
     const productosArray = this.productosFiltrados();
-    const map = new Map<string, Zapato[]>();
+    const todosProductos = this.productos();
+
+    // 1. Agrupar TODOS los productos para saber qué variantes (colores) existen para cada modelo
+    const mapVariantes = new Map<string, Zapato[]>();
+    for (const p of todosProductos) {
+      const clave = `${p.nombre.trim().toLowerCase()}|${(p.genero || 'Caballero')}|${p.categoria}`;
+      if (!mapVariantes.has(clave)) mapVariantes.set(clave, []);
+      mapVariantes.get(clave)!.push(p);
+    }
+
+    // 2. Agrupar los productos FILTRADOS por modelo para asegurar que se muestran juntos
+    const mapFiltradosPorModelo = new Map<string, Zapato[]>();
     for (const p of productosArray) {
       const clave = `${p.nombre.trim().toLowerCase()}|${(p.genero || 'Caballero')}|${p.categoria}`;
-      if (!map.has(clave)) map.set(clave, []);
-      map.get(clave)!.push(p);
+      if (!mapFiltradosPorModelo.has(clave)) mapFiltradosPorModelo.set(clave, []);
+      mapFiltradosPorModelo.get(clave)!.push(p);
     }
-    return Array.from(map.values());
+
+    // 3. Crear las tarjetas respetando el orden por modelo
+    const catMap = new Map<string, { base: Zapato; variantes: Zapato[] }[]>();
+    // Ordenamos las claves para que los modelos salgan alfabéticamente
+    const clavesOrdenadas = Array.from(mapFiltradosPorModelo.keys()).sort();
+    
+    for (const clave of clavesOrdenadas) {
+      const productosDelModelo = mapFiltradosPorModelo.get(clave)!;
+      const variantesDelModelo = mapVariantes.get(clave) || [];
+      
+      for (const p of productosDelModelo) {
+        const cat = p.categoria || 'Otros';
+        if (!catMap.has(cat)) catMap.set(cat, []);
+        catMap.get(cat)!.push({ base: p, variantes: variantesDelModelo });
+      }
+    }
+    return Array.from(catMap.entries()).map(([cat, tarjetas]) => ({ cat, tarjetas }));
   });
 
-  readonly modelosPorCategoria = computed(() => {
-    const grupos = this.modelosAgrupados();
-    const catMap = new Map<string, Zapato[][]>();
-    for (const grupo of grupos) {
-      const cat = grupo[0].categoria || 'Otros';
-      if (!catMap.has(cat)) catMap.set(cat, []);
-      catMap.get(cat)!.push(grupo);
-    }
-    return Array.from(catMap.entries()).map(([cat, grupos]) => ({ cat, grupos }));
-  });
-
-  readonly categoriasOrden = ['Deportivo', 'Urbano', 'Casual', 'Formal', 'Botas'];
+  readonly categoriasOrden = ['Deportivo', 'Urbano', 'Jordan', 'Correr'];
 
   get modelosPorCategoriaOrdenados() {
-    return this.modelosPorCategoria().sort((a, b) =>
+    return this.tarjetasPorCategoria().sort((a, b) =>
       (this.categoriasOrden.indexOf(a.cat) ?? 99) - (this.categoriasOrden.indexOf(b.cat) ?? 99)
     );
   }
@@ -231,7 +247,8 @@ export class CatalogoComponent implements OnInit {
   }
 
   // ─── ESTADO DE DETALLE ─────────────────────────────────────────
-  varianteSeleccionadaPorModelo = signal<{ [nombre: string]: number }>({});
+  varianteSeleccionadaPorTarjeta = signal<{ [idTarjeta: number]: number }>({});
+  cargandoVariantePorTarjeta = signal<{ [idTarjeta: number]: boolean }>({});
   productoDetalle = signal<Zapato | null>(null);
   cargandoDetalle = signal<boolean>(false);
 
@@ -267,43 +284,36 @@ export class CatalogoComponent implements OnInit {
     this.productoDetalle.set(null);
   }
 
-  obtenerVarianteActiva(variantes: Zapato[]): Zapato {
-    const modeloNombre = variantes[0].nombre;
-    const idSeleccionado = this.varianteSeleccionadaPorModelo()[modeloNombre];
+  obtenerVarianteParaTarjeta(idTarjeta: number, base: Zapato, variantes: Zapato[]): Zapato {
+    const idSeleccionado = this.varianteSeleccionadaPorTarjeta()[idTarjeta];
     if (idSeleccionado) {
       const variante = variantes.find(v => v.id === idSeleccionado);
       if (variante) return variante;
     }
-    return variantes[0];
+    return base;
   }
 
-  seleccionarVariante(modeloNombre: string, idProducto: number): void {
-    this.varianteSeleccionadaPorModelo.update(current => ({ ...current, [modeloNombre]: idProducto }));
-    const abierto = this.productoDetalle();
-    if (abierto && abierto.nombre === modeloNombre) {
-      const variantesDelModelo = this.modelosAgrupados().find(v => v[0].nombre === modeloNombre);
-      if (variantesDelModelo) {
-        const nueva = variantesDelModelo.find(v => v.id === idProducto);
-        if (nueva && nueva.id !== abierto.id) {
-          this.cargandoDetalle.set(true);
-          const imagenesUrls = this.getImagenesGaleria(nueva.imagen);
-          let cargadas = 0;
-          let finalizado = false;
-          const finalizar = () => {
-            if (finalizado) return;
-            finalizado = true;
-            this.productoDetalle.set(nueva);
-            this.cargandoDetalle.set(false);
-          };
-          if (imagenesUrls.length === 0) { finalizar(); return; }
-          const timeoutId = setTimeout(() => finalizar(), 3000);
-          const checkLoad = () => { cargadas++; if (cargadas === imagenesUrls.length) { clearTimeout(timeoutId); finalizar(); } };
-          imagenesUrls.forEach(url => { const img = new Image(); img.onload = checkLoad; img.onerror = checkLoad; img.src = url; });
-        } else if (nueva) {
-          this.productoDetalle.set(nueva);
-        }
-      }
+  seleccionarVariante(idTarjeta: number, varianteUrl: string, idProducto: number): void {
+    if (this.varianteSeleccionadaPorTarjeta()[idTarjeta] === idProducto) return;
+    
+    const imgUrl = this.getPrimeraImagen(varianteUrl);
+    if (!imgUrl || imgUrl === 'assets/no-image.png') {
+      this.varianteSeleccionadaPorTarjeta.update(current => ({ ...current, [idTarjeta]: idProducto }));
+      return;
     }
+
+    this.cargandoVariantePorTarjeta.update(c => ({ ...c, [idTarjeta]: true }));
+
+    const img = new Image();
+    img.onload = () => {
+      this.varianteSeleccionadaPorTarjeta.update(current => ({ ...current, [idTarjeta]: idProducto }));
+      this.cargandoVariantePorTarjeta.update(c => ({ ...c, [idTarjeta]: false }));
+    };
+    img.onerror = () => {
+      this.varianteSeleccionadaPorTarjeta.update(current => ({ ...current, [idTarjeta]: idProducto }));
+      this.cargandoVariantePorTarjeta.update(c => ({ ...c, [idTarjeta]: false }));
+    };
+    img.src = imgUrl;
   }
 
   calcularTotalStock(producto: Zapato): number {

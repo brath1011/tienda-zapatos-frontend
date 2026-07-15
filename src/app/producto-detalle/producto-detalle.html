@@ -11,8 +11,13 @@
     <div class="detalle-layout">
       
       <!-- Columna Izquierda: Galería de las 8 imágenes en grid vertical (Estilo Nike) -->
-      <div class="modal-imagenes-galeria">
-        <div class="grid-imagenes-nike">
+      <div class="modal-imagenes-galeria" style="position: relative;">
+        @if (cargandoVariante()) {
+          <div class="spinner-overlay">
+            <div class="spinner"></div>
+          </div>
+        }
+        <div class="grid-imagenes-nike" [class.cargando]="cargandoVariante()">
           @for (img of getImagenesGaleria(prod.imagen); track $index) {
             @if (img.trim() !== '') {
               <div class="imagen-item-nike">
@@ -79,7 +84,7 @@
             <div class="detalle-tallas-container">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <p class="titulo-seccion" style="margin: 0;">Selecciona tu talla:</p>
-                <span style="font-size: 0.8rem; color: #707070; text-decoration: underline; cursor: pointer;">Guía de tallas</span>
+                <span (click)="mostrarGuia.set(true)" style="font-size: 0.8rem; color: #707070; text-decoration: underline; cursor: pointer;">Guía de tallas</span>
               </div>
               
               <div class="tallas-grid-nike">
@@ -146,3 +151,49 @@
 
   }
 </div>
+
+<!-- Modal Guía de Tallas -->
+@if (mostrarGuia()) {
+  <div class="modal-overlay" (click)="mostrarGuia.set(false)" style="z-index: 99999;">
+    <div class="modal-tallas" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-tallas" (click)="mostrarGuia.set(false)">×</button>
+      
+      <div class="modal-tallas-header">
+        <h2>Guía de Tallas - Calzado</h2>
+        <p>Encuentra tu talla correcta en la tabla a continuación. Desplázate horizontalmente si estás en móvil.</p>
+      </div>
+
+      <div class="tabla-tallas-scroll">
+        <table class="tabla-tallas-datos">
+          <thead>
+            <tr>
+              <th>EEUU Hombre</th>
+              <th>EEUU Mujer</th>
+              <th class="resaltar-pe">PE</th>
+              <th>EUR</th>
+              <th>Largo del pie (cm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>5.5</td><td>7</td><td class="resaltar-pe">37</td><td>38</td><td>24</td></tr>
+            <tr><td>6</td><td>7.5</td><td class="resaltar-pe">37.5</td><td>38.5</td><td>24</td></tr>
+            <tr><td>6.5</td><td>8</td><td class="resaltar-pe">38</td><td>39</td><td>24.5</td></tr>
+            <tr><td>7</td><td>8.5</td><td class="resaltar-pe">39</td><td>40</td><td>25</td></tr>
+            <tr><td>7.5</td><td>9</td><td class="resaltar-pe">39.5</td><td>40.5</td><td>25.5</td></tr>
+            <tr><td>8</td><td>9.5</td><td class="resaltar-pe">40</td><td>41</td><td>26</td></tr>
+            <tr><td>8.5</td><td>10</td><td class="resaltar-pe">41</td><td>42</td><td>26.5</td></tr>
+            <tr><td>9</td><td>10.5</td><td class="resaltar-pe">41.5</td><td>42.5</td><td>27</td></tr>
+            <tr><td>9.5</td><td>11</td><td class="resaltar-pe">42</td><td>43</td><td>27.5</td></tr>
+            <tr><td>10</td><td>11.5</td><td class="resaltar-pe">42.5</td><td>43.5</td><td>28</td></tr>
+            <tr><td>10.5</td><td>12</td><td class="resaltar-pe">43</td><td>44</td><td>28.5</td></tr>
+            <tr><td>11</td><td>12.5</td><td class="resaltar-pe">44</td><td>45</td><td>29</td></tr>
+            <tr><td>11.5</td><td>13</td><td class="resaltar-pe">44.5</td><td>45.5</td><td>29.5</td></tr>
+            <tr><td>12</td><td>13.5</td><td class="resaltar-pe">45</td><td>46</td><td>30</td></tr>
+            <tr><td>12.5</td><td>14</td><td class="resaltar-pe">46</td><td>47</td><td>30.5</td></tr>
+            <tr><td>13</td><td>14.5</td><td class="resaltar-pe">47</td><td>47.5</td><td>31</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { environment } from '../../environments/environment';
 import { ProductoService } from '../services/producto.service';
 import { Zapato } from '../models/api.models';
@@ -8,7 +8,7 @@ import { Zapato } from '../models/api.models';
 @Component({
   selector: 'app-admin-productos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './admin-productos.html',
   styleUrl: './admin-productos.scss'
 })
@@ -39,9 +39,17 @@ export class AdminProductosComponent implements OnInit {
     return this.tallasCaballero;
   });
 
+  // Filtro de categorías para la tabla
+  readonly filtroCategoria = signal<string>('');
+
   // Agrupa los productos por modelo (nombre+marca+genero+categoria) para mostrar UNA fila por modelo en la tabla
   readonly productosAgrupados = computed(() => {
-    const todos = this.productos();
+    let todos = this.productos();
+    
+    const cat = this.filtroCategoria();
+    if (cat) {
+      todos = todos.filter(p => p.categoria === cat);
+    }
     const mapa = new Map<string, { representante: Zapato; variantes: Zapato[]; stockTotal: number }>();
     for (const p of todos) {
       const clave = `${p.nombre.trim().toLowerCase()}|${p.marca.trim().toLowerCase()}|${(p.genero||'Caballero')}|${p.categoria}`;
@@ -55,7 +63,7 @@ export class AdminProductosComponent implements OnInit {
     return Array.from(mapa.values());
   });
 
-  readonly categorias = ['Deportivo', 'Casual', 'Formal', 'Urbano', 'Botas'];
+  readonly categorias = ['Deportivo', 'Urbano', 'Jordan', 'Correr'];
   readonly generos = ['Caballero', 'Mujer', 'Unisex'];
   readonly tallasDisponibles = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'];
 

@@ -24,10 +24,12 @@ export class ProductoDetalleComponent implements OnInit {
   readonly productos = signal<Zapato[]>([]);
   readonly productoActual = signal<Zapato | null>(null);
   readonly cargando = signal(true);
+  readonly cargandoVariante = signal(false);
   readonly mensaje = signal('');
   readonly mensajeError = signal('');
   
   tallaSeleccionada = signal<string>('');
+  readonly mostrarGuia = signal(false);
 
   readonly variantesMismoModelo = computed(() => {
     const actual = this.productoActual();
@@ -83,11 +85,13 @@ export class ProductoDetalleComponent implements OnInit {
             this.router.navigate(['/catalogo']);
           }
           this.cargando.set(false);
+          this.cargandoVariante.set(false);
         });
       },
       error: (err) => {
         this.mensajeError.set('No se pudieron cargar los datos.');
         this.cargando.set(false);
+        this.cargandoVariante.set(false);
       }
     });
   }
@@ -124,7 +128,28 @@ export class ProductoDetalleComponent implements OnInit {
   }
 
   seleccionarVariante(id: number): void {
-    this.router.navigate(['/producto', id]);
+    const v = this.productos().find(p => p.id === id);
+    if (!v) {
+      this.router.navigate(['/producto', id]);
+      return;
+    }
+
+    const imgUrl = this.getPrimeraImagen(v.imagen);
+    if (!imgUrl || imgUrl === 'assets/no-image.png') {
+      this.router.navigate(['/producto', id]);
+      return;
+    }
+
+    this.cargandoVariante.set(true);
+
+    const img = new Image();
+    img.onload = () => {
+      this.router.navigate(['/producto', id]);
+    };
+    img.onerror = () => {
+      this.router.navigate(['/producto', id]);
+    };
+    img.src = imgUrl;
   }
 
   volverCatalogo(): void {
