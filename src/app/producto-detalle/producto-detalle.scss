@@ -51,6 +51,7 @@
     width: 60%;
     padding: 2.5rem;
     background-color: #ffffff;
+    position: relative;
 
     @media (max-width: 900px) {
       width: 100%;
@@ -61,9 +62,15 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+      transition: all 0.3s ease;
 
       @media (max-width: 600px) {
         grid-template-columns: 1fr;
+      }
+      
+      &.cargando {
+        opacity: 0.5;
+        filter: blur(2px);
       }
     }
 
@@ -430,3 +437,161 @@
     }
   }
 }
+
+/* Estilos de la Guía de Tallas */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  
+  .spinner {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #111111;
+    border-radius: 50%;
+    animation: spin-detail 0.8s linear infinite;
+  }
+}
+
+@keyframes spin-detail {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.modal-tallas {
+  background-color: #ffffff;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 2.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: modalEntrar 0.3s ease;
+
+  @media (max-width: 600px) {
+    padding: 1.5rem;
+    width: 95%;
+  }
+}
+
+@keyframes modalEntrar {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.btn-cerrar-tallas {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #707070;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #111111;
+  }
+}
+
+.modal-tallas-header {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111111;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: #707070;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  small {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+  }
+}
+
+.tabla-tallas-scroll {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.tabla-tallas-datos {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.95rem;
+
+  th {
+    background-color: #f9fafb;
+    color: #111111;
+    font-weight: 700;
+    padding: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    white-space: nowrap;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    color: #4b5563;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  tr:hover {
+    background-color: #f3f4f6;
+  }
+
+  .resaltar-pe {
+    font-weight: bold;
+    color: #111111;
+    background-color: #f9fafb;
+  }
+}
+

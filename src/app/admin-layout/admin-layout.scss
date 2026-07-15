@@ -1,6 +1,6 @@
 .admin-dashboard-container {
   display: flex;
-  min-height: calc(100vh - 70px); // Subtract navbar height if applicable
+  min-height: calc(100vh - 60px); // Subtract navbar height if applicable
   background-color: #f8fafc;
 }
 
@@ -12,6 +12,13 @@
   flex-direction: column;
   padding: 2rem 0;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 10;
 
   .sidebar-header {
     padding: 0 2rem 2rem 2rem;
@@ -76,6 +83,7 @@
 .admin-content {
   flex: 1;
   padding: 2rem;
+  margin-left: 260px; /* Ancho de la sidebar fija */
   overflow-y: auto;
   
   // Custom scrollbar
@@ -97,7 +105,9 @@
   }
   
   .admin-sidebar {
+    position: static;
     width: 100%;
+    height: auto;
     padding: 1rem 0;
     
     .sidebar-nav {
@@ -105,5 +115,9 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+  }
+
+  .admin-content {
+    margin-left: 0;
   }
 }

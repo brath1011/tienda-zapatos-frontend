@@ -304,8 +304,16 @@
 
 .grid-productos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tarjeta-producto {
@@ -347,9 +355,38 @@
       transition: transform 0.5s ease;
     }
 
-    &:hover img {
+    &:hover img:not(.cargando) {
       transform: scale(1.05);
     }
+    
+    img.cargando {
+      opacity: 0.5;
+      filter: blur(2px);
+    }
+
+    .spinner-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+      
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #111111;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .etiquetas-flotantes {
