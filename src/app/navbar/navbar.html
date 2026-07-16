@@ -18,25 +18,25 @@
         </a>
       </li>
       <li class="nav-item-dropdown">
-        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
+        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}" (click)="ocultarDropdownTemporalmene()">
           Hombre
         </a>
-        <div class="dropdown-categorias">
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Deportivo' }">Deportivo</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Urbano' }">Urbano</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Jordan' }">Jordan</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Correr' }">Correr</a>
+        <div class="dropdown-categorias" [class.ocultar]="cerrarDropdownForzado()">
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Deportivo' }" (click)="ocultarDropdownTemporalmene()">Deportivo</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Urbano' }" (click)="ocultarDropdownTemporalmene()">Urbano</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Jordan' }" (click)="ocultarDropdownTemporalmene()">Jordan</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Correr' }" (click)="ocultarDropdownTemporalmene()">Correr</a>
         </div>
       </li>
       <li class="nav-item-dropdown">
-        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
+        <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}" (click)="ocultarDropdownTemporalmene()">
           Mujer
         </a>
-        <div class="dropdown-categorias">
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Deportivo' }">Deportivo</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Urbano' }">Urbano</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Jordan' }">Jordan</a>
-          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Correr' }">Correr</a>
+        <div class="dropdown-categorias" [class.ocultar]="cerrarDropdownForzado()">
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Deportivo' }" (click)="ocultarDropdownTemporalmene()">Deportivo</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Urbano' }" (click)="ocultarDropdownTemporalmene()">Urbano</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Jordan' }" (click)="ocultarDropdownTemporalmene()">Jordan</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Correr' }" (click)="ocultarDropdownTemporalmene()">Correr</a>
         </div>
       </li>
       <li>

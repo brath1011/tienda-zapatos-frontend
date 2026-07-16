@@ -53,3 +53,46 @@
   font-size: 0.9rem;
   a { color: #2563eb; text-decoration: none; font-weight: bold; }
 }
+
+.input-con-icono {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding-right: 2.75rem;
+  }
+}
+
+.btn-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  outline: none;
+
+  &:hover {
+    color: #2563eb;
+  }
+}
+
+.icono-ojo {
+  width: 20px;
+  height: 20px;
+}
+
+.ayuda-texto {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}

@@ -20,6 +20,12 @@ export class NavbarComponent {
   menuMobileAbierto = signal(false);
   carritoAbierto = signal(false);
   buscarTermino = signal('');
+  cerrarDropdownForzado = signal(false);
+
+  ocultarDropdownTemporalmene(): void {
+    this.cerrarDropdownForzado.set(true);
+    setTimeout(() => this.cerrarDropdownForzado.set(false), 500);
+  }
 
   buscar(event: Event): void {
     const value = (event.target as HTMLInputElement).value;

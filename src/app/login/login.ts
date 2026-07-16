@@ -19,6 +19,11 @@ export class LoginComponent {
 
   readonly cargando = signal(false);
   readonly mensajeError = signal('');
+  readonly mostrarPassword = signal(false);
+
+  togglePassword(): void {
+    this.mostrarPassword.update(show => !show);
+  }
 
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

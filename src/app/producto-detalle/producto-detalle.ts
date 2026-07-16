@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { CarritoService } from '../services/carrito.service';
@@ -10,7 +10,7 @@ import { Zapato } from '../models/api.models';
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './producto-detalle.html',
   styleUrl: './producto-detalle.scss'
 })

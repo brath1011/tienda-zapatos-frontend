@@ -132,6 +132,12 @@
         flex-direction: column;
         z-index: 1010;
 
+        &.ocultar {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+
         a {
           padding: 10px 20px;
           font-size: 0.9rem;

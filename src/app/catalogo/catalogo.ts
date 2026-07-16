@@ -122,12 +122,10 @@ export class CatalogoComponent implements OnInit {
       );
     }
 
-    // 3. Filtro "Lo nuevo"
+    // 3. Filtro "Lo nuevo" (Destacado - Los Más Vendidos)
     const nuevo = this.filtroNuevo();
     if (nuevo && prods.length > 0) {
-      const sortedIds = [...prods].map(p => p.id || 0).sort((a, b) => b - a);
-      const thresholdId = sortedIds[Math.min(3, sortedIds.length - 1)];
-      prods = prods.filter(p => (p.id || 0) >= thresholdId);
+      prods = prods.filter(p => this.esMasVendido(p));
     }
 
     // 4. Filtro por CATEGORÍA

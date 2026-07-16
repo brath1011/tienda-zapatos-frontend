@@ -19,6 +19,11 @@ export class RegistroComponent {
   readonly cargando = signal(false);
   readonly mensaje = signal('');
   readonly mensajeError = signal('');
+  readonly mostrarPassword = signal(false);
+
+  togglePassword(): void {
+    this.mostrarPassword.update(show => !show);
+  }
 
   readonly registroForm = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
