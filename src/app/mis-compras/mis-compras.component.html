@@ -62,7 +62,7 @@
 
 <!-- Modal de Boleta Flotante -->
 <div class="modal-overlay" *ngIf="boletaSeleccionada()" (click)="cerrarBoleta()">
-  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative; overflow: hidden;">
+  <div class="modal-boleta" (click)="$event.stopPropagation()" style="position: relative; overflow-y: auto;">
     <button class="btn-cerrar" (click)="cerrarBoleta()">×</button>
     
     <!-- WATERMARK REEMBOLSO -->
