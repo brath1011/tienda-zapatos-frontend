@@ -52,7 +52,7 @@
           @if (prod.precioDescuento) {
             <div style="margin-bottom: 15px;">
               <p class="detalle-precio" style="text-decoration: line-through; color: #94a3b8; font-size: 1.2rem; margin-bottom: 0;">{{ prod.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
-              <p class="detalle-precio" style="color: #ef4444; font-size: 1.8rem; font-weight: 800; margin-top: 5px;">{{ prod.precioDescuento | currency:'PEN':'S/ ':'1.2-2' }} <span style="font-size: 0.9rem; font-weight: normal; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; vertical-align: middle;">¡En oferta!</span></p>
+              <p class="detalle-precio" style="color: #ef4444; font-size: 1.8rem; font-weight: 800; margin-top: 5px;">{{ prod.precioDescuento | currency:'PEN':'S/ ':'1.2-2' }} <span style="font-size: 0.9rem; font-weight: bold; background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px;">{{ obtenerPorcentajeDescuento(prod.precio, prod.precioDescuento) }}% OFF</span></p>
             </div>
           } @else {
             <p class="detalle-precio">{{ prod.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
@@ -193,6 +193,36 @@
             <tr><td>13</td><td>14.5</td><td class="resaltar-pe">47</td><td>47.5</td><td>31</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Agregado al Carrito (Toast Top Right) -->
+@if (mostrarModalAgregado()) {
+  <div class="toast-agregado-overlay">
+    <div class="toast-agregado-content" (click)="$event.stopPropagation()">
+      <div class="toast-header">
+        <div class="toast-title">
+          <span class="icono-check-circulo">✔</span> Agregado al carrito
+        </div>
+        <button class="btn-cerrar-toast" (click)="mostrarModalAgregado.set(false)">×</button>
+      </div>
+      
+      <div class="toast-body">
+        <img [src]="getPrimeraImagen(productoActual()?.imagen)" [alt]="productoActual()?.nombre" class="toast-img">
+        <div class="toast-info">
+          <h4>{{ productoActual()?.nombre }}</h4>
+          <p class="toast-sub">Zapatillas para {{ productoActual()?.genero || 'hombre' | lowercase }}</p>
+          <p class="toast-sub">Color: {{ productoActual()?.color }}</p>
+          <p class="toast-sub">Talla {{ tallaSeleccionada() }}</p>
+          <p class="toast-precio">{{ productoActual()?.precioDescuento ? productoActual()?.precioDescuento : productoActual()?.precio | currency:'PEN':'S/ ':'1.2-2' }}</p>
+        </div>
+      </div>
+      
+      <div class="toast-footer">
+        <button class="btn-toast-outline" routerLink="/carrito">Ver Carrito ({{ carritoSvc.cantidadGlobal() }})</button>
+        <button class="btn-toast-solid" routerLink="/carrito">Comprar</button>
       </div>
     </div>
   </div>

@@ -11,44 +11,79 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 3rem;
-  font-weight: 600;
-  color: #999;
+  margin-bottom: 3.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: #ccc;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-left: 20px;
+    margin-bottom: 2rem;
+  }
 }
 
 .paso {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   
   .icono-paso {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: #eee;
-    font-size: 0.8rem;
+    background: #f5f5f5;
+    color: #999;
+    font-size: 0.85rem;
+    font-weight: 800;
+    transition: all 0.3s ease;
+  }
+  
+  .texto-paso {
+    transition: color 0.3s ease;
   }
   
   &.activo {
-    color: #e31837;
-    .icono-paso { background: #e31837; color: white; }
+    color: #111;
+    .icono-paso { 
+      background: #111; 
+      color: white; 
+      box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.1);
+    }
   }
   
   &.completado {
-    color: #333;
-    .icono-paso { background: #333; color: white; }
+    color: #111;
+    .icono-paso { 
+      background: #111; 
+      color: white; 
+    }
   }
 }
 
 .linea {
   flex: 1;
-  max-width: 150px;
-  height: 1px;
+  max-width: 100px;
+  height: 2px;
   background: #eee;
-  margin: 0 1rem;
+  margin: 0 1.5rem;
+  transition: background 0.3s ease;
+  
+  &.linea-activa {
+    background: #111;
+  }
+
+  @media (max-width: 600px) {
+    display: none;
+  }
 }
 
 /* GRID PRINCIPAL */
@@ -77,42 +112,6 @@
   }
 }
 
-/* PRODUCTOS */
-.lista-productos {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
-}
-
-.producto-checkout {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  
-  .foto-placeholder {
-    width: 80px;
-    height: 100px;
-    background: #f0f0f0;
-    border-radius: 4px;
-  }
-  
-  .info-prod {
-    flex: 1;
-    h4 { margin: 0 0 0.5rem 0; font-size: 1rem; }
-    .detalles-prod { color: #666; font-size: 0.85rem; margin-bottom: 0.5rem; }
-    .controles-cantidad { display: flex; gap: 1rem; font-size: 0.9rem; font-weight: 500; }
-  }
-  
-  .acciones-prod {
-    text-align: right;
-    .precio-total-prod { font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem; }
-    .btn-basurero {
-      background: none; border: none; cursor: pointer; font-size: 1.2rem;
-      &:hover { color: #e31837; }
-    }
-  }
-}
 
 /* FORMULARIOS */
 .campo {
@@ -183,19 +182,84 @@
     margin-bottom: 1.5rem;
   }
   
+  .lista-productos-sidebar {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+  }
+
+  .producto-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+
+    .foto-sidebar {
+      width: 65px;
+      height: 65px;
+      object-fit: cover;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+
+    .info-sidebar {
+      flex: 1;
+      h4 { 
+        margin: 0 0 0.2rem 0; 
+        font-size: 0.95rem; 
+        font-weight: 600;
+        color: #111;
+      }
+      .detalles-sidebar { 
+        color: #666; 
+        font-size: 0.75rem; 
+        margin-bottom: 0.2rem; 
+      }
+      .precio-sidebar {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #111;
+      }
+    }
+
+    .btn-quitar {
+      background: none; 
+      border: none; 
+      cursor: pointer; 
+      font-size: 1.2rem;
+      color: #999;
+      padding: 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      &:hover { color: #e31837; }
+    }
+  }
+  
   .fila-cupon {
     display: flex;
     gap: 0.5rem;
-    align-items: flex-end;
+    align-items: center;
     margin-bottom: 1.5rem;
+    .campo {
+      margin-bottom: 0;
+    }
+    input {
+      margin: 0;
+      padding: 0.8rem;
+    }
     .btn-aplicar {
-      padding: 0.75rem 1.5rem;
-      background: #333;
+      padding: 0.8rem 1.5rem;
+      background: #111;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.2s;
+      &:hover { background: #333; }
     }
   }
   

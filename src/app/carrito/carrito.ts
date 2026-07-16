@@ -6,6 +6,7 @@ import { CarritoService } from '../services/carrito.service';
 import { PedidoService } from '../services/pedido.service';
 import { AuthService } from '../services/auth.service';
 import { DireccionService } from '../services/direccion.service';
+import { InfoModalService } from '../services/info-modal.service';
 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UBIGEO_DATA } from '../utils/ubigeo.data';
@@ -22,6 +23,7 @@ export class CarritoComponent implements OnInit {
   private readonly pedidosApi = inject(PedidoService);
   readonly authSvc = inject(AuthService);
   private readonly fb = inject(FormBuilder);
+  readonly infoModal = inject(InfoModalService);
 
   readonly procesando = signal(false);
   readonly mensaje = signal('');
@@ -41,7 +43,8 @@ export class CarritoComponent implements OnInit {
     dptoInterior: [''],
     metodoPago: ['TARJETA', Validators.required],
     numeroTarjeta: ['', [Validators.required, Validators.pattern(/^(\d{4}\s?){3}\d{4}$/)]],
-    cvv: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]]
+    cvv: ['', [Validators.required, Validators.pattern(/^\d{3}$/)]],
+    terminos: [false, Validators.requiredTrue]
   });
 
   departamentos = Object.keys(UBIGEO_DATA);
@@ -245,9 +248,9 @@ export class CarritoComponent implements OnInit {
 
   comprar(): void {
     const pForm = this.pagoForm.controls;
-    if (pForm.numeroTarjeta.invalid || pForm.cvv.invalid) {
+    if (pForm.numeroTarjeta.invalid || pForm.cvv.invalid || pForm.terminos.invalid) {
       this.pagoForm.markAllAsTouched();
-      this.mensajeError.set('Por favor completa los datos de pago correctamente.');
+      this.mensajeError.set('Por favor completa los datos de pago y acepta los términos y condiciones.');
       return;
     }
 

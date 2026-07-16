@@ -1,5 +1,8 @@
+:host {
+  display: block;
+}
+
 .contenedor-catalogo {
-  padding: 2rem 2.5rem;
   max-width: 1280px;
   margin: 0 auto;
   font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
@@ -24,11 +27,40 @@
   align-items: center;
   margin-bottom: 2.5rem;
 
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
   p {
     margin: 0;
     color: #707070;
     font-weight: 500;
     font-size: 0.95rem;
+  }
+
+  .acciones-cabecera {
+    display: flex;
+    gap: 10px;
+
+    .btn-filtros-mobile {
+      display: none;
+      background: #ffffff;
+      border: 1px solid #111111;
+      color: #111111;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      align-items: center;
+      gap: 6px;
+
+      @media (max-width: 900px) {
+        display: flex;
+      }
+    }
   }
 }
 
@@ -92,26 +124,81 @@
   }
 }
 
+.overlay-filtros-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.activo {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 .sidebar-filtros {
   width: 250px;
   flex-shrink: 0;
   position: sticky;
-  top: 2rem;
-  max-height: calc(100vh - 4rem);
+  top: 85px; /* Altura del navbar (60px) + espacio extra */
+  max-height: calc(100vh - 90px);
   overflow-y: auto;
   padding-right: 1rem;
+  background-color: #ffffff;
 
   @media (max-width: 900px) {
-    width: 100%;
-    position: static;
-    max-height: none;
-    overflow-y: visible;
-    padding-right: 0;
-    margin-bottom: 2rem;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 320px;
+    max-width: 85vw;
+    height: 100vh;
+    max-height: 100vh;
+    z-index: 1050;
+    padding: 20px;
+    box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+
+    &.abierto-mobile {
+      right: 0;
+    }
   }
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+  .sidebar-header-mobile {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+
+    @media (max-width: 900px) {
+      display: flex;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .btn-cerrar-filtros {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+  }
 
   .sidebar-header {
     display: flex;
@@ -124,6 +211,10 @@
       font-weight: 800;
       color: #111111;
       letter-spacing: -0.02em;
+
+      @media (max-width: 900px) {
+        display: none;
+      }
     }
 
     .btn-limpiar-filtros {
@@ -312,7 +403,9 @@
   }
 
   @media (max-width: 700px) {
-    grid-template-columns: 1fr;
+    /* Mantenemos 2 columnas en móvil, achicando el gap */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }
 
@@ -411,6 +504,17 @@
     letter-spacing: 0.03em;
   }
 
+  .etiqueta-descuento {
+    background-color: #ef4444;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
   .etiqueta-genero {
     background: rgba(17, 17, 17, 0.8);
     backdrop-filter: blur(4px);
@@ -438,6 +542,10 @@
     cursor: pointer;
     &:hover {
       color: #707070;
+    }
+
+    @media (max-width: 600px) {
+      font-size: 0.95rem;
     }
   }
 
@@ -497,6 +605,10 @@
     font-weight: 800;
     color: #111111;
     margin: auto 0 12px;
+
+    @media (max-width: 600px) {
+      font-size: 1.1rem;
+    }
   }
 
   .talla-seccion-tarjeta {

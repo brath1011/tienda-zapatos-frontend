@@ -4,9 +4,14 @@
       <h1 class="titulo">Catálogo de Zapatos</h1>
       <p>{{ productosFiltrados().length }} productos encontrados · {{ productosConStock() }} disponibles</p>
     </div>
-    <button type="button" class="btn-secundario" (click)="cargarProductos()" [disabled]="cargando()">
-      {{ cargando() ? 'Cargando...' : 'Actualizar' }}
-    </button>
+    <div class="acciones-cabecera">
+      <button class="btn-filtros-mobile" (click)="toggleFiltrosMobile()">
+        <span class="icono">⚲</span> Filtrar
+      </button>
+      <button type="button" class="btn-secundario" (click)="cargarProductos()" [disabled]="cargando()">
+        {{ cargando() ? 'Cargando...' : 'Actualizar' }}
+      </button>
+    </div>
   </header>
 
   @if (mensaje()) {
@@ -18,8 +23,16 @@
   }
 
   <div class="layout-principal">
+    <!-- Fondo oscuro móvil para los filtros -->
+    <div class="overlay-filtros-mobile" [class.activo]="mostrarFiltrosMobile()" (click)="toggleFiltrosMobile()"></div>
+
     <!-- SIDEBAR DE FILTROS -->
-    <aside class="sidebar-filtros">
+    <aside class="sidebar-filtros" [class.abierto-mobile]="mostrarFiltrosMobile()">
+      
+      <div class="sidebar-header-mobile">
+        <h3>Filtros</h3>
+        <button class="btn-cerrar-filtros" (click)="toggleFiltrosMobile()">&times;</button>
+      </div>
 
       <!-- Encabezado del sidebar con botón de limpiar -->
       <div class="sidebar-header">
@@ -203,10 +216,16 @@
                 <article class="tarjeta-producto" [class.sin-stock]="calcularTotalStock(prod) === 0" (click)="verDetalle(prod)" style="cursor: pointer;">
                   <div class="tarjeta-imagen" style="position: relative;">
                     
-                    <!-- Etiquetas de Categoría / Mas Vendido -->
+                    <!-- Etiquetas de Categoría / Mas Vendido / Descuento -->
                     <div class="etiquetas-flotantes">
                       @if (esMasVendido(prod)) {
                         <span class="etiqueta-mas-vendido">Lo Más Vendido</span>
+                      } @else {
+                        <span></span> <!-- Spacer to push discount tag to the right if not mas vendido -->
+                      }
+                      
+                      @if (prod.precioDescuento && prod.precio > prod.precioDescuento) {
+                        <span class="etiqueta-descuento">-{{ obtenerPorcentajeDescuento(prod.precio, prod.precioDescuento) }}%</span>
                       }
                     </div>
 

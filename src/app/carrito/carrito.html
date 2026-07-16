@@ -15,12 +15,12 @@
         <span class="icono-paso">@if (pasoActual() > 1) { ✓ } @else { 1 }</span>
         <span class="texto-paso">Carro de compra</span>
       </div>
-      <div class="linea"></div>
+      <div class="linea" [class.linea-activa]="pasoActual() > 1"></div>
       <div class="paso" [class.completado]="pasoActual() > 2" [class.activo]="pasoActual() === 2">
         <span class="icono-paso">@if (pasoActual() > 2) { ✓ } @else { 2 }</span>
         <span class="texto-paso">Detalles de pago</span>
       </div>
-      <div class="linea"></div>
+      <div class="linea" [class.linea-activa]="pasoActual() > 2"></div>
       <div class="paso" [class.activo]="pasoActual() === 3">
         <span class="icono-paso">3</span>
         <span class="texto-paso">Orden completada</span>
@@ -35,32 +35,7 @@
       <!-- COLUMNA IZQUIERDA -->
       <div class="checkout-main">
         
-        <!-- LISTA DE PRODUCTOS (Solo en paso 1) -->
-        <div class="lista-productos">
-          @for (item of carritoSvc.items(); track $index) {
-            @let producto = carritoSvc.getProducto(item);
-            <div class="producto-checkout">
-              <div class="foto-placeholder">
-                <!-- Se asume que no hay imagen real guardada en BD para la demostración, usamos placeholder gris o icono -->
-              </div>
-              <div class="info-prod">
-                <h4>{{ producto?.nombre || 'Producto' }}</h4>
-                <div class="detalles-prod">
-                  <span>{{ producto?.color | uppercase }}</span> - <span>TALLA {{ item.tallaSeleccionada }}</span>
-                </div>
-                <div class="controles-cantidad">
-                  <span>Cant: {{ item.cantidad }}</span> 
-                  <span class="precio-unit">S/. {{ producto?.precio }} c/u</span>
-                </div>
-              </div>
-              <div class="acciones-prod">
-                <div class="precio-total-prod">{{ carritoSvc.getSubtotal(item) | currency:'PEN':'S/ ':'1.2-2' }}</div>
-                <button class="btn-basurero" (click)="eliminar(item)">🗑</button>
-              </div>
-            </div>
-          }
-        </div>
-  
+
         @if (pasoActual() === 1) {
           <!-- PASO 1: INFORMACIÓN Y DIRECCIÓN -->
           <div class="seccion-checkout">
@@ -175,6 +150,16 @@
               </div>
             </div>
             
+            <div class="campo mt-3" style="display:flex; align-items:flex-start; gap:10px;">
+              <input type="checkbox" formControlName="terminos" id="chkTerminos" style="width: 20px; height: 20px; flex-shrink: 0; cursor: pointer; margin-top: 2px;">
+              <label for="chkTerminos" style="font-size: 0.85rem; margin-bottom: 0; cursor: pointer; color: #444; flex: 1; line-height: 1.4;">
+                He leído y acepto los <a href="javascript:void(0)" (click)="infoModal.abrirTerminos()" style="color:#111; font-weight:600; text-decoration:underline;">Términos y Condiciones</a> y las <a href="javascript:void(0)" (click)="infoModal.abrirPoliticas()" style="color:#111; font-weight:600; text-decoration:underline;">Políticas de Devolución</a>.
+              </label>
+            </div>
+            @if (pagoForm.controls.terminos.invalid && pagoForm.controls.terminos.touched) {
+              <small class="error-texto" style="display:block; margin-top:4px;">Debes aceptar los términos para continuar.</small>
+            }
+            
             <button class="btn-secundario mt-3" (click)="volverPaso()">← Volver a Dirección</button>
           </div>
         }
@@ -183,11 +168,29 @@
       <!-- COLUMNA DERECHA (Resumen) -->
       <aside class="checkout-sidebar">
         <h3>Resumen de la compra</h3>
+
+        <div class="lista-productos-sidebar">
+          @for (item of carritoSvc.items(); track $index) {
+            @let producto = carritoSvc.getProducto(item);
+            <div class="producto-sidebar">
+              <img [src]="producto?.imagen ? producto.imagen.split(',')[0] : 'assets/no-image.png'" alt="{{ producto?.nombre }}" class="foto-sidebar">
+              <div class="info-sidebar">
+                <h4>{{ producto?.nombre || 'Producto' }}</h4>
+                <div class="detalles-sidebar">
+                  {{ producto?.color | uppercase }} | Talla {{ item.tallaSeleccionada }} | Cant: {{ item.cantidad }}
+                </div>
+                <div class="precio-sidebar">
+                  {{ carritoSvc.getSubtotal(item) | currency:'PEN':'S/ ':'1.2-2' }}
+                </div>
+              </div>
+              <button class="btn-quitar" (click)="eliminar(item)" title="Quitar">×</button>
+            </div>
+          }
+        </div>
         
         <div class="fila-cupon">
-          <div class="campo" style="flex:1;">
-            <label>Código de cupon</label>
-            <input type="text">
+          <div class="campo" style="flex:1; margin-bottom:0;">
+            <input type="text" placeholder="Código de cupón">
           </div>
           <button class="btn-aplicar">Aplicar</button>
         </div>
