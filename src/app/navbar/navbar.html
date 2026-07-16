@@ -1,9 +1,11 @@
 <nav class="navbar-moderno">
+  <!-- Botón Menú Móvil -->
+  <button class="btn-menu-mobile" (click)="toggleMenuMobile()">
+    ☰
+  </button>
+
   <!-- Izquierda: Logo Nike-Style / UTP Fashion -->
   <div class="logo" routerLink="/inicio" style="cursor: pointer;">
-    <svg class="swoosh-logo" viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
-      <path d="M21 6.5c-1.2 1.5-3.2 3.2-5.7 4.8-2.5 1.6-5.1 2.8-7.8 3.5-1.8.5-3.3.7-4.5.7-.6 0-1-.1-1.2-.2 0 0-.1 0-.1-.1.1-.3.4-.8 1-1.6.6-.8 1.4-1.9 2.5-3.2.3-.4.7-.6 1.1-.6.3 0 .7.1 1.2.4.9.5 2.1.8 3.7.8 1.9 0 4.1-.6 6.5-1.9 2.4-1.3 4.2-2.7 5.3-4.2.1 0 .2.1.2.2v.4z"/>
-    </svg>
     <span class="logo-texto">UTPShop</span>
   </div>
 
@@ -12,18 +14,30 @@
     @if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
       <li>
         <a [routerLink]="['/catalogo']" [queryParams]="{ nuevo: true }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
-          Lo nuevo
+          Destacado
         </a>
       </li>
-      <li>
+      <li class="nav-item-dropdown">
         <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
           Hombre
         </a>
+        <div class="dropdown-categorias">
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Deportivo' }">Deportivo</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Urbano' }">Urbano</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Jordan' }">Jordan</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Correr' }">Correr</a>
+        </div>
       </li>
-      <li>
+      <li class="nav-item-dropdown">
         <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer' }" routerLinkActive="activo" [routerLinkActiveOptions]="{exact: false}">
           Mujer
         </a>
+        <div class="dropdown-categorias">
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Deportivo' }">Deportivo</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Urbano' }">Urbano</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Jordan' }">Jordan</a>
+          <a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Correr' }">Correr</a>
+        </div>
       </li>
       <li>
         <a routerLink="/catalogo" [routerLinkActiveOptions]="{matrixParams: 'ignored', queryParams: 'ignored', paths: 'subset', fragment: 'ignored'}" routerLinkActive="activo">
@@ -131,5 +145,41 @@
       <a routerLink="/login" class="btn-login">Iniciar Sesión</a>
     }
 
+  </div>
+
+  <!-- Menú Lateral Móvil -->
+  <div class="overlay-mobile" [class.activo]="menuMobileAbierto()" (click)="toggleMenuMobile()"></div>
+  <div class="menu-mobile-drawer" [class.abierto]="menuMobileAbierto()">
+    <div class="drawer-header">
+      <span class="logo-texto">UTPShop</span>
+      <button class="btn-cerrar-drawer" (click)="toggleMenuMobile()">&times;</button>
+    </div>
+    
+    <div class="drawer-body">
+      <ul class="enlaces-mobile">
+        @if (!auth.esAdmin() && !auth.esVentas() && !auth.esRepartidor()) {
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ nuevo: true }" (click)="toggleMenuMobile()">Destacado</a></li>
+          
+          <li class="section-title">Hombre</li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Deportivo' }" (click)="toggleMenuMobile()">Deportivo</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Urbano' }" (click)="toggleMenuMobile()">Urbano</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Jordan' }" (click)="toggleMenuMobile()">Jordan</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Hombre', categoria: 'Correr' }" (click)="toggleMenuMobile()">Correr</a></li>
+          
+          <li class="section-title">Mujer</li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Deportivo' }" (click)="toggleMenuMobile()">Deportivo</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Urbano' }" (click)="toggleMenuMobile()">Urbano</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Jordan' }" (click)="toggleMenuMobile()">Jordan</a></li>
+          <li><a [routerLink]="['/catalogo']" [queryParams]="{ genero: 'Mujer', categoria: 'Correr' }" (click)="toggleMenuMobile()">Correr</a></li>
+          
+          <li class="section-divider"></li>
+          <li><a routerLink="/catalogo" (click)="toggleMenuMobile()">Ver todo</a></li>
+        } @else if (auth.esRepartidor()) {
+          <li><a routerLink="/admin/repartos" (click)="toggleMenuMobile()">Mis Repartos</a></li>
+        } @else {
+          <li><a routerLink="/admin" (click)="toggleMenuMobile()">Panel Admin</a></li>
+        }
+      </ul>
+    </div>
   </div>
 </nav>

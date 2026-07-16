@@ -16,7 +16,7 @@ import { Zapato } from '../models/api.models';
 })
 export class ProductoDetalleComponent implements OnInit {
   private readonly productosApi = inject(ProductoService);
-  private readonly carritoSvc = inject(CarritoService);
+  readonly carritoSvc = inject(CarritoService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly auth = inject(AuthService);
@@ -30,6 +30,7 @@ export class ProductoDetalleComponent implements OnInit {
   
   tallaSeleccionada = signal<string>('');
   readonly mostrarGuia = signal(false);
+  readonly mostrarModalAgregado = signal(false);
 
   readonly variantesMismoModelo = computed(() => {
     const actual = this.productoActual();
@@ -45,21 +46,15 @@ export class ProductoDetalleComponent implements OnInit {
     const actual = this.productoActual();
     if (!actual) return [];
     
-    // Buscar productos de la misma categoría o marca, excluyendo las variantes exactas del mismo modelo
+    // Excluir el modelo exacto que estamos viendo, pero permitir cualquier otra categoría/marca
     let relacionados = this.productos().filter(p => {
       const esMismoModelo = p.nombre === actual.nombre && p.genero === actual.genero;
-      if (esMismoModelo) return false; // Ya se muestran en variantes
-      
-      const mismaCategoria = p.categoria === actual.categoria;
-      const mismaMarca = p.marca === actual.marca;
-      const mismoGenero = p.genero === actual.genero;
-      
-      return (mismaCategoria || mismaMarca) && mismoGenero;
+      return !esMismoModelo;
     });
 
-    // Mezclar al azar y tomar máximo 4
+    // Mezclar al azar y tomar máximo 8 para rellenar la sección
     relacionados = relacionados.sort(() => 0.5 - Math.random());
-    return relacionados.slice(0, 4);
+    return relacionados.slice(0, 8);
   });
 
   ngOnInit(): void {
@@ -107,7 +102,14 @@ export class ProductoDetalleComponent implements OnInit {
   }
 
   esMasVendido(producto: Zapato): boolean {
-    return producto.nombre.toLowerCase().includes('force') || (producto.id || 0) % 2 === 0;
+    if (!producto.tallasStock) return false;
+    const tallasBajo12 = Object.values(producto.tallasStock).filter(stock => stock !== undefined && stock > 0 && stock < 12);
+    return tallasBajo12.length >= 2;
+  }
+
+  obtenerPorcentajeDescuento(precio: number, precioDescuento?: number): number {
+    if (!precioDescuento || precio <= 0) return 0;
+    return Math.round(((precio - precioDescuento) / precio) * 100);
   }
 
   calcularTotalStock(producto: Zapato): number {
@@ -175,8 +177,8 @@ export class ProductoDetalleComponent implements OnInit {
     this.carritoSvc.agregarItem(prod, 1, talla).subscribe({
       next: (agregado) => {
         if (agregado) {
-          this.mensaje.set(`Talla ${talla} agregada al carrito exitosamente.`);
-          setTimeout(() => this.mensaje.set(''), 3000);
+          this.mostrarModalAgregado.set(true);
+          setTimeout(() => this.mostrarModalAgregado.set(false), 4000);
         } else {
           this.mensajeError.set(this.carritoSvc.mensaje() || 'No se pudo agregar al carrito.');
         }

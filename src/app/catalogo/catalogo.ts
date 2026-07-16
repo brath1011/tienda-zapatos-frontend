@@ -248,12 +248,24 @@ export class CatalogoComponent implements OnInit {
 
   // ─── ESTADO DE DETALLE ─────────────────────────────────────────
   varianteSeleccionadaPorTarjeta = signal<{ [idTarjeta: number]: number }>({});
-  cargandoVariantePorTarjeta = signal<{ [idTarjeta: number]: boolean }>({});
+  cargandoVariantePorTarjeta = signal<{ [tarjetaId: string]: boolean }>({});
+  mostrarFiltrosMobile = signal(false);
   productoDetalle = signal<Zapato | null>(null);
   cargandoDetalle = signal<boolean>(false);
 
   esMasVendido(producto: Zapato): boolean {
-    return producto.nombre.toLowerCase().includes('force') || (producto.id || 0) % 2 === 0;
+    if (!producto.tallasStock) return false;
+    const tallasBajo12 = Object.values(producto.tallasStock).filter(stock => stock !== undefined && stock > 0 && stock < 12);
+    return tallasBajo12.length >= 2;
+  }
+
+  obtenerPorcentajeDescuento(precio: number, precioDescuento?: number): number {
+    if (!precioDescuento || precio <= 0) return 0;
+    return Math.round(((precio - precioDescuento) / precio) * 100);
+  }
+
+  toggleFiltrosMobile(): void {
+    this.mostrarFiltrosMobile.update(v => !v);
   }
 
   ngOnInit(): void {
@@ -263,6 +275,7 @@ export class CatalogoComponent implements OnInit {
       this.filtroGenero.set(params['genero'] || 'Todos');
       this.filtroBusqueda.set(params['buscar'] || '');
       this.filtroNuevo.set(params['nuevo'] === 'true');
+      this.filtroCategoria.set(params['categoria'] || '');
     });
   }
 

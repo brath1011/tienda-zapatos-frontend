@@ -43,5 +43,7 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
+  { path: 'terminos', loadComponent: () => import('./terminos/terminos').then(m => m.TerminosComponent) },
+  { path: 'politicas', loadComponent: () => import('./politicas/politicas').then(m => m.PoliticasComponent) },
   { path: '**', redirectTo: 'inicio' }
 ];

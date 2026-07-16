@@ -1,25 +1,88 @@
-<div class="hero-section">
-  <div class="hero-contenido">
-    <h1>Camina con estilo, pisa con fuerza</h1>
-    <p>Descubre la nueva colección de ZapaStore. Las mejores marcas, la mejor calidad, directamente a tus pies.</p>
-    <a routerLink="/catalogo" class="btn-accion">Ver colección 2026</a>
+<div class="carousel-container">
+  <div class="carousel-slides" [style.transform]="'translateX(-' + (slideActual() * 100) + '%)'">
+    @for (banner of banners; track banner.id) {
+      <div class="slide">
+        <a [routerLink]="[banner.link]" [queryParams]="banner.queryParams">
+          <img [src]="banner.imagen" [alt]="banner.titulo" class="banner-img">
+        </a>
+      </div>
+    }
+  </div>
+
+  <button class="carousel-btn prev" (click)="anterior(); detenerSlider(); iniciarSlider()">❮</button>
+  <button class="carousel-btn next" (click)="siguiente(); detenerSlider(); iniciarSlider()">❯</button>
+
+  <div class="carousel-dots">
+    @for (banner of banners; track banner.id; let i = $index) {
+      <span class="dot" [class.activo]="slideActual() === i" (click)="irA(i)"></span>
+    }
   </div>
 </div>
 
-<div class="beneficios">
-  <div class="card-beneficio">
-    <span class="icono">Envío</span>
-    <h3>Envío rápido</h3>
-    <p>A todo el país en 24h</p>
+<div class="productos-destacados-section">
+  <div class="header-productos">
+    <h2>Productos más comprados</h2>
+    <div class="controles-productos">
+      <button class="btn-flecha prev-prod" (click)="scrollProds(-1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="btn-flecha next-prod" (click)="scrollProds(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
   </div>
-  <div class="card-beneficio">
-    <span class="icono">Garantía</span>
-    <h3>Garantía</h3>
-    <p>Devolución gratuita</p>
-  </div>
-  <div class="card-beneficio">
-    <span class="icono">Pago</span>
-    <h3>Pago seguro</h3>
-    <p>Protección total</p>
+  
+  <!-- Mensajes -->
+  @if (mensaje() || mensajeError()) {
+    <div class="mensajes-container">
+      @if (mensaje()) {
+        <div class="mensaje-exito">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          {{ mensaje() }}
+        </div>
+      }
+      @if (mensajeError()) {
+        <div class="mensaje-error">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          {{ mensajeError() }}
+          <button (click)="mensajeError.set('')" class="btn-cerrar-error">✕</button>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="productos-slider" #productosSlider>
+    @for (prod of productos(); track prod.id) {
+      <div class="producto-card">
+        <div class="img-container">
+           <!-- Etiquetas Flotantes -->
+           <div class="etiquetas-flotantes">
+             @if (esMasVendido(prod)) {
+               <span class="etiqueta-mas-vendido">Lo Más Vendido</span>
+             } @else {
+               <span></span>
+             }
+             @if (prod.precioDescuento && prod.precio > prod.precioDescuento) {
+               <span class="etiqueta-descuento">-{{ obtenerPorcentajeDescuento(prod.precio, prod.precioDescuento) }}%</span>
+             }
+           </div>
+
+           <img [src]="getPrimeraImagen(prod.imagen)" [alt]="prod.nombre" [routerLink]="['/producto', prod.id]">
+        </div>
+        <div class="info-prod">
+          <div class="cat-marca">{{prod.marca}}</div>
+          <h4 [routerLink]="['/producto', prod.id]">{{prod.nombre}}</h4>
+          
+          <div class="precios">
+            @if (prod.precioDescuento) {
+              <p class="precio-descuento">S/ {{prod.precioDescuento | number:'1.2-2'}}</p>
+              <p class="precio-original">S/ {{prod.precio | number:'1.2-2'}}</p>
+            } @else {
+              <p class="precio">S/ {{prod.precio | number:'1.2-2'}}</p>
+            }
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </div>

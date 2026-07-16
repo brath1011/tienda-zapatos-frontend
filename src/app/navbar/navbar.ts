@@ -17,6 +17,7 @@ export class NavbarComponent {
   private readonly router = inject(Router);
 
   menuAbierto = signal(false);
+  menuMobileAbierto = signal(false);
   carritoAbierto = signal(false);
   buscarTermino = signal('');
 
@@ -28,6 +29,10 @@ export class NavbarComponent {
 
   toggleMenu(): void {
     this.menuAbierto.update(v => !v);
+  }
+
+  toggleMenuMobile(): void {
+    this.menuMobileAbierto.update(v => !v);
   }
 
   toggleCarrito(): void {

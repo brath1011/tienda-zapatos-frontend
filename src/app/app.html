@@ -8,39 +8,62 @@
   <footer class="footer-oscuro">
     <div class="footer-contenido">
       <div class="footer-columna">
-        <h3>UTPShop</h3>
-        <p>La mejor tienda de zapatillas 100% originales con despacho inmediato y atención personalizada.</p>
-        <div class="redes-sociales">
-          <a href="https://facebook.com" target="_blank" class="red-enlace">🔵 Facebook</a>
-          <a href="https://instagram.com" target="_blank" class="red-enlace">📸 Instagram</a>
-          <a href="https://tiktok.com" target="_blank" class="red-enlace">🎵 TikTok</a>
+        <h3>LEGALES</h3>
+        <ul>
+          <li><a href="#">Tiempos y costos de envío</a></li>
+          <li><a href="javascript:void(0)" (click)="infoModal.abrirPoliticas()">Políticas de Devolución</a></li>
+          <li><a href="#">Plazos de reembolso</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>AYUDA & APOYO</h3>
+        <ul>
+          <li><a href="javascript:void(0)" (click)="infoModal.abrirTerminos()">Términos y condiciones</a></li>
+          <li><a href="#">Beneficios 0% intereses</a></li>
+          @if (!auth.estaAutenticado()) {
+            <li><a routerLink="/login">Regístrate para correos</a></li>
+          }
+        </ul>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>SERVICIO AL CLIENTE</h3>
+        <ul>
+          <li><a href="#">Contáctanos</a></li>
+          <li><a href="#">Nuestras Tiendas</a></li>
+          <li><a href="javascript:void(0)" (click)="infoModal.abrirDatos()">Política de Datos</a></li>
+        </ul>
+        <a href="#" class="btn-libro-reclamaciones">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: bottom;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          LIBRO DE RECLAMACIONES
+        </a>
+      </div>
+      
+      <div class="footer-columna">
+        <h3>PAGO SEGURO</h3>
+        <div class="iconos-pago">
+          <span class="pago-tarjeta">VISA</span>
+          <span class="pago-tarjeta">Diners</span>
+          <span class="pago-tarjeta">MasterCard</span>
+          <span class="pago-tarjeta">AMEX</span>
         </div>
       </div>
-      
-      <div class="footer-columna">
-        <h3>Enlaces Rápidos</h3>
-        <ul>
-          <li><a routerLink="/inicio">Inicio</a></li>
-          <li><a routerLink="/catalogo">Catálogo</a></li>
-          <li><a routerLink="/perfil">Mi Cuenta</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-columna">
-        <h3>Atención al Cliente</h3>
-        <ul>
-          <li><a href="#">Preguntas Frecuentes</a></li>
-          <li><a href="#">Términos y Condiciones</a></li>
-          <li><a href="#">Políticas de Devolución</a></li>
-        </ul>
-      </div>
-      
-      <div class="footer-columna">
-        <h3>Contacto</h3>
-        <p>📍 Av. Petit Thouars 116, Lima, Perú</p>
-        <p>📞 +51 987 654 321</p>
-        <p>✉️ soporte@utpfashion.com</p>
-      </div>
+    </div>
+    
+    <div class="footer-redes-centro">
+      <a href="https://instagram.com/utpshop" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+      </a>
+      <a href="https://tiktok.com/@utpshop" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
+      </a>
+      <a href="https://facebook.com/utpshop" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+      </a>
+      <a href="https://wa.me/51987654321" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+      </a>
     </div>
     
     <div class="footer-inferior">
@@ -54,4 +77,103 @@
     <span class="icono-wa">💬</span>
     <span class="texto-wa">¿Necesitas ayuda?</span>
   </a>
+}
+
+@if (infoModal.mostrarTerminos()) {
+  <div class="modal-overlay-info" (click)="infoModal.cerrarTerminos()">
+    <div class="modal-content-info" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-info" (click)="infoModal.cerrarTerminos()">&times;</button>
+      <h2>Términos y Condiciones de Uso</h2>
+      <div class="modal-body-info">
+        <p><strong>Última actualización: Julio 2026</strong></p>
+        
+        <h3>1. Aceptación de los Términos</h3>
+        <p>Al acceder y utilizar el sitio web de UTPShop, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte, le sugerimos no utilizar nuestros servicios. Su compra ratifica el acuerdo de las condiciones aquí expuestas.</p>
+        
+        <h3>2. Uso del Servicio y Registro</h3>
+        <p>Nuestra tienda en línea está destinada a la venta minorista de calzado urbano y deportivo de las mejores marcas. Usted se compromete a proporcionar información verdadera, exacta y completa al momento de registrarse y realizar una compra, ya que esto garantiza que el envío de su producto (Delivery) sea seguro y exacto.</p>
+        
+        <h3>3. Precios y Disponibilidad</h3>
+        <p>Todos los precios están expresados en Soles (PEN) e incluyen los impuestos de ley correspondientes (IGV). La disponibilidad de los productos y sus tallas está sujeta a cambios en tiempo real. Aunque procuramos mantener el inventario exacto, nos reservamos el derecho de cancelar cualquier pedido si, de forma imprevista, el stock resulta insuficiente tras la confirmación de pago, garantizando la devolución íntegra de su dinero de inmediato.</p>
+        
+        <h3>4. Proceso de Compra y Reserva de Stock</h3>
+        <p>Para asegurar una compra justa para todos nuestros usuarios, al momento de avanzar al paso de pagos en el carrito, el stock de las zapatillas seleccionadas se reserva temporalmente a su nombre. Si el pago no se completa en los próximos minutos, la reserva será cancelada automáticamente y el producto volverá a estar disponible para el público en general.</p>
+        
+        <h3>5. Envíos y Delivery</h3>
+        <p>Ofrecemos servicio de Delivery propio. El costo de envío varía según la provincia de destino y se calculará automáticamente en el momento del pago. Las zonas de Lima y Callao podrían estar sujetas a promociones de envío gratuito.</p>
+        
+        <h3>6. Privacidad y Seguridad de Datos</h3>
+        <p>UTPShop valora su privacidad. Toda la información personal y financiera proporcionada durante el proceso de compra es estrictamente confidencial. Los datos de las tarjetas son procesados a través de pasarelas seguras encriptadas.</p>
+        
+        <h3>7. Cambios en los Términos</h3>
+        <p>UTPShop se reserva el derecho de modificar estos términos y condiciones en cualquier momento para mejorar el servicio y adaptarse a las nuevas normativas de comercio electrónico en el país.</p>
+      </div>
+    </div>
+  </div>
+}
+
+@if (infoModal.mostrarPoliticas()) {
+  <div class="modal-overlay-info" (click)="infoModal.cerrarPoliticas()">
+    <div class="modal-content-info" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-info" (click)="infoModal.cerrarPoliticas()">&times;</button>
+      <h2>Políticas de Devolución</h2>
+      <div class="modal-body-info">
+        <p><strong>Última actualización: Julio 2026</strong></p>
+        
+        <h3>1. Nuestra Garantía de Satisfacción</h3>
+        <p>En UTPShop queremos que esté 100% satisfecho y feliz con sus nuevas zapatillas. Entendemos que a veces las tallas pueden variar según la horma o simplemente cambiaste de opinión, por lo que ofrecemos una política de devoluciones sin complicaciones dentro de los <strong>30 días naturales</strong> siguientes a la fecha en la que recibiste tu pedido en la puerta de tu casa.</p>
+        
+        <h3>2. Requisitos Estrictos para la Devolución</h3>
+        <p>Para que tu devolución o cambio sea aprobado rápidamente, asegúrate de cumplir con lo siguiente:</p>
+        <ul>
+          <li>El producto debe estar exactamente en el mismo estado en que lo recibiste. Totalmente nuevo, sin ningún tipo de desgaste, sin arrugas en el empeine, y la suela debe estar completamente limpia (te recomendamos probar el calzado sobre una alfombra o tapete limpio en casa).</li>
+          <li>El producto debe conservar absolutamente todas sus etiquetas puestas.</li>
+          <li>Debes devolverlo en su caja original, cuidando que esta no esté rota ni estropeada (la caja de las zapatillas es parte del producto).</li>
+          <li>Es indispensable adjuntar la boleta electrónica de compra enviada a tu correo, o indicarnos el número de pedido.</li>
+        </ul>
+        
+        <h3>3. Proceso para Solicitar Devolución o Cambio</h3>
+        <p>Para iniciar una devolución, escríbenos directamente a nuestro WhatsApp oficial (haciendo clic en el botón verde inferior de nuestra página) o mándanos un correo a <strong>soporte@utpfashion.com</strong>. Nuestro equipo validará el caso y coordinará el recojo del paquete en tu domicilio, o te indicará en qué sede de nuestros couriers asociados puedes depositar la caja.</p>
+        
+        <h3>4. Reembolsos de Dinero</h3>
+        <p>Si prefieres el dinero en lugar de un cambio de modelo, primero inspeccionaremos el artículo devuelto en nuestros almacenes (este proceso toma 1 a 2 días hábiles). Una vez aprobado, el reembolso será procesado a tu cuenta bancaria o método de pago original dentro de un plazo de 5 a 10 días hábiles adicionales. Ten en cuenta que los gastos de envío originales que pagaste por el delivery no son reembolsables.</p>
+        
+        <h3>5. Cambios de Talla (Primer Cambio Gratis)</h3>
+        <p>Sabemos lo importante que es el ajuste perfecto. Por ello, el <strong>primer cambio de talla es completamente gratuito</strong> en zonas seleccionadas. Nosotros asumiremos el costo de recojo y envío del nuevo par hacia ti. A partir del segundo cambio por el mismo pedido, los costos logísticos deberán ser asumidos por el cliente.</p>
+      </div>
+    </div>
+  </div>
+}
+
+@if (infoModal.mostrarDatos()) {
+  <div class="modal-overlay-info" (click)="infoModal.cerrarDatos()">
+    <div class="modal-content-info" (click)="$event.stopPropagation()">
+      <button class="btn-cerrar-info" (click)="infoModal.cerrarDatos()">&times;</button>
+      <h2>Política de Privacidad y Tratamiento de Datos</h2>
+      <div class="modal-body-info">
+        <p><strong>Última actualización: Julio 2026</strong></p>
+        
+        <h3>1. Recopilación de Información</h3>
+        <p>En UTPShop recopilamos información personal básica (nombre, correo electrónico, dirección de envío y número telefónico) únicamente cuando usted se registra en nuestra plataforma o realiza una compra. No almacenamos datos de tarjetas de crédito en nuestros servidores, ya que utilizamos pasarelas de pago externas y seguras.</p>
+        
+        <h3>2. Uso de la Información</h3>
+        <p>Los datos que nos proporciona se utilizan exclusivamente para:</p>
+        <ul>
+          <li>Procesar y enviar sus pedidos de zapatillas.</li>
+          <li>Enviarle actualizaciones sobre el estado de su entrega.</li>
+          <li>Mejorar nuestra atención al cliente.</li>
+          <li>Enviarle correos con ofertas y novedades (solo si se suscribió a nuestro boletín).</li>
+        </ul>
+        
+        <h3>3. Protección de sus Datos</h3>
+        <p>Implementamos medidas de seguridad técnicas y organizativas para proteger su información personal contra accesos no autorizados, alteraciones o destrucción. Cumplimos con lo dispuesto en la Ley de Protección de Datos Personales vigente en Perú (Ley N° 29733).</p>
+        
+        <h3>4. Compartición de Datos</h3>
+        <p>Nos comprometemos a no vender, intercambiar ni transferir su información personal a terceros. La única excepción son nuestras empresas de logística y transporte (couriers), quienes reciben estrictamente la información necesaria para poder entregar sus zapatillas en su domicilio.</p>
+        
+        <h3>5. Derechos ARCO</h3>
+        <p>Usted tiene derecho a Acceder, Rectificar, Cancelar y Oponerse (Derechos ARCO) al uso de sus datos personales en cualquier momento. Para ejercer estos derechos, simplemente envíenos un correo a <strong>soporte@utpfashion.com</strong>.</p>
+      </div>
+    </div>
+  </div>
 }
