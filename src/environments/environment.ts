@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'http://localhost:8090'
+  apiUrl: 'https://tienda-zapatos-backend-1.onrender.com'
 };
